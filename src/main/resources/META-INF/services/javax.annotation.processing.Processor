@@ -1,1 +1,1 @@
-com.chy.lamia.processor.CopyBeanAnnotationProcessor
+org.z.chy.lamia.processor.CopyBeanAnnotationProcessor
