@@ -1,4 +1,4 @@
-package org.z.chy.lamia.annotation;
+package com.chy.lamia.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.SOURCE)
-public @interface CopyBean {
+public @interface SmartReturn {
 
 
 }
