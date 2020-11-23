@@ -2,6 +2,7 @@ package com.chy.lamia.processor;
 
 import com.chy.lamia.annotation.SmartReturn;
 import com.chy.lamia.element.ClassElement;
+import com.chy.lamia.entity.Var;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.TypeTag;
 import com.chy.lamia.visitor.ParameterVisitor;
@@ -66,7 +67,15 @@ public class SmartReturnAnnotationProcessor extends AbstractProcessor {
             if (returnType.getTag() != TypeTag.CLASS) {
                 return;
             }
-            new ClassElement(elementUtils,trees,returnType.toString());
+            ClassElement returnElement = new ClassElement(elementUtils, trees, returnType.toString());
+            //先获取返回值       ========
+            Map<String, Var> instantVarName = returnElement.getInstantVarName();
+
+
+
+
+
+
             //String  = returnType.toString();
 
             //elementUtils.getTree(methodSymbol).accept(new CopyBeanMethodVisitor());
