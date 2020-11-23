@@ -1,6 +1,8 @@
 package com.chy.lamia.element;
 
+import com.chy.lamia.element.tree.GetterCollect;
 import com.chy.lamia.element.tree.VarCollect;
+import com.chy.lamia.entity.Getter;
 import com.chy.lamia.entity.Var;
 import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.model.JavacElements;
@@ -15,8 +17,16 @@ public class TreeClassConstruction implements IClassConstruction {
     private final JavacTrees trees;
     private final JCTree jcTree;
 
-    //实例属性的容器
-    private final Map<String, Var> instantVar;
+    /**
+     * 实例属性的容器
+     */
+    private final Map<String, Var> instantVars;
+
+    /**
+     * 实例中所有的 getter
+     * key getter方法对应的 字段的名称
+     */
+    private final Map<String, Getter> instantGetters;
 
 
 
@@ -28,7 +38,11 @@ public class TreeClassConstruction implements IClassConstruction {
 
         VarCollect varCollect = new VarCollect();
         jcTree.accept(varCollect);
-        this.instantVar = varCollect.getData();
+        this.instantVars = varCollect.getData();
+
+        GetterCollect getterCollect = new GetterCollect();
+        jcTree.accept(getterCollect);
+        this.instantGetters = getterCollect.getData();
 
     }
 

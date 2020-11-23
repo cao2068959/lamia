@@ -3,7 +3,6 @@ package com.chy.lamia.element.tree;
 
 import com.chy.lamia.entity.Var;
 import com.chy.lamia.visitor.InstantVarVisitor;
-import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.tree.JCTree;
 
