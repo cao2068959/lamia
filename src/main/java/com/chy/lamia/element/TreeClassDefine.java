@@ -14,6 +14,10 @@ import com.sun.tools.javac.tree.JCTree;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 通过 直接解析的 java 文件来获取的 class信息
+ * 里面的 属性都是 懒加载的形式获取，注意的是 是非线程安全
+ */
 public class TreeClassDefine implements IClassDefine {
 
 
@@ -24,51 +28,74 @@ public class TreeClassDefine implements IClassDefine {
     /**
      * 实例中的所有属性
      */
-    private final Map<String, Var> instantVars;
+    private Map<String, Var> instantVars;
 
     /**
      * 实例中所有的 getter
      * key getter方法对应的 字段的名称
      */
-    private final Map<String, Getter> instantGetters;
-    private final Map<String, Setter> instantSetters;
+    private Map<String, Getter> instantGetters;
+    private Map<String, Setter> instantSetters;
 
 
     /**
      * 实例中所有的构造器
      */
-    private final List<Constructor> constructors;
+    private List<Constructor> constructors;
 
 
     public TreeClassDefine(JavacElements elementUtils, JavacTrees trees, JCTree jcTree) {
         this.elementUtils = elementUtils;
         this.trees = trees;
         this.jcTree = jcTree;
-
-        VarCollect varCollect = new VarCollect();
-        jcTree.accept(varCollect);
-        this.instantVars = varCollect.getData();
-
-        GetSetCollect getterCollect = new GetSetCollect();
-        jcTree.accept(getterCollect);
-        this.instantGetters = getterCollect.getGetterData();
-        this.instantSetters = getterCollect.getSetterData();
-
-        ConstructorCollect constructorCollect = new ConstructorCollect();
-        jcTree.accept(constructorCollect);
-        constructors = constructorCollect.getData();
-
     }
 
-
+    @Override
     public AssembleFactory getAssembleFactory() {
-        return new AssembleFactory(constructors, instantSetters);
+        return new AssembleFactory(getConstructors(), getInstantSetters());
     }
 
     @Override
     public Map<String, Var> getInstantVars() {
+        if (instantVars == null) {
+            VarCollect varCollect = new VarCollect();
+            jcTree.accept(varCollect);
+            this.instantVars = varCollect.getData();
+        }
         return instantVars;
     }
 
+    @Override
+    public Map<String, Getter> getInstantGetters() {
 
+        if (instantGetters == null) {
+            GetSetCollect getterCollect = new GetSetCollect();
+            jcTree.accept(getterCollect);
+            this.instantGetters = getterCollect.getGetterData();
+            this.instantSetters = getterCollect.getSetterData();
+        }
+
+        return instantGetters;
+    }
+
+    @Override
+    public Map<String, Setter> getInstantSetters() {
+        if (instantSetters == null) {
+            GetSetCollect getterCollect = new GetSetCollect();
+            jcTree.accept(getterCollect);
+            this.instantGetters = getterCollect.getGetterData();
+            this.instantSetters = getterCollect.getSetterData();
+        }
+        return instantSetters;
+    }
+
+    @Override
+    public List<Constructor> getConstructors() {
+        if (constructors == null) {
+            ConstructorCollect constructorCollect = new ConstructorCollect();
+            jcTree.accept(constructorCollect);
+            constructors = constructorCollect.getData();
+        }
+        return constructors;
+    }
 }

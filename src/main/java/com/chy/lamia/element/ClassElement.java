@@ -1,5 +1,6 @@
 package com.chy.lamia.element;
 
+import com.chy.lamia.entity.Getter;
 import com.chy.lamia.entity.Var;
 import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.model.JavacElements;
@@ -28,6 +29,14 @@ public class ClassElement {
 
     public Map<String, Var> getInstantVarName(){
         return classConstruction.getInstantVars();
+    }
+
+    public AssembleFactory getAssembleFactory(){
+        return classConstruction.getAssembleFactory();
+    }
+
+    public Map<String, Getter> getInstantGetters(){
+        return classConstruction.getInstantGetters();
     }
 
 
