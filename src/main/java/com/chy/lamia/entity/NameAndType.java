@@ -4,11 +4,18 @@ public class NameAndType {
 
     String name;
     String typePath;
+    String methodName;
 
 
     public NameAndType(String name, String typePath) {
         this.name = name;
         this.typePath = typePath;
+    }
+
+    public NameAndType(String name, String typePath, String methodName) {
+        this.name = name;
+        this.typePath = typePath;
+        this.methodName = methodName;
     }
 
     public String getName() {
@@ -25,5 +32,9 @@ public class NameAndType {
 
     public void setTypePath(String typePath) {
         this.typePath = typePath;
+    }
+
+    public String getMethodName() {
+        return methodName;
     }
 }

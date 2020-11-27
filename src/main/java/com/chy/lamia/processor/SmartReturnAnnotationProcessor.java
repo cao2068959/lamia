@@ -3,11 +3,12 @@ package com.chy.lamia.processor;
 import com.chy.lamia.annotation.SmartReturn;
 import com.chy.lamia.element.AssembleFactory;
 import com.chy.lamia.element.ClassElement;
+import com.chy.lamia.entity.ChosenClass;
 import com.chy.lamia.entity.Getter;
-import com.chy.lamia.entity.Var;
+import com.chy.lamia.utils.JCUtils;
+import com.chy.lamia.visitor.MethodUpdateVisitor;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.TypeTag;
-import com.chy.lamia.visitor.ParameterVisitor;
 import com.sun.source.util.Trees;
 import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.model.JavacElements;
@@ -16,15 +17,12 @@ import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeMaker;
 import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.code.Symbol;
-import com.sun.tools.javac.util.List;
 
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @SupportedAnnotationTypes("com.chy.lamia.annotation.SmartReturn")
 @SupportedSourceVersion(SourceVersion.RELEASE_11)
@@ -36,7 +34,9 @@ public class SmartReturnAnnotationProcessor extends AbstractProcessor {
 
     JavacTrees trees;
 
-    private Map<String, Symbol.MethodSymbol> pendMethod = new HashMap<>();
+    JCUtils jcUtils;
+
+    private ChosenClass chosenClass = new ChosenClass();
 
     private Map<String, ClassElement> classElementCache = new HashMap<>();
 
@@ -47,6 +47,7 @@ public class SmartReturnAnnotationProcessor extends AbstractProcessor {
         treeMaker = TreeMaker.instance(context);
         elementUtils = (JavacElements) processingEnv.getElementUtils();
         trees = (JavacTrees) Trees.instance(processingEnv);
+        jcUtils = new JCUtils(treeMaker, elementUtils);
 
     }
 
@@ -65,41 +66,37 @@ public class SmartReturnAnnotationProcessor extends AbstractProcessor {
      * 处理标注了@SmartReturn 的方法， 生成对应的实现代码
      */
     private void handleSignMethod() {
-        pendMethod.values().stream().forEach(methodSymbol -> {
-            //解析这个方法的返回值
-            Type returnType = methodSymbol.getReturnType();
-            //返回值不是一个对象就不进行处理了
-            if (returnType.getTag() != TypeTag.CLASS) {
-                return;
-            }
-            //解析返回值 的类结构
-            ClassElement returnClassElement = getClassElement(returnType.toString());
-            AssembleFactory assembleFactory = returnClassElement.getAssembleFactory();
-
-            assembleForParameters(methodSymbol.getParameters(), assembleFactory);
-
-            AssembleFactory.Candidate candidate = assembleFactory.choose();
-            if (candidate == null) {
-                throw new RuntimeException("类 ： [" + returnType.toString() + "] 构造器参数不够");
-            }
-
-
-            //String  = returnType.toString();
-
-            //elementUtils.getTree(methodSymbol).accept(new CopyBeanMethodVisitor());
-
+        chosenClass.forEach((className, simpleClass) -> {
+            //解析这个类里面所有打了注解的方法
+            simpleClass.getLists().forEach(methodSymbol->{
+                //解析这个方法的返回值
+                Type returnType = methodSymbol.getReturnType();
+                //返回值不是一个对象就不进行处理了
+                if (returnType.getTag() != TypeTag.CLASS) {
+                    return;
+                }
+                //解析返回值 的类结构
+                ClassElement returnClassElement = getClassElement(returnType.toString());
+                AssembleFactory assembleFactory = returnClassElement.getAssembleFactory();
+                assembleForParameters(methodSymbol.getParameters(), assembleFactory);
+                List<JCTree.JCStatement> treeStatements = assembleFactory.generateTree();
+                JCTree ownerTree = elementUtils.getTree(methodSymbol.owner);
+                ownerTree.accept(new MethodUpdateVisitor(treeStatements, jcUtils));
+            });
         });
     }
 
     private void assembleForParameters(List<Symbol.VarSymbol> params, AssembleFactory assembleFactory) {
-        if (params == null || params.length() == 0) {
+        if (params == null || params.size() == 0) {
             return;
         }
         params.stream().forEach(varSymbol -> {
             ClassElement classElement = getClassElement(varSymbol.type.toString());
             Map<String, Getter> getters = classElement.getInstantGetters();
-            getters.entrySet().forEach(getterEntry -> {
-                assembleFactory.match(getterEntry.getKey(), getterEntry.getValue().getTypePath());
+            getters.forEach((k, v) -> {
+                JCTree.JCExpressionStatement getterExpression = jcUtils.execMethod(varSymbol.name.toString(),
+                        v.getSimpleName(), new LinkedList<>());
+                assembleFactory.match(k, v.getTypePath(), getterExpression.expr);
             });
         });
     }
@@ -113,15 +110,10 @@ public class SmartReturnAnnotationProcessor extends AbstractProcessor {
      * @param roundEnv
      */
     private void prepare(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        Set<? extends Element> rootElements = roundEnv.getRootElements();
-        for (Element rootElement : rootElements) {
-            JCTree tree = elementUtils.getTree(rootElement);
-            tree.accept(new ParameterVisitor());
-        }
-
         for (Element element : roundEnv.getElementsAnnotatedWith(SmartReturn.class)) {
             Symbol.MethodSymbol methodSymbol = (Symbol.MethodSymbol) element;
-            pendMethod.put(methodSymbol.toString(), methodSymbol);
+            String key = methodSymbol.owner.toString();
+            chosenClass.put(key, methodSymbol);
         }
     }
 
@@ -132,7 +124,7 @@ public class SmartReturnAnnotationProcessor extends AbstractProcessor {
         if (result != null) {
             return result;
         }
-        result = new ClassElement(elementUtils, trees, classPath);
+        result = new ClassElement(jcUtils, classPath);
         classElementCache.put(classPath, result);
         return result;
     }

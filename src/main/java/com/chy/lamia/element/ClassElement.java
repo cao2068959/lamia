@@ -2,6 +2,7 @@ package com.chy.lamia.element;
 
 import com.chy.lamia.entity.Getter;
 import com.chy.lamia.entity.Var;
+import com.chy.lamia.utils.JCUtils;
 import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.model.JavacElements;
 import com.sun.tools.javac.tree.JCTree;
@@ -10,32 +11,28 @@ import java.util.Map;
 
 public class ClassElement {
 
-    JavacElements elementUtils;
-    JavacTrees trees;
     String classPath;
     IClassDefine classConstruction;
 
 
-    public ClassElement(JavacElements elementUtils, JavacTrees trees, String classPath) {
-        this.elementUtils = elementUtils;
-        this.trees = trees;
+    public ClassElement(JCUtils jcUtils, String classPath) {
         this.classPath = classPath;
-        JCTree tree = elementUtils.getTree(elementUtils.getTypeElement(classPath));
-        if(tree != null){
-            classConstruction = new TreeClassDefine(elementUtils,trees,tree);
+        JCTree tree = jcUtils.getTree(classPath);
+        if (tree != null) {
+            classConstruction = new TreeClassDefine(jcUtils, tree);
         }
     }
 
 
-    public Map<String, Var> getInstantVarName(){
+    public Map<String, Var> getInstantVarName() {
         return classConstruction.getInstantVars();
     }
 
-    public AssembleFactory getAssembleFactory(){
+    public AssembleFactory getAssembleFactory() {
         return classConstruction.getAssembleFactory();
     }
 
-    public Map<String, Getter> getInstantGetters(){
+    public Map<String, Getter> getInstantGetters() {
         return classConstruction.getInstantGetters();
     }
 

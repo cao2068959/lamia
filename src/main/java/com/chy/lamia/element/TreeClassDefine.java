@@ -7,6 +7,7 @@ import com.chy.lamia.entity.Constructor;
 import com.chy.lamia.entity.Getter;
 import com.chy.lamia.entity.Setter;
 import com.chy.lamia.entity.Var;
+import com.chy.lamia.utils.JCUtils;
 import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.model.JavacElements;
 import com.sun.tools.javac.tree.JCTree;
@@ -20,10 +21,8 @@ import java.util.Map;
  */
 public class TreeClassDefine implements IClassDefine {
 
-
-    private final JavacElements elementUtils;
-    private final JavacTrees trees;
-    private final JCTree jcTree;
+    JCUtils jcUtils;
+    JCTree jcTree;
 
     /**
      * 实例中的所有属性
@@ -44,15 +43,15 @@ public class TreeClassDefine implements IClassDefine {
     private List<Constructor> constructors;
 
 
-    public TreeClassDefine(JavacElements elementUtils, JavacTrees trees, JCTree jcTree) {
-        this.elementUtils = elementUtils;
-        this.trees = trees;
+    public TreeClassDefine(JCUtils jcUtils, JCTree jcTree) {
+        this.jcUtils = jcUtils;
         this.jcTree = jcTree;
     }
 
     @Override
     public AssembleFactory getAssembleFactory() {
-        return new AssembleFactory(getConstructors(), getInstantSetters());
+        String classPath = ((JCTree.JCClassDecl) jcTree).sym.toString();
+        return new AssembleFactory(jcUtils, classPath, getConstructors(), getInstantSetters());
     }
 
     @Override
