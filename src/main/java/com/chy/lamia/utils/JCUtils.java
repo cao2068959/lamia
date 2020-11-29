@@ -1,11 +1,13 @@
 package com.chy.lamia.utils;
 
+import com.chy.lamia.entity.Expression;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.model.JavacElements;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeMaker;
 import com.sun.tools.javac.util.List;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 
@@ -43,14 +45,11 @@ public class JCUtils {
         } else {
             left = treeMaker.Ident(elementUtils.getName(methodInstanceName));
         }
-
         return treeMaker.Exec(
                 treeMaker.Apply(
                         List.nil(),
-                        treeMaker.Select(left, // . 左边的内容
-                                elementUtils.getName(methodName) // . 右边的内容
-                        ),
-                        toSunList(param) // 方法中的内容
+                        treeMaker.Select(left, elementUtils.getName(methodName)),
+                        toSunList(param) // 方法的入参
                 )
         );
     }
@@ -77,11 +76,23 @@ public class JCUtils {
      * 生成一个 new语句 比如 new User("1","2")
      *
      * @param className 要new的class 的全路径
-     * @param arg       构造器的入参
+     * @param argAndTypes       构造器的入参
      * @return
      */
-    public JCTree.JCNewClass newClass(String className, java.util.List<JCTree.JCExpression> arg) {
-        List<JCTree.JCExpression> agslist = toSunList(arg);
+    public JCTree.JCNewClass newClass(String className, java.util.List<Expression> argAndTypes) {
+        java.util.List<JCTree.JCExpression> args = new ArrayList();
+        int pos = 0;
+        for (Expression argAndType : argAndTypes) {
+            JCTree.JCExpression expression = argAndType.getExpression();
+            if(pos == 0){
+                pos = expression.pos;
+            }else{
+                pos = pos + expression.toString().length();
+                expression.pos = pos;
+            }
+            args.add(expression);
+        }
+        List<JCTree.JCExpression> agslist = toSunList(args);
         return treeMaker.NewClass(null, List.nil(), memberAccess(className), agslist, null);
     }
 

@@ -3,45 +3,47 @@ package com.chy.lamia.entity;
 
 import com.sun.tools.javac.code.Symbol;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
 public class ChosenClass {
 
-    public Map<String, SimpleClass> data = new HashMap<>();
+    public Map<String, SimpleMethodCollect> data = new HashMap<>();
 
     public void put(String key, Symbol.MethodSymbol methodSymbol) {
-        SimpleClass simpleClass = data.get(key);
+        SimpleMethodCollect simpleClass = data.get(key);
         if (simpleClass == null) {
-            simpleClass = new SimpleClass();
+            simpleClass = new SimpleMethodCollect();
             data.put(key, simpleClass);
         }
         simpleClass.add(methodSymbol);
     }
 
-    public void forEach(BiConsumer<String, SimpleClass> action) {
+    public void forEach(BiConsumer<String, SimpleMethodCollect> action) {
         data.forEach((k, v) -> {
             action.accept(k, v);
         });
     }
 
 
-    public Map<String, SimpleClass> getData() {
+    public Map<String, SimpleMethodCollect> getData() {
         return data;
     }
 
-    public class SimpleClass {
-        private List<Symbol.MethodSymbol> lists = new ArrayList<>();
+    public static class SimpleMethodCollect {
+        private Map<String, Symbol.MethodSymbol> map = new HashMap<>();
 
-        public void add(Symbol.MethodSymbol methodSymbol) {
-            lists.add(methodSymbol);
+        public boolean contains(String methodName) {
+            return map.containsKey(methodName);
         }
 
-        public List<Symbol.MethodSymbol> getLists() {
-            return lists;
+        public void add(Symbol.MethodSymbol methodSymbol) {
+            map.put(methodSymbol.toString(), methodSymbol);
+        }
+
+        public Map<String, Symbol.MethodSymbol> getDatas() {
+            return map;
         }
     }
 

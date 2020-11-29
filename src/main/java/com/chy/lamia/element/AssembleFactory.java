@@ -1,6 +1,7 @@
 package com.chy.lamia.element;
 
 import com.chy.lamia.entity.Constructor;
+import com.chy.lamia.entity.Expression;
 import com.chy.lamia.entity.Setter;
 import com.chy.lamia.utils.JCUtils;
 import com.sun.tools.javac.tree.JCTree;
@@ -13,7 +14,7 @@ import java.util.*;
  */
 public class AssembleFactory {
     List<Candidate> allCandidate = new ArrayList<>();
-    Map<String, JCTree.JCExpression> expressionMap = new HashMap<>();
+    Map<String, Expression> expressionMap = new HashMap<>();
     JCUtils jcUtils;
     private boolean complete = false;
     private String originalClassPath;
@@ -41,7 +42,8 @@ public class AssembleFactory {
             boolean match = candidate.match(fieldName, fieldType);
             //返回true 说明 这个表达式将是构成的一部分，把他存起来
             if (match) {
-                expressionMap.put(fieldName, expression);
+                Expression expressionWrapper = new Expression(expression, fieldType);
+                expressionMap.put(fieldName, expressionWrapper);
 
             }
             if (candidate.end()) {
@@ -70,8 +72,8 @@ public class AssembleFactory {
 
     private void createSetter(Candidate candidate, String instantName, List<JCTree.JCStatement> result) {
         candidate.getHitSetter().forEach((k, v) -> {
-            JCTree.JCExpression jcExpression = expressionMap.get(k);
-            JCTree.JCExpressionStatement setterExpression = jcUtils.execMethod(instantName, v.getMethodName(), jcExpression);
+            Expression expression = expressionMap.get(k);
+            JCTree.JCExpressionStatement setterExpression = jcUtils.execMethod(instantName, v.getMethodName(), expression.getExpression());
             result.add(setterExpression);
         });
     }
@@ -80,7 +82,7 @@ public class AssembleFactory {
     private String createNewInstant(Candidate candidate, List<JCTree.JCStatement> result) {
 
         Constructor constructor = candidate.getConstructor();
-        List<JCTree.JCExpression> paramsExpression = new ArrayList<>();
+        List<Expression> paramsExpression = new ArrayList<>();
         constructor.getParams().forEach(param -> {
             String name = param.getName();
             paramsExpression.add(expressionMap.get(name));
