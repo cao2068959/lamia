@@ -1,8 +1,7 @@
 package com.chy.lamia.processor;
 
 import com.chy.lamia.annotation.SmartReturn;
-import com.chy.lamia.element.ClassElement;
-import com.chy.lamia.entity.ChosenClass;
+import com.chy.lamia.processor.marked.MarkedContext;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.visitor.MethodUpdateVisitor;
 import com.sun.source.util.Trees;
@@ -32,7 +31,7 @@ public class SmartReturnAnnotationProcessor extends AbstractProcessor {
 
     JCUtils jcUtils;
 
-    private ChosenClass chosenClass = new ChosenClass();
+    private MarkedContext markedContext = new MarkedContext();
 
 
     @Override
@@ -60,9 +59,9 @@ public class SmartReturnAnnotationProcessor extends AbstractProcessor {
      * 处理标注了@SmartReturn 的方法， 生成对应的实现代码
      */
     private void handleSignMethod() {
-        chosenClass.forEach((className, signMethods) -> {
+        markedContext.forEach((className, markedMethods) -> {
             JCTree tree = elementUtils.getTree(elementUtils.getTypeElement(className));
-            tree.accept(new MethodUpdateVisitor(signMethods, jcUtils));
+            tree.accept(new MethodUpdateVisitor(markedMethods, jcUtils));
         });
     }
 
@@ -78,7 +77,7 @@ public class SmartReturnAnnotationProcessor extends AbstractProcessor {
         for (Element element : roundEnv.getElementsAnnotatedWith(SmartReturn.class)) {
             Symbol.MethodSymbol methodSymbol = (Symbol.MethodSymbol) element;
             String key = methodSymbol.owner.toString();
-            chosenClass.put(key, methodSymbol);
+            markedContext.put(key, methodSymbol);
         }
     }
 

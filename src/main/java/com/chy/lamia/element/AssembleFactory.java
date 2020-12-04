@@ -29,8 +29,6 @@ public class AssembleFactory {
             Candidate candidate = new Candidate(constructor, setterMap);
             allCandidate.add(candidate);
         }
-
-
     }
 
 
@@ -44,7 +42,6 @@ public class AssembleFactory {
             if (match) {
                 Expression expressionWrapper = new Expression(expression, fieldType);
                 expressionMap.put(fieldName, expressionWrapper);
-
             }
             if (candidate.end()) {
                 complete = true;
@@ -100,7 +97,7 @@ public class AssembleFactory {
         for (Candidate candidate : allCandidate) {
             int cScore = candidate.score();
             if (score < cScore) {
-                cScore = cScore;
+                score = cScore;
                 result = candidate;
             }
         }

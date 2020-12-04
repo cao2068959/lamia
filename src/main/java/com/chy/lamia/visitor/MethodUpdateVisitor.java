@@ -3,9 +3,11 @@ package com.chy.lamia.visitor;
 
 import com.chy.lamia.element.AssembleFactory;
 import com.chy.lamia.element.ClassElement;
-import com.chy.lamia.entity.ChosenClass;
+import com.chy.lamia.element.LooseBlock;
+import com.chy.lamia.element.LooseBlockVisitor;
 import com.chy.lamia.entity.Getter;
 import com.chy.lamia.entity.SunList;
+import com.chy.lamia.processor.marked.MarkedMethods;
 import com.chy.lamia.utils.JCUtils;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
@@ -20,11 +22,11 @@ import java.util.Map;
 public class MethodUpdateVisitor extends TreeTranslator {
 
 
-    private final ChosenClass.SimpleMethodCollect signMethods;
+    private final MarkedMethods markedMethods;
     private final JCUtils jcUtils;
 
-    public MethodUpdateVisitor(ChosenClass.SimpleMethodCollect signMethods, JCUtils jcUtils) {
-        this.signMethods = signMethods;
+    public MethodUpdateVisitor(MarkedMethods markedMethods, JCUtils jcUtils) {
+        this.markedMethods = markedMethods;
         this.jcUtils = jcUtils;
 
     }
@@ -39,7 +41,7 @@ public class MethodUpdateVisitor extends TreeTranslator {
     private void updateMethod(JCTree.JCMethodDecl methodSymbolDecl) {
         Symbol.MethodSymbol methodSymbol = methodSymbolDecl.sym;
         //确认这个方法是不是应该被修改 及打了注解 @SmartReturn
-        if (!signMethods.contains(methodSymbol.toString())) {
+        if (!markedMethods.contains(methodSymbol.toString())) {
             return;
         }
 
@@ -53,6 +55,8 @@ public class MethodUpdateVisitor extends TreeTranslator {
         ClassElement returnClassElement = ClassElement.getClassElement(returnType.toString(), jcUtils);
         //根据不同的策略获取 返回值的生成工厂
         AssembleFactory assembleFactory = returnClassElement.getAssembleFactory();
+        untieBlock(methodSymbolDecl);
+
         //把所有的方法变量以及入参变量 都传入 组装工厂里, 让工厂自己判断到底应该如何去生成结果对象
         assembleReady(methodSymbolDecl, assembleFactory);
         //获取 结果对象的 生成的语句
@@ -63,9 +67,18 @@ public class MethodUpdateVisitor extends TreeTranslator {
     }
 
 
+    private void untieBlock(JCTree.JCMethodDecl methodSymbolDecl) {
+        JCTree.JCBlock originalBody = methodSymbolDecl.body;
+        LooseBlockVisitor looseBlockVisitor = new LooseBlockVisitor();
+        looseBlockVisitor.accept(originalBody);
+        List<LooseBlock> looseBlocks = looseBlockVisitor.getResult();
+        System.out.println(looseBlocks);
+    }
+
 
     private void doUpdateMethod(JCTree.JCMethodDecl methodSymbolDecl, List<JCTree.JCStatement> treeStatements) {
         JCTree.JCBlock oldBody = methodSymbolDecl.getBody();
+        //把新的代码加在 自定义的代码之后， return 之前
         oldBody.getStatements().forEach(satement -> {
             treeStatements.add(satement);
         });
@@ -76,7 +89,7 @@ public class MethodUpdateVisitor extends TreeTranslator {
     private void assembleReady(JCTree.JCMethodDecl methodSymbolDecl, AssembleFactory assembleFactory) {
         SunList<Symbol.VarSymbol> paramList = new SunList<>(methodSymbolDecl.sym.getParameters());
         //先把 方法入参的所有变量给 传入到工厂里
-        assembleForParameters(paramList,assembleFactory);
+        assembleForParameters(paramList, assembleFactory);
     }
 
 
