@@ -30,8 +30,8 @@ public abstract class AbstractBlockVisitor {
                 JCTree.JCBlock elseBlock = (JCTree.JCBlock) jcif.elsepart;
                 JCTree.JCBlock thenBlock = (JCTree.JCBlock) jcif.thenpart;
                 ifVisit(jcif, thenBlock, elseBlock);
-                blockVisit(thenBlock, (block) -> jcif.thenpart = block);
-                blockVisit(elseBlock, (block) -> jcif.elsepart = block);
+                blockVisit(thenBlock);
+                blockVisit(elseBlock);
                 continue;
             }
 
@@ -40,7 +40,7 @@ public abstract class AbstractBlockVisitor {
             if (statement instanceof JCTree.JCWhileLoop) {
                 JCTree.JCWhileLoop jcWhileLoop = (JCTree.JCWhileLoop) statement;
                 whileLoopVisit(jcWhileLoop, (JCTree.JCBlock) jcWhileLoop.body);
-                blockVisit((JCTree.JCBlock) jcWhileLoop.body, (block) -> jcWhileLoop.body = block);
+                blockVisit((JCTree.JCBlock) jcWhileLoop.body);
                 continue;
             }
 
@@ -62,7 +62,7 @@ public abstract class AbstractBlockVisitor {
             if (statement instanceof JCTree.JCBlock) {
                 JCTree.JCBlock jcBlock = (JCTree.JCBlock) statement;
                 innerBlockVisit(jcBlock);
-                blockVisit(jcBlock, (block) -> jcBlock.stats = block.stats);
+                blockVisit(jcBlock);
                 continue;
             }
         }
@@ -75,7 +75,7 @@ public abstract class AbstractBlockVisitor {
     public void innerBlockVisit(JCTree.JCBlock statement) {
     }
 
-    public void blockVisit(JCTree.JCBlock statement, Modify modify) {
+    public void blockVisit(JCTree.JCBlock statement) {
     }
 
     public void whileLoopVisit(JCTree.JCWhileLoop statement, JCTree.JCBlock whileBlock) {

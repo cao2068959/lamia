@@ -31,6 +31,9 @@ public class JCUtils {
     }
 
 
+
+
+
     /**
      * @param methodInstanceName 方法所在对象的名称 / 全路径的类名称
      * @param methodName         方法名称
@@ -58,6 +61,10 @@ public class JCUtils {
     public JCTree.JCBlock createBlock(java.util.List<JCTree.JCStatement> statements) {
         List<JCTree.JCStatement> jcStatements = toSunList(statements);
         return treeMaker.Block(0, jcStatements);
+    }
+
+    public JCTree.JCReturn createReturn(String returnName) {
+        return treeMaker.Return(treeMaker.Ident(elementUtils.getName(returnName)));
     }
 
     public JCTree.JCExpressionStatement execMethod(String methodInstanceName, String methodName,

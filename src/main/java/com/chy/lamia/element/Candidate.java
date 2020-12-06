@@ -46,20 +46,20 @@ public class Candidate {
      * 传入字段进来，看看能不能和构造器和setter匹配上
      * 如果匹配到那么 将返回true
      *
-     * @param fieldName
-     * @param fieldType
      * @return
      */
-    public boolean match(String fieldName, String fieldType) {
+    public boolean match(NameAndType target) {
+        String fieldName = target.getName();
+
         NameAndType constructor = constructorParamMap.get(fieldName);
 
-        if (constructor != null && constructor.getTypePath().equals(fieldType)) {
+        if (constructor != null && constructor.matchType(target)) {
             constructorHit.add(fieldName);
             return true;
         }
 
         NameAndType setter = setterMap.get(fieldName);
-        if (setter != null && setter.getTypePath().equals(fieldType)) {
+        if (setter != null && setter.matchType(target)) {
             setterHit.add(fieldName);
             return true;
         }
@@ -96,5 +96,10 @@ public class Candidate {
 
     public Constructor getConstructor() {
         return constructor;
+    }
+
+    public void clear(){
+        constructorHit = new HashSet<>();
+        setterHit = new HashSet<>();
     }
 }

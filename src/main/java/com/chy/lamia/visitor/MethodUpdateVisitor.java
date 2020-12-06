@@ -5,7 +5,9 @@ import com.chy.lamia.element.AssembleFactory;
 import com.chy.lamia.element.ClassElement;
 import com.chy.lamia.element.LooseBlock;
 import com.chy.lamia.element.LooseBlockVisitor;
+import com.chy.lamia.entity.AssembleResult;
 import com.chy.lamia.entity.Getter;
+import com.chy.lamia.entity.NameAndType;
 import com.chy.lamia.entity.SunList;
 import com.chy.lamia.processor.marked.MarkedMethods;
 import com.chy.lamia.utils.JCUtils;
@@ -55,24 +57,87 @@ public class MethodUpdateVisitor extends TreeTranslator {
         ClassElement returnClassElement = ClassElement.getClassElement(returnType.toString(), jcUtils);
         //根据不同的策略获取 返回值的生成工厂
         AssembleFactory assembleFactory = returnClassElement.getAssembleFactory();
-        untieBlock(methodSymbolDecl);
+        //获取方法中所有的入参
+        SunList<Symbol.VarSymbol> paramList = new SunList<>(methodSymbolDecl.sym.getParameters());
+        //解析原来方法中的方法体,计算出 所有的通路
+        List<LooseBlock> looseBlocks = untieBlock(methodSymbolDecl);
+        for (LooseBlock looseBlock : looseBlocks) {
+            assemble(looseBlock, paramList, assembleFactory);
+        }
+    }
 
-        //把所有的方法变量以及入参变量 都传入 组装工厂里, 让工厂自己判断到底应该如何去生成结果对象
-        assembleReady(methodSymbolDecl, assembleFactory);
+    private void assemble(LooseBlock looseBlock, SunList<Symbol.VarSymbol> paramList, AssembleFactory assembleFactory) {
+        //先清空
+        assembleFactory.clear();
+        //先把方法入参当做材料添加进入 工厂中
+        addMaterialsFromParameters(paramList, assembleFactory);
+        //把方法体中能访问到的所有参数当做材料添加进入 工厂中
+        addMaterialsFromMethodBodyVar(looseBlock.getVars(), assembleFactory);
+        //去修改老的方法的 方法体
+        modifyMethodBody(looseBlock,assembleFactory);
+    }
+
+    /**
+     * 去修改 方法体里的内容
+     *
+     * @param looseBlock
+     * @param assembleFactory
+     */
+    private void modifyMethodBody(LooseBlock looseBlock,AssembleFactory assembleFactory){
+
         //获取 结果对象的 生成的语句
-        List<JCTree.JCStatement> treeStatements = assembleFactory.generateTree();
-        //把生成的语句插入到原来的代码中
-        doUpdateMethod(methodSymbolDecl, treeStatements);
+        AssembleResult assembleResult = assembleFactory.generateTree();
 
+        //要去修改之前的方法,要先把之前的方法给拿出来
+        JCTree.JCBlock oldBlock = looseBlock.getBlock();
+        List<JCTree.JCStatement> newStatement = new LinkedList<>();
+        for (JCTree.JCStatement oldStatement : oldBlock.getStatements()) {
+            // 先把老的方法 到 return之前的语句都复制一份
+            if(!(oldStatement instanceof JCTree.JCReturn)){
+                newStatement.add(oldStatement);
+                continue;
+            }
+            //复制到 return语句了, 抛弃老的 return 语句, 把新生成的语句加上去
+            for (JCTree.JCStatement treeStatement : assembleResult.getStatements()) {
+                newStatement.add(treeStatement);
+            }
+
+            //生成 新的 return 语句
+            String newInstantName = assembleResult.getNewInstantName();
+            JCTree.JCReturn aReturn = jcUtils.createReturn(newInstantName);
+            newStatement.add(aReturn);
+        }
+
+        JCTree.JCBlock block = jcUtils.createBlock(newStatement);
+        looseBlock.modifyBody(block);
     }
 
 
-    private void untieBlock(JCTree.JCMethodDecl methodSymbolDecl) {
+    /**
+     * 去解析 原来的方法体, 每到一个 return  都算一个 通路, 计算出代码有可能经过的所有通路, 并且把每一个通路中 可以访问到 变量给保存下来
+     * func(A a,B b){
+     *   C c = ...
+     *   if(..){
+     *       D d = ..
+     *       return
+     *   }
+     *   E e = ..
+     *   return
+     * }
+     * 上述代码 可以解析出 2条 通路
+     * 1 . 进入到 if 中 return结束 , 可以访问的 变量有 c,d
+     * 2 . 不经过 if 直到方法结束 , 可以访问到的 变量有 c,e
+     * 这里仅仅只解析 方法体中的变量, 方法的入参并不计算在内
+     *
+     * @param methodSymbolDecl
+     * @return
+     */
+    private List<LooseBlock> untieBlock(JCTree.JCMethodDecl methodSymbolDecl) {
         JCTree.JCBlock originalBody = methodSymbolDecl.body;
         LooseBlockVisitor looseBlockVisitor = new LooseBlockVisitor();
         looseBlockVisitor.accept(originalBody);
         List<LooseBlock> looseBlocks = looseBlockVisitor.getResult();
-        System.out.println(looseBlocks);
+        return looseBlocks;
     }
 
 
@@ -86,14 +151,17 @@ public class MethodUpdateVisitor extends TreeTranslator {
         methodSymbolDecl.body = jcUtils.createBlock(treeStatements);
     }
 
-    private void assembleReady(JCTree.JCMethodDecl methodSymbolDecl, AssembleFactory assembleFactory) {
-        SunList<Symbol.VarSymbol> paramList = new SunList<>(methodSymbolDecl.sym.getParameters());
-        //先把 方法入参的所有变量给 传入到工厂里
-        assembleForParameters(paramList, assembleFactory);
+
+    private void addMaterialsFromMethodBodyVar(List<NameAndType> methodBodyVars, AssembleFactory assembleFactory) {
+        if (methodBodyVars == null || methodBodyVars.size() == 0) {
+            return;
+        }
+        methodBodyVars.forEach(methodBodyVar -> {
+            assembleFactory.match(methodBodyVar, jcUtils.memberAccess(methodBodyVar.getName()));
+        });
     }
 
-
-    private void assembleForParameters(SunList<Symbol.VarSymbol> params, AssembleFactory assembleFactory) {
+    private void addMaterialsFromParameters(SunList<Symbol.VarSymbol> params, AssembleFactory assembleFactory) {
         if (params == null || params.size() == 0) {
             return;
         }
@@ -105,7 +173,8 @@ public class MethodUpdateVisitor extends TreeTranslator {
             getters.forEach((k, v) -> {
                 JCTree.JCExpressionStatement getterExpression = jcUtils.execMethod(varSymbol.name.toString(),
                         v.getSimpleName(), new LinkedList<>());
-                assembleFactory.match(k, v.getTypePath(), getterExpression.expr);
+                NameAndType nameAndType = new NameAndType(k, v.getTypePath());
+                assembleFactory.match(nameAndType, getterExpression.expr);
             });
         });
     }

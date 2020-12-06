@@ -1,8 +1,6 @@
 package com.chy.lamia.element;
 
-import com.chy.lamia.entity.Constructor;
-import com.chy.lamia.entity.Expression;
-import com.chy.lamia.entity.Setter;
+import com.chy.lamia.entity.*;
 import com.chy.lamia.utils.JCUtils;
 import com.sun.tools.javac.tree.JCTree;
 
@@ -32,16 +30,16 @@ public class AssembleFactory {
     }
 
 
-    public void match(String fieldName, String fieldType, JCTree.JCExpression expression) {
+    public void match(NameAndType nameAndType, JCTree.JCExpression expression) {
         if (complete) {
             return;
         }
         for (Candidate candidate : allCandidate) {
-            boolean match = candidate.match(fieldName, fieldType);
+            boolean match = candidate.match(nameAndType);
             //返回true 说明 这个表达式将是构成的一部分，把他存起来
             if (match) {
-                Expression expressionWrapper = new Expression(expression, fieldType);
-                expressionMap.put(fieldName, expressionWrapper);
+                Expression expressionWrapper = new Expression(expression);
+                expressionMap.put(nameAndType.getName(), expressionWrapper);
             }
             if (candidate.end()) {
                 complete = true;
@@ -49,7 +47,7 @@ public class AssembleFactory {
         }
     }
 
-    public List<JCTree.JCStatement> generateTree() {
+    public AssembleResult generateTree() {
         Candidate candidate = choose();
         if (candidate == null) {
             throw new RuntimeException("类 ： [" + originalClassPath + "] 构造器参数不够");
@@ -58,12 +56,13 @@ public class AssembleFactory {
 
     }
 
-    private List<JCTree.JCStatement> doGenerateTree(Candidate candidate) {
-        List<JCTree.JCStatement> result = new ArrayList<>();
+    private AssembleResult doGenerateTree(Candidate candidate) {
+        List<JCTree.JCStatement> statements = new ArrayList<>();
         //先使用构造器生成要返回的 空 对象
-        String newInstant = createNewInstant(candidate, result);
+        String newInstant = createNewInstant(candidate, statements);
         //生成对应的 set 方法
-        createSetter(candidate, newInstant, result);
+        createSetter(candidate, newInstant, statements);
+        AssembleResult result = new AssembleResult(statements, newInstant);
         return result;
     }
 
@@ -105,4 +104,9 @@ public class AssembleFactory {
     }
 
 
+    public void clear() {
+        complete = false;
+        expressionMap = new HashMap<>();
+        allCandidate.forEach(Candidate::clear);
+    }
 }

@@ -2,6 +2,7 @@ package com.chy.lamia.element;
 
 
 import com.chy.lamia.entity.NameAndType;
+import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.visitor.AbstractBlockVisitor;
 import com.sun.tools.javac.tree.JCTree;
 
@@ -32,11 +33,11 @@ public class LooseBlockVisitor extends AbstractBlockVisitor {
      * @param statement
      */
     @Override
-    public void blockVisit(JCTree.JCBlock statement, Modify modify) {
+    public void blockVisit(JCTree.JCBlock statement) {
         LooseBlockVisitor looseBlockVisitor = new LooseBlockVisitor(vars, result);
         //继续去扫描代码块里面的代码
         looseBlockVisitor.accept(statement);
-        analyzeResult()
+        analyzeResult(looseBlockVisitor);
     }
 
     /**
@@ -44,22 +45,17 @@ public class LooseBlockVisitor extends AbstractBlockVisitor {
      *
      * @param looseBlockVisitor
      */
-    private void analyzeResult(LooseBlockVisitor looseBlockVisitor, Modify modify) {
+    private void analyzeResult(LooseBlockVisitor looseBlockVisitor) {
         // 对应的 模块里面没有 return，那么 不是目标对象，就不进行处理了
         if (!looseBlockVisitor.haveReturn) {
             return;
         }
-        LooseBlock looseBlock = new LooseBlock(vars, modify);
+        LooseBlock looseBlock = new LooseBlock(looseBlockVisitor.getVars(), looseBlockVisitor.block);
         result.add(looseBlock);
     }
 
     public List<LooseBlock> getResult() {
-        analyzeResult(this, (newBlock) -> {
-            if (block == null) {
-                return;
-            }
-            block.stats = newBlock.stats;
-        });
+        analyzeResult(this);
         return result;
     }
 
