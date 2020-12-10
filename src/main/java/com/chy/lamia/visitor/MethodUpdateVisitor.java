@@ -147,7 +147,6 @@ public class MethodUpdateVisitor extends TreeTranslator {
         oldBody.getStatements().forEach(satement -> {
             treeStatements.add(satement);
         });
-
         methodSymbolDecl.body = jcUtils.createBlock(treeStatements);
     }
 
@@ -165,6 +164,7 @@ public class MethodUpdateVisitor extends TreeTranslator {
         if (params == null || params.size() == 0) {
             return;
         }
+
         params.forEach(varSymbol -> {
             //先把 类型转成 ClassElement 方便获取 getter setter 等一系列的方法
             ClassElement classElement = ClassElement.getClassElement(varSymbol.type.toString(), jcUtils);

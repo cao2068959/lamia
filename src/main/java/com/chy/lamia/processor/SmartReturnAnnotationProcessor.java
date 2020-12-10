@@ -1,6 +1,7 @@
 package com.chy.lamia.processor;
 
 import com.chy.lamia.annotation.SmartReturn;
+import com.chy.lamia.log.Logger;
 import com.chy.lamia.processor.marked.MarkedContext;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.visitor.MethodUpdateVisitor;
@@ -33,7 +34,6 @@ public class SmartReturnAnnotationProcessor extends AbstractProcessor {
 
     private MarkedContext markedContext = new MarkedContext();
 
-
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         Context context = ((JavacProcessingEnvironment) processingEnv).getContext();
@@ -46,11 +46,19 @@ public class SmartReturnAnnotationProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-
-        if (roundEnv.processingOver()) {
-            handleSignMethod();
-        } else {
-            prepare(annotations, roundEnv);
+        Logger.log("--------> 执行执行");
+        try {
+            if (roundEnv.processingOver()) {
+                handleSignMethod();
+            } else {
+                prepare(annotations, roundEnv);
+            }
+            return true;
+        }catch (Exception e){
+            Logger.throwableLog(e);
+            e.printStackTrace();
+        }finally {
+            Logger.push();
         }
         return true;
     }

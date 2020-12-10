@@ -55,7 +55,7 @@ public class NameAndType {
             return true;
         }
 
-        if (simpleTypeName.equals(typePath)) {
+        if (simpleTypeName.equals(type)) {
             return true;
         }
         return false;

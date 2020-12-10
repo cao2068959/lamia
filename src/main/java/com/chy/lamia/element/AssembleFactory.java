@@ -31,18 +31,12 @@ public class AssembleFactory {
 
 
     public void match(NameAndType nameAndType, JCTree.JCExpression expression) {
-        if (complete) {
-            return;
-        }
         for (Candidate candidate : allCandidate) {
             boolean match = candidate.match(nameAndType);
             //返回true 说明 这个表达式将是构成的一部分，把他存起来
             if (match) {
                 Expression expressionWrapper = new Expression(expression);
                 expressionMap.put(nameAndType.getName(), expressionWrapper);
-            }
-            if (candidate.end()) {
-                complete = true;
             }
         }
     }
