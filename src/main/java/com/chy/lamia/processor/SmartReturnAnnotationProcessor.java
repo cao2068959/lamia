@@ -56,11 +56,10 @@ public class SmartReturnAnnotationProcessor extends AbstractProcessor {
             return true;
         }catch (Exception e){
             Logger.throwableLog(e);
-            e.printStackTrace();
+            throw e;
         }finally {
             Logger.push();
         }
-        return true;
     }
 
     /**

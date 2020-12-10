@@ -2,6 +2,7 @@ package com.chy.lamia.log;
 
 
 import java.io.*;
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -11,23 +12,22 @@ public class LamiaSimpleLogger {
 
     List<String> content = new ArrayList<>();
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-    String logPath = "/Users/hengyuan/IdeaProjects/work/lamia/chy/123/";
+    String logPath = null;
 
     private OutputStream openFile(String path) throws FileNotFoundException {
         String fileName = "lamialog.log";
-
         if (path == null || path.length() == 0) {
-            path = fileName;
-        } else {
-            if (path.endsWith("/")) {
-                path = path.substring(0, path.length() - 1);
-            }
-            File dir = new File(path);
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-            path = path + "/" + fileName;
+            return null;
         }
+        if (path.endsWith("/")) {
+            path = path.substring(0, path.length() - 1);
+        }
+        File dir = new File(path);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        path = path + "/" + fileName;
+
         File file = new File(path);
         return new FileOutputStream(file, true);
     }
@@ -61,7 +61,10 @@ public class LamiaSimpleLogger {
         }
         OutputStream outputStream = null;
         try {
-            outputStream = openFile(logPath);
+            outputStream = openFile(getLogPath());
+            if (outputStream == null) {
+                return;
+            }
             for (String txt : content) {
                 wire(outputStream, txt + "\n");
             }
@@ -70,13 +73,28 @@ public class LamiaSimpleLogger {
         } finally {
             content = new ArrayList<>();
             try {
+                if (outputStream == null) {
+                    return;
+                }
                 outputStream.close();
             } catch (IOException e) {
             }
         }
-
-
     }
+
+    private String getLogPath() {
+        String result = logPath;
+        if (result != null && result.length() > 0) {
+            return result;
+        }
+
+        URL resource = this.getClass().getClassLoader().getResource("");
+        if (resource != null) {
+            return resource.getPath();
+        }
+        return null;
+    }
+
 
     private void wire(OutputStream outputStream, String context) throws IOException {
         outputStream.write(context.getBytes());
