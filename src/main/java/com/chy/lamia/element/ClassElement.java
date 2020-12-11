@@ -20,7 +20,32 @@ public class ClassElement {
         JCTree tree = jcUtils.getTree(classPath);
         if (tree != null) {
             classDefine = new TreeClassDefine(jcUtils, tree);
+            return;
         }
+
+        //没有对应的源码，说明对应的java文件已经生成了 class文件 那么使用 ASM  解析
+        Class<?> classForReflect = getClassForReflect(classPath);
+        if (classForReflect != null) {
+            classDefine = new ReflectClassDefine(jcUtils, classForReflect);
+            return;
+        }
+
+        throw new RuntimeException("无法解析类： " + classPath);
+
+    }
+
+    /**
+     * 通过反射去获取对应的 class对象
+     *
+     * @param classPath
+     * @return
+     */
+    private Class<?> getClassForReflect(String classPath) {
+        try {
+            return Class.forName(classPath);
+        } catch (ClassNotFoundException e) {
+        }
+        return null;
     }
 
 

@@ -14,7 +14,6 @@ import com.sun.tools.javac.tree.TreeMaker;
 import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.code.Symbol;
 
-
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
@@ -46,7 +45,6 @@ public class SmartReturnAnnotationProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        Logger.log("--------> 执行执行");
         try {
             if (roundEnv.processingOver()) {
                 handleSignMethod();
