@@ -26,7 +26,7 @@ public class ClassElement {
         //没有对应的源码，说明对应的java文件已经生成了 class文件 那么使用 ASM  解析
         Class<?> classForReflect = getClassForReflect(classPath);
         if (classForReflect != null) {
-            classDefine = new ReflectClassDefine(jcUtils, classForReflect);
+            classDefine = new AsmClassDefine(jcUtils, classForReflect);
             return;
         }
 

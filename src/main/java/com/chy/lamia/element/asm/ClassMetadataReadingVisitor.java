@@ -126,4 +126,19 @@ public class ClassMetadataReadingVisitor extends ClassVisitor {
         return c;
     }
 
+    public Map<String, Var> getInstantVars() {
+        return instantVars;
+    }
+
+    public Map<String, Getter> getInstantGetters() {
+        return instantGetters;
+    }
+
+    public Map<String, Setter> getInstantSetters() {
+        return instantSetters;
+    }
+
+    public List<Constructor> getConstructors() {
+        return constructors;
+    }
 }

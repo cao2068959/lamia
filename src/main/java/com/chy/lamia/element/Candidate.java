@@ -102,4 +102,15 @@ public class Candidate {
         constructorHit = new HashSet<>();
         setterHit = new HashSet<>();
     }
+
+    @Override
+    public String toString() {
+        return "Candidate{" +
+                "constructorParamMap=" + constructorParamMap +
+                ", setterMap=" + setterMap +
+                ", constructor=" + constructor +
+                ", constructorHit=" + constructorHit +
+                ", setterHit=" + setterHit +
+                '}';
+    }
 }

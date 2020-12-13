@@ -12,6 +12,10 @@ public class Constructor {
         params.add(nameAndType);
     }
 
+    public void add(NameAndType nameAndType) {
+        params.add(nameAndType);
+    }
+
 
     public List<NameAndType> getParams() {
         return params;
