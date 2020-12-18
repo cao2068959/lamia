@@ -1,6 +1,7 @@
 package com.chy.lamia.utils;
 
 import com.chy.lamia.entity.Expression;
+import com.chy.lamia.entity.PriorityExpression;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.model.JavacElements;
 import com.sun.tools.javac.tree.JCTree;
@@ -86,10 +87,10 @@ public class JCUtils {
      * @param argAndTypes       构造器的入参
      * @return
      */
-    public JCTree.JCNewClass newClass(String className, java.util.List<Expression> argAndTypes) {
+    public JCTree.JCNewClass newClass(String className, java.util.List<PriorityExpression> argAndTypes) {
         java.util.List<JCTree.JCExpression> args = new ArrayList();
         int pos = 0;
-        for (Expression argAndType : argAndTypes) {
+        for (PriorityExpression argAndType : argAndTypes) {
             JCTree.JCExpression expression = argAndType.getExpression();
             if(pos == 0){
                 pos = expression.pos;

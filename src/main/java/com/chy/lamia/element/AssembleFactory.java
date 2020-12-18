@@ -13,7 +13,7 @@ import java.util.*;
  */
 public class AssembleFactory {
     List<Candidate> allCandidate = new ArrayList<>();
-    Map<String, Expression> expressionMap = new HashMap<>();
+    Map<String, PriorityExpression> expressionMap = new HashMap<>();
     JCUtils jcUtils;
     private boolean complete = false;
     private String originalClassPath;
@@ -31,15 +31,26 @@ public class AssembleFactory {
     }
 
 
-    public void match(NameAndType nameAndType, JCTree.JCExpression expression) {
+    public void match(NameAndType nameAndType, JCTree.JCExpression expression, Integer priority) {
         for (Candidate candidate : allCandidate) {
             boolean match = candidate.match(nameAndType);
             //返回true 说明 这个表达式将是构成的一部分，把他存起来
             if (match) {
-                Expression expressionWrapper = new Expression(expression);
-                expressionMap.put(nameAndType.getName(), expressionWrapper);
+                updateExpressionMap(nameAndType.getName(), expression, priority);
             }
         }
+    }
+
+    private void updateExpressionMap(String name, JCTree.JCExpression expression, Integer priority) {
+        PriorityExpression priorityExpression = expressionMap.get(name);
+        if (priorityExpression == null) {
+            expressionMap.put(name, new PriorityExpression(expression, priority));
+            return;
+        }
+        if (priority > priorityExpression.getPriority()) {
+            expressionMap.put(name, new PriorityExpression(expression, priority));
+        }
+        return;
     }
 
     public AssembleResult generateTree() {
@@ -63,7 +74,7 @@ public class AssembleFactory {
 
     private void createSetter(Candidate candidate, String instantName, List<JCTree.JCStatement> result) {
         candidate.getHitSetter().forEach((k, v) -> {
-            Expression expression = expressionMap.get(k);
+            PriorityExpression expression = expressionMap.get(k);
             JCTree.JCExpressionStatement setterExpression = jcUtils.execMethod(instantName, v.getMethodName(), expression.getExpression());
             result.add(setterExpression);
         });
@@ -73,7 +84,7 @@ public class AssembleFactory {
     private String createNewInstant(Candidate candidate, List<JCTree.JCStatement> result) {
 
         Constructor constructor = candidate.getConstructor();
-        List<Expression> paramsExpression = new ArrayList<>();
+        List<PriorityExpression> paramsExpression = new ArrayList<>();
         constructor.getParams().forEach(param -> {
             String name = param.getName();
             paramsExpression.add(expressionMap.get(name));
@@ -84,6 +95,7 @@ public class AssembleFactory {
         result.add(newVar);
         return varName;
     }
+
 
     private Candidate choose() {
         int score = -1;
