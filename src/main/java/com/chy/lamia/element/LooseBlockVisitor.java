@@ -54,6 +54,7 @@ public class LooseBlockVisitor extends AbstractBlockVisitor {
         result.add(looseBlock);
     }
 
+
     public List<LooseBlock> getResult() {
         analyzeResult(this);
         return result;
