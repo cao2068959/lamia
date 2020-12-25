@@ -1,8 +1,7 @@
 package com.chy.lamia.element;
 
 
-import com.chy.lamia.entity.NameAndType;
-import com.chy.lamia.utils.JCUtils;
+import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.visitor.AbstractBlockVisitor;
 import com.sun.tools.javac.tree.JCTree;
 
@@ -13,7 +12,7 @@ import java.util.List;
 public class LooseBlockVisitor extends AbstractBlockVisitor {
 
     private boolean haveReturn = false;
-    private final List<NameAndType> vars;
+    private final List<ParameterType> vars;
     private final List<LooseBlock> result;
 
     public LooseBlockVisitor() {
@@ -21,7 +20,7 @@ public class LooseBlockVisitor extends AbstractBlockVisitor {
         result = new LinkedList<>();
     }
 
-    public LooseBlockVisitor(List<NameAndType> vars, List<LooseBlock> result) {
+    public LooseBlockVisitor(List<ParameterType> vars, List<LooseBlock> result) {
         this.vars = new LinkedList<>(vars);
         this.result = result;
     }
@@ -65,8 +64,8 @@ public class LooseBlockVisitor extends AbstractBlockVisitor {
     public void variableVisit(JCTree.JCVariableDecl statement) {
         String typePath = statement.vartype.toString();
         String name = statement.getName().toString();
-        NameAndType nameAndType = new NameAndType(name, typePath);
-        vars.add(nameAndType);
+        ParameterType parameterType = new ParameterType(name, typePath);
+        vars.add(parameterType);
     }
 
     @Override
@@ -75,7 +74,7 @@ public class LooseBlockVisitor extends AbstractBlockVisitor {
     }
 
 
-    public List<NameAndType> getVars() {
+    public List<ParameterType> getVars() {
         return vars;
     }
 }

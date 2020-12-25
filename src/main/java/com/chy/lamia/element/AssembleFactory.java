@@ -1,7 +1,8 @@
 package com.chy.lamia.element;
 
+import com.chy.lamia.element.type.TypeProcessorFactory;
 import com.chy.lamia.entity.*;
-import com.chy.lamia.log.Logger;
+import com.chy.lamia.enums.MatchReuslt;
 import com.chy.lamia.utils.JCUtils;
 import com.sun.tools.javac.tree.JCTree;
 
@@ -28,15 +29,30 @@ public class AssembleFactory {
             Candidate candidate = new Candidate(constructor, setterMap);
             allCandidate.add(candidate);
         }
+
+
     }
 
 
-    public void match(NameAndType nameAndType, JCTree.JCExpression expression, Integer priority) {
+    public void match(ParameterType parameterType, JCTree.JCExpression expression, Integer priority) {
+
+        boolean additional = false;
         for (Candidate candidate : allCandidate) {
-            boolean match = candidate.match(nameAndType);
-            //返回true 说明 这个表达式将是构成的一部分，把他存起来
-            if (match) {
-                updateExpressionMap(nameAndType.getName(), expression, priority);
+            MatchReuslt matchReuslt = candidate.match(parameterType);
+            //类型和名称都相同了 说明 这个表达式将是构成的一部分，把他存起来
+            if (matchReuslt == MatchReuslt.HIT) {
+                updateExpressionMap(parameterType.getName(), expression, priority);
+            }
+            if (matchReuslt == MatchReuslt.MAY) {
+                additional = true;
+            }
+        }
+
+        // 如果additional=true 说明名称匹配上了，但是类型不同，类型可能是optional这样的包装类型 ，解析包装后再递归给他一次机会
+        if (additional) {
+            UnpackResult unpack = TypeProcessorFactory.instance.unpack(parameterType, expression);
+            if(unpack != null){
+                //match(nameAndType,)
             }
         }
     }

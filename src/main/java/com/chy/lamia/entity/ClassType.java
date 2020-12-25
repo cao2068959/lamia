@@ -1,23 +1,14 @@
 package com.chy.lamia.entity;
 
-public class NameAndType {
 
-    final String name;
+public class ClassType {
+
     final String typePath;
     String simpleTypeName = "";
-    String methodName;
 
-
-    public NameAndType(String name, String typePath) {
-        this.name = name;
+    public ClassType(String typePath) {
         this.typePath = typePath;
         this.simpleTypeName = generaterSimpleTypeName(typePath);
-
-    }
-
-    public NameAndType(String name, String typePath, String methodName) {
-        this(name, typePath);
-        this.methodName = methodName;
     }
 
     private String generaterSimpleTypeName(String typePath) {
@@ -36,16 +27,6 @@ public class NameAndType {
         return typePath.substring(index + 1);
     }
 
-
-    public String getName() {
-        return name;
-    }
-
-    public String getMethodName() {
-        return methodName;
-    }
-
-
     public boolean matchType(String type) {
         if (type == null) {
             return false;
@@ -61,8 +42,14 @@ public class NameAndType {
         return false;
     }
 
-    public boolean matchType(NameAndType nameAndType) {
-        return matchType(nameAndType.typePath);
+    public boolean matchType(ClassType type){
+        return matchType(type.getTypePath());
     }
+
+
+    public String getTypePath() {
+        return typePath;
+    }
+
 
 }

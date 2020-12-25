@@ -40,7 +40,7 @@ public class SmartReturnAnnotationProcessor extends AbstractProcessor {
         elementUtils = (JavacElements) processingEnv.getElementUtils();
         trees = (JavacTrees) Trees.instance(processingEnv);
         jcUtils = new JCUtils(treeMaker, elementUtils);
-
+        JCUtils.instance = jcUtils;
     }
 
     @Override

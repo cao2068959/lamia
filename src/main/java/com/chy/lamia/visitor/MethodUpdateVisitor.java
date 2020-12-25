@@ -7,10 +7,11 @@ import com.chy.lamia.element.LooseBlock;
 import com.chy.lamia.element.LooseBlockVisitor;
 import com.chy.lamia.entity.AssembleResult;
 import com.chy.lamia.entity.Getter;
-import com.chy.lamia.entity.NameAndType;
+import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.entity.SunList;
 import com.chy.lamia.processor.marked.MarkedMethods;
 import com.chy.lamia.utils.JCUtils;
+import com.chy.lamia.utils.SymbolUtils;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.TypeTag;
@@ -118,13 +119,13 @@ public class MethodUpdateVisitor extends TreeTranslator {
     /**
      * 去解析 原来的方法体, 每到一个 return  都算一个 通路, 计算出代码有可能经过的所有通路, 并且把每一个通路中 可以访问到 变量给保存下来
      * func(A a,B b){
-     *   C c = ...
-     *   if(..){
-     *       D d = ..
-     *       return
-     *   }
-     *   E e = ..
-     *   return
+     * C c = ...
+     * if(..){
+     * D d = ..
+     * return
+     * }
+     * E e = ..
+     * return
      * }
      * 上述代码 可以解析出 2条 通路
      * 1 . 进入到 if 中 return结束 , 可以访问的 变量有 c,d
@@ -142,7 +143,7 @@ public class MethodUpdateVisitor extends TreeTranslator {
         return looseBlocks;
     }
 
-    private void addMaterialsFromMethodBodyVar(List<NameAndType> methodBodyVars, AssembleFactory assembleFactory) {
+    private void addMaterialsFromMethodBodyVar(List<ParameterType> methodBodyVars, AssembleFactory assembleFactory) {
         if (methodBodyVars == null || methodBodyVars.size() == 0) {
             return;
         }
@@ -156,9 +157,11 @@ public class MethodUpdateVisitor extends TreeTranslator {
             return;
         }
         params.forEach(varSymbol -> {
-            NameAndType nameAndType = new NameAndType(varSymbol.name.toString(), varSymbol.type.toString());
+            ParameterType parameterType = new ParameterType(varSymbol.name.toString(), varSymbol.type.toString());
+            List<ParameterType> generic = SymbolUtils.getGeneric(varSymbol);
+            parameterType.setGeneric(generic);
             //先把 这个参数本身给塞入工厂
-            assembleFactory.match(nameAndType, jcUtils.memberAccess(nameAndType.getName()), PARAMETERS);
+            assembleFactory.match(parameterType, jcUtils.memberAccess(parameterType.getName()), PARAMETERS);
 
             //解析这个类里面所有的 getter setter 塞入构造工厂中
             anatomyClassToAssembleFactory(varSymbol.type.toString(), varSymbol.name.toString(),
@@ -186,9 +189,9 @@ public class MethodUpdateVisitor extends TreeTranslator {
             //生成 a.getXX() 的表达式
             JCTree.JCExpressionStatement getterExpression = jcUtils.execMethod(instanceName, v.getSimpleName(),
                     new LinkedList<>());
-            NameAndType nameAndType = new NameAndType(k, v.getTypePath());
+            ParameterType parameterType = new ParameterType(k, v.getTypePath());
             //将表达式放入 合成工厂去匹配
-            assembleFactory.match(nameAndType, getterExpression.expr, priority);
+            assembleFactory.match(parameterType, getterExpression.expr, priority);
         });
     }
 

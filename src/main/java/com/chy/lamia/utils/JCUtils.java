@@ -3,6 +3,7 @@ package com.chy.lamia.utils;
 import com.chy.lamia.entity.Expression;
 import com.chy.lamia.entity.PriorityExpression;
 import com.sun.tools.javac.code.Flags;
+import com.sun.tools.javac.code.TypeTag;
 import com.sun.tools.javac.model.JavacElements;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeMaker;
@@ -16,6 +17,8 @@ public class JCUtils {
 
     TreeMaker treeMaker;
     JavacElements elementUtils;
+    public static JCUtils instance;
+
 
     public JCUtils(TreeMaker treeMaker, JavacElements elementUtils) {
         this.treeMaker = treeMaker;
@@ -31,9 +34,10 @@ public class JCUtils {
         return expr;
     }
 
-
-
-
+    public JCTree.JCExpression getNullExpression() {
+        JCTree.JCLiteral literal = treeMaker.Literal(TypeTag.BOT, null);
+        return literal;
+    }
 
     /**
      * @param methodInstanceName 方法所在对象的名称 / 全路径的类名称
@@ -49,6 +53,11 @@ public class JCUtils {
         } else {
             left = treeMaker.Ident(elementUtils.getName(methodInstanceName));
         }
+        return execMethod(left, methodName, param);
+    }
+
+    public JCTree.JCExpressionStatement execMethod(JCTree.JCExpression left, String methodName,
+                                                   java.util.List<JCTree.JCExpression> param) {
         return treeMaker.Exec(
                 treeMaker.Apply(
                         List.nil(),
@@ -83,8 +92,8 @@ public class JCUtils {
     /**
      * 生成一个 new语句 比如 new User("1","2")
      *
-     * @param className 要new的class 的全路径
-     * @param argAndTypes       构造器的入参
+     * @param className   要new的class 的全路径
+     * @param argAndTypes 构造器的入参
      * @return
      */
     public JCTree.JCNewClass newClass(String className, java.util.List<PriorityExpression> argAndTypes) {
@@ -92,9 +101,9 @@ public class JCUtils {
         int pos = 0;
         for (PriorityExpression argAndType : argAndTypes) {
             JCTree.JCExpression expression = argAndType.getExpression();
-            if(pos == 0){
+            if (pos == 0) {
                 pos = expression.pos;
-            }else{
+            } else {
                 pos = pos + expression.toString().length();
                 expression.pos = pos;
             }

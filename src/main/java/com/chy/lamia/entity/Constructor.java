@@ -5,19 +5,19 @@ import java.util.List;
 
 public class Constructor {
 
-    private List<NameAndType> params = new ArrayList<>();
+    private List<ParameterType> params = new ArrayList<>();
 
     public void add(String name, String typePath) {
-        NameAndType nameAndType = new NameAndType(name, typePath);
-        params.add(nameAndType);
+        ParameterType parameterType = new ParameterType(name, typePath);
+        params.add(parameterType);
     }
 
-    public void add(NameAndType nameAndType) {
-        params.add(nameAndType);
+    public void add(ParameterType parameterType) {
+        params.add(parameterType);
     }
 
 
-    public List<NameAndType> getParams() {
+    public List<ParameterType> getParams() {
         return params;
     }
 }

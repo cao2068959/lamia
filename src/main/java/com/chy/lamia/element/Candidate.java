@@ -1,10 +1,9 @@
 package com.chy.lamia.element;
 
 import com.chy.lamia.entity.Constructor;
-import com.chy.lamia.entity.NameAndType;
+import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.entity.Setter;
-import com.chy.lamia.utils.JCUtils;
-import com.sun.tools.javac.tree.JCTree;
+import com.chy.lamia.enums.MatchReuslt;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,8 +18,8 @@ import java.util.Set;
 public class Candidate {
 
 
-    private Map<String, NameAndType> constructorParamMap = new HashMap<>();
-    private Map<String, NameAndType> setterMap = new HashMap<>();
+    private Map<String, ParameterType> constructorParamMap = new HashMap<>();
+    private Map<String, ParameterType> setterMap = new HashMap<>();
     private Constructor constructor;
     private Set<String> constructorHit = new HashSet<>();
     private Set<String> setterHit = new HashSet<>();
@@ -36,7 +35,7 @@ public class Candidate {
         allSetter.entrySet().stream()
                 .filter(setter -> !constructorParamMap.containsKey(setter.getKey()))
                 .forEach(setter -> {
-                    NameAndType result = new NameAndType(setter.getKey(), setter.getValue().getTypePath(),
+                    ParameterType result = new ParameterType(setter.getKey(), setter.getValue().getTypePath(),
                             setter.getValue().getSimpleName());
                     setterMap.put(setter.getKey(), result);
                 });
@@ -48,24 +47,29 @@ public class Candidate {
      *
      * @return
      */
-    public boolean match(NameAndType target) {
+    public MatchReuslt match(ParameterType target) {
         String fieldName = target.getName();
 
-        NameAndType constructor = constructorParamMap.get(fieldName);
+        ParameterType constructor = constructorParamMap.get(fieldName);
 
-        if (constructor != null && constructor.matchType(target)) {
-            constructorHit.add(fieldName);
-            return true;
+        if (constructor != null) {
+            if (constructor.matchType(target)) {
+                constructorHit.add(fieldName);
+                return MatchReuslt.HIT;
+            }
+            return MatchReuslt.MAY;
         }
 
-        NameAndType setter = setterMap.get(fieldName);
-        if (setter != null && setter.matchType(target)) {
-            setterHit.add(fieldName);
-            return true;
+        ParameterType setter = setterMap.get(fieldName);
+        if (setter != null) {
+            if (setter.matchType(target)) {
+                setterHit.add(fieldName);
+                return MatchReuslt.HIT;
+            }
+            return MatchReuslt.MAY;
         }
-        return false;
+        return MatchReuslt.MISS;
     }
-
 
     public boolean end() {
         if (constructorHit.size() != constructorParamMap.size()) {
@@ -86,8 +90,8 @@ public class Candidate {
         return setterHit.size();
     }
 
-    public Map<String, NameAndType> getHitSetter() {
-        Map<String, NameAndType> result = new HashMap<>();
+    public Map<String, ParameterType> getHitSetter() {
+        Map<String, ParameterType> result = new HashMap<>();
         setterHit.forEach(hit -> {
             result.put(hit, setterMap.get(hit));
         });
@@ -98,7 +102,7 @@ public class Candidate {
         return constructor;
     }
 
-    public void clear(){
+    public void clear() {
         constructorHit = new HashSet<>();
         setterHit = new HashSet<>();
     }
