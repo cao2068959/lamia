@@ -51,8 +51,8 @@ public class AssembleFactory {
         // 如果additional=true 说明名称匹配上了，但是类型不同，类型可能是optional这样的包装类型 ，解析包装后再递归给他一次机会
         if (additional) {
             UnpackResult unpack = TypeProcessorFactory.instance.unpack(parameterType, expression);
-            if(unpack != null){
-                //match(nameAndType,)
+            if (unpack != null) {
+                match(unpack.getParameterType(), unpack.getExpression(), priority);
             }
         }
     }

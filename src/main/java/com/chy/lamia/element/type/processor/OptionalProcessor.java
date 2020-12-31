@@ -31,7 +31,7 @@ public class OptionalProcessor implements ITypeProcessor {
 
         ParameterType newParameterType = new ParameterType(parameterType.getName(), genericByOption);
 
-        UnpackResult result = new UnpackResult(expression, newParameterType);
+        UnpackResult result = new UnpackResult(newExpression, newParameterType);
         return result;
     }
 
