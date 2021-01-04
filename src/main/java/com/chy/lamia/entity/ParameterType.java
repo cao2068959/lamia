@@ -43,6 +43,14 @@ public class ParameterType {
         return type;
     }
 
+    public String getTypePatch(){
+        if(type == null){
+            return null;
+        }
+        return type.typePath;
+
+    }
+
     public String getName() {
         return name;
     }

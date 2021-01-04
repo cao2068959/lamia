@@ -3,6 +3,7 @@ package com.chy.lamia.utils;
 import com.chy.lamia.entity.Expression;
 import com.chy.lamia.entity.PriorityExpression;
 import com.sun.tools.javac.code.Flags;
+import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.TypeTag;
 import com.sun.tools.javac.model.JavacElements;
 import com.sun.tools.javac.tree.JCTree;
@@ -86,7 +87,11 @@ public class JCUtils {
 
 
     public JCTree getTree(String treePath) {
-        return elementUtils.getTree(elementUtils.getTypeElement(treePath));
+        Symbol.ClassSymbol typeElement = elementUtils.getTypeElement(treePath);
+        if(typeElement == null){
+            return null;
+        }
+        return elementUtils.getTree(typeElement);
     }
 
     /**

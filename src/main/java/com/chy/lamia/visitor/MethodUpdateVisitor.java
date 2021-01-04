@@ -143,6 +143,14 @@ public class MethodUpdateVisitor extends TreeTranslator {
         return looseBlocks;
     }
 
+    @Override
+    public void visitImport(JCTree.JCImport tree) {
+        super.visitImport(tree);
+    }
+
+
+
+
     private void addMaterialsFromMethodBodyVar(List<ParameterType> methodBodyVars, AssembleFactory assembleFactory) {
         if (methodBodyVars == null || methodBodyVars.size() == 0) {
             return;
@@ -163,7 +171,7 @@ public class MethodUpdateVisitor extends TreeTranslator {
             //先把 这个参数本身给塞入工厂
             assembleFactory.match(parameterType, jcUtils.memberAccess(parameterType.getName()), PARAMETERS);
             //解析这个类里面所有的 getter setter 塞入构造工厂中
-            anatomyClassToAssembleFactory(varSymbol.type.toString(), varSymbol.name.toString(),
+            anatomyClassToAssembleFactory(parameterType.getTypePatch(), parameterType.getName(),
                     assembleFactory, jcUtils, PARAMETERS_IN_VAR);
         });
     }

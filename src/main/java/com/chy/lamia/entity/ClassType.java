@@ -7,9 +7,25 @@ public class ClassType {
     String simpleTypeName = "";
 
     public ClassType(String typePath) {
+        typePath = typePathPurify(typePath);
         this.typePath = typePath;
         this.simpleTypeName = generaterSimpleTypeName(typePath);
     }
+
+    /**
+     * 净化 类路径，如果后面带了泛型，将会把泛型给抹去
+     *
+     * @param typePath
+     * @return
+     */
+    private String typePathPurify(String typePath) {
+        int index = typePath.indexOf("<");
+        if (index == -1) {
+            return typePath;
+        }
+        return typePath.substring(0,index);
+    }
+
 
     private String generaterSimpleTypeName(String typePath) {
         if (typePath == null) {
@@ -42,7 +58,7 @@ public class ClassType {
         return false;
     }
 
-    public boolean matchType(ClassType type){
+    public boolean matchType(ClassType type) {
         return matchType(type.getTypePath());
     }
 

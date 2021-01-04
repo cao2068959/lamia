@@ -2,6 +2,8 @@ package com.chy.lamia.element;
 
 
 import com.chy.lamia.entity.ParameterType;
+import com.chy.lamia.utils.JCUtils;
+import com.chy.lamia.utils.SymbolUtils;
 import com.chy.lamia.visitor.AbstractBlockVisitor;
 import com.sun.tools.javac.tree.JCTree;
 
@@ -65,6 +67,8 @@ public class LooseBlockVisitor extends AbstractBlockVisitor {
         String typePath = statement.vartype.toString();
         String name = statement.getName().toString();
         ParameterType parameterType = new ParameterType(name, typePath);
+        //SymbolUtils.getGeneric(typePath);
+
         vars.add(parameterType);
     }
 
