@@ -6,8 +6,10 @@ import com.chy.lamia.processor.marked.MarkedContext;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.visitor.MethodUpdateVisitor;
 import com.chy.lamia.visitor.MethodUpdateVisitor2;
+import com.sun.tools.javac.comp.Attr;
 import com.sun.source.util.Trees;
 import com.sun.tools.javac.api.JavacTrees;
+import com.sun.tools.javac.comp.Enter;
 import com.sun.tools.javac.model.JavacElements;
 import com.sun.tools.javac.processing.JavacProcessingEnvironment;
 import com.sun.tools.javac.tree.JCTree;
@@ -40,7 +42,9 @@ public class SmartReturnAnnotationProcessor extends AbstractProcessor {
         treeMaker = TreeMaker.instance(context);
         elementUtils = (JavacElements) processingEnv.getElementUtils();
         trees = (JavacTrees) Trees.instance(processingEnv);
-        jcUtils = new JCUtils(treeMaker, elementUtils);
+        Attr attr = Attr.instance(context);
+        Enter enter = Enter.instance(context);
+        jcUtils = new JCUtils(treeMaker, elementUtils, attr, enter);
         JCUtils.instance = jcUtils;
     }
 
@@ -53,10 +57,10 @@ public class SmartReturnAnnotationProcessor extends AbstractProcessor {
                 prepare(annotations, roundEnv);
             }
             return true;
-        }catch (Exception e){
+        } catch (Exception e) {
             Logger.throwableLog(e);
             throw e;
-        }finally {
+        } finally {
             Logger.push();
         }
     }
@@ -67,7 +71,7 @@ public class SmartReturnAnnotationProcessor extends AbstractProcessor {
     private void handleSignMethod() {
         markedContext.forEach((className, markedMethods) -> {
             JCTree tree = elementUtils.getTree(elementUtils.getTypeElement(className));
-            tree.accept(new MethodUpdateVisitor(markedMethods, jcUtils));
+            tree.accept(new MethodUpdateVisitor(markedMethods, jcUtils, tree));
         });
     }
 

@@ -1,10 +1,14 @@
 package com.chy.lamia.utils;
 
-import com.chy.lamia.entity.Expression;
 import com.chy.lamia.entity.PriorityExpression;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Symbol;
+import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.TypeTag;
+import com.sun.tools.javac.comp.Attr;
+import com.sun.tools.javac.comp.AttrContext;
+import com.sun.tools.javac.comp.Enter;
+import com.sun.tools.javac.comp.Env;
 import com.sun.tools.javac.model.JavacElements;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeMaker;
@@ -16,14 +20,27 @@ import java.util.LinkedList;
 
 public class JCUtils {
 
+    private final Attr attr;
+    private final Enter enter;
     TreeMaker treeMaker;
     JavacElements elementUtils;
     public static JCUtils instance;
 
 
-    public JCUtils(TreeMaker treeMaker, JavacElements elementUtils) {
+    public JCUtils(TreeMaker treeMaker, JavacElements elementUtils, Attr attr, Enter enter) {
         this.treeMaker = treeMaker;
         this.elementUtils = elementUtils;
+        this.attr = attr;
+        this.enter = enter;
+    }
+
+    public Type attribType(JCTree node, JCTree.JCVariableDecl variable) {
+        if (!(node instanceof JCTree.JCClassDecl)) {
+            return null;
+        }
+        JCTree.JCClassDecl jcClassDecl = (JCTree.JCClassDecl) node;
+        Env<AttrContext> classEnv = enter.getClassEnv(jcClassDecl.sym);
+        return attr.attribType(variable.vartype, classEnv);
     }
 
     public JCTree.JCExpression memberAccess(String components) {
@@ -88,7 +105,7 @@ public class JCUtils {
 
     public JCTree getTree(String treePath) {
         Symbol.ClassSymbol typeElement = elementUtils.getTypeElement(treePath);
-        if(typeElement == null){
+        if (typeElement == null) {
             return null;
         }
         return elementUtils.getTree(typeElement);

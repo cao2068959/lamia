@@ -1,7 +1,6 @@
 package com.chy.lamia.visitor;
 
 
-import com.chy.lamia.element.Modify;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.util.List;
 
@@ -9,8 +8,9 @@ import com.sun.tools.javac.util.List;
 public abstract class AbstractBlockVisitor {
 
     public JCTree.JCBlock block;
+    public JCTree classTree;
 
-    public void accept(JCTree.JCBlock block) {
+    public void accept(JCTree.JCBlock block, JCTree classTree) {
         if (block == null) {
             return;
         }
@@ -19,6 +19,7 @@ public abstract class AbstractBlockVisitor {
             return;
         }
         this.block = block;
+        this.classTree = classTree;
         doVisitorAllBlock(statements);
     }
 

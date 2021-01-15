@@ -29,11 +29,12 @@ public class MethodUpdateVisitor extends TreeTranslator {
 
     private final MarkedMethods markedMethods;
     private final JCUtils jcUtils;
+    private JCTree classTree;
 
-    public MethodUpdateVisitor(MarkedMethods markedMethods, JCUtils jcUtils) {
+    public MethodUpdateVisitor(MarkedMethods markedMethods, JCUtils jcUtils, JCTree tree) {
         this.markedMethods = markedMethods;
         this.jcUtils = jcUtils;
-
+        this.classTree = tree;
     }
 
 
@@ -138,18 +139,10 @@ public class MethodUpdateVisitor extends TreeTranslator {
     private List<LooseBlock> untieBlock(JCTree.JCMethodDecl methodSymbolDecl) {
         JCTree.JCBlock originalBody = methodSymbolDecl.body;
         LooseBlockVisitor looseBlockVisitor = new LooseBlockVisitor();
-        looseBlockVisitor.accept(originalBody);
+        looseBlockVisitor.accept(originalBody, classTree);
         List<LooseBlock> looseBlocks = looseBlockVisitor.getResult();
         return looseBlocks;
     }
-
-    @Override
-    public void visitImport(JCTree.JCImport tree) {
-        super.visitImport(tree);
-    }
-
-
-
 
     private void addMaterialsFromMethodBodyVar(List<ParameterType> methodBodyVars, AssembleFactory assembleFactory) {
         if (methodBodyVars == null || methodBodyVars.size() == 0) {

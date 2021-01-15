@@ -5,6 +5,7 @@ import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.utils.SymbolUtils;
 import com.chy.lamia.visitor.AbstractBlockVisitor;
+import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.tree.JCTree;
 
 import java.util.LinkedList;
@@ -37,7 +38,7 @@ public class LooseBlockVisitor extends AbstractBlockVisitor {
     public void blockVisit(JCTree.JCBlock statement) {
         LooseBlockVisitor looseBlockVisitor = new LooseBlockVisitor(vars, result);
         //继续去扫描代码块里面的代码
-        looseBlockVisitor.accept(statement);
+        looseBlockVisitor.accept(statement, classTree);
         analyzeResult(looseBlockVisitor);
     }
 
@@ -64,11 +65,10 @@ public class LooseBlockVisitor extends AbstractBlockVisitor {
 
     @Override
     public void variableVisit(JCTree.JCVariableDecl statement) {
-        String typePath = statement.vartype.toString();
+        Type type = JCUtils.instance.attribType(classTree, statement);
         String name = statement.getName().toString();
-        ParameterType parameterType = new ParameterType(name, typePath);
-        //SymbolUtils.getGeneric(typePath);
-
+        ParameterType parameterType = new ParameterType(name, type.toString());
+        parameterType.setGeneric(SymbolUtils.getGeneric(type));
         vars.add(parameterType);
     }
 
@@ -76,7 +76,6 @@ public class LooseBlockVisitor extends AbstractBlockVisitor {
     public void returnVisit(JCTree.JCReturn statement) {
         haveReturn = true;
     }
-
 
     public List<ParameterType> getVars() {
         return vars;
