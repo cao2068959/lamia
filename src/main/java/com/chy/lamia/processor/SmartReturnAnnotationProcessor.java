@@ -5,7 +5,6 @@ import com.chy.lamia.log.Logger;
 import com.chy.lamia.processor.marked.MarkedContext;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.visitor.MethodUpdateVisitor;
-import com.chy.lamia.visitor.MethodUpdateVisitor2;
 import com.sun.tools.javac.comp.Attr;
 import com.sun.source.util.Trees;
 import com.sun.tools.javac.api.JavacTrees;

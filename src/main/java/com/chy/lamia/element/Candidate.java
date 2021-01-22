@@ -49,37 +49,39 @@ public class Candidate {
      */
     public MatchReuslt match(ParameterType target) {
         String fieldName = target.getName();
-
+        //获取构造器的字段，然后匹配，匹配上了就放入 hit容器中
         ParameterType constructor = constructorParamMap.get(fieldName);
-
-        if (constructor != null) {
-            if (constructor.matchType(target)) {
-                constructorHit.add(fieldName);
-                return MatchReuslt.HIT;
-            }
-            return MatchReuslt.MAY;
+        MatchReuslt constructorMatchReuslt = matchType(fieldName, constructor, target, constructorHit);
+        if (constructorMatchReuslt == MatchReuslt.HIT) {
+            return MatchReuslt.HIT;
         }
 
+        //获取setter的字段，然后匹配，匹配上了就放入 hit容器中
         ParameterType setter = setterMap.get(fieldName);
-        if (setter != null) {
-            if (setter.matchType(target)) {
-                setterHit.add(fieldName);
-                return MatchReuslt.HIT;
-            }
+        MatchReuslt setterMatchReuslt = matchType(fieldName, setter, target, setterHit);
+        if (setterMatchReuslt == MatchReuslt.HIT) {
+            return MatchReuslt.HIT;
+        }
+
+        //只要构造器和setter 中有一个是可能，那么就直接返回
+        if(setterMatchReuslt == MatchReuslt.MAY || constructorMatchReuslt == MatchReuslt.MAY){
             return MatchReuslt.MAY;
         }
+
         return MatchReuslt.MISS;
     }
 
-    public boolean end() {
-        if (constructorHit.size() != constructorParamMap.size()) {
-            return false;
-        }
 
-        if (setterHit.size() != setterMap.size()) {
-            return false;
+    private MatchReuslt matchType(String fieldName, ParameterType componentType,
+                                  ParameterType target, Set<String> his) {
+        if (componentType == null) {
+            return MatchReuslt.MISS;
         }
-        return true;
+        if (componentType.matchType(target)) {
+            his.add(fieldName);
+            return MatchReuslt.HIT;
+        }
+        return MatchReuslt.MAY;
     }
 
     public int score() {

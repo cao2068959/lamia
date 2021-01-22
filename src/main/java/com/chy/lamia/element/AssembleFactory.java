@@ -29,8 +29,6 @@ public class AssembleFactory {
             Candidate candidate = new Candidate(constructor, setterMap);
             allCandidate.add(candidate);
         }
-
-
     }
 
 
@@ -47,7 +45,6 @@ public class AssembleFactory {
                 additional = true;
             }
         }
-
         // 如果additional=true 说明名称匹配上了，但是类型不同，类型可能是optional这样的包装类型 ，解析包装后再递归给他一次机会
         if (additional) {
             UnpackResult unpack = TypeProcessorFactory.instance.unpack(parameterType, expression);
