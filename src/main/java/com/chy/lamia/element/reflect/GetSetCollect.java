@@ -31,7 +31,7 @@ public class GetSetCollect {
 
     private void setterHandle(String name, Method method) {
         String returnTypeName = method.getReturnType().getName();
-        if (!"void".equals(returnTypeName)) {
+        if (!"void".equals(returnTypeName.toLowerCase())) {
             return;
         }
 
@@ -43,7 +43,7 @@ public class GetSetCollect {
         String varName = varNameHandle(name.substring(3));
         Setter setter = new Setter();
         setter.setTypePath(parameterTypeName);
-        setter.setSimpleName(varName);
+        setter.setSimpleName(name);
         instantSetters.put(varName, setter);
     }
 
@@ -53,7 +53,7 @@ public class GetSetCollect {
             return;
         }
         String returnTypeName = method.getReturnType().getName();
-        if ("void".equals(returnTypeName)) {
+        if ("void".equals(returnTypeName.toLowerCase())) {
             return;
         }
         String varName = varNameHandle(name.substring(3));

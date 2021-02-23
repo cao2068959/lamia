@@ -129,4 +129,12 @@ public class AssembleFactory {
         expressionMap = new HashMap<>();
         allCandidate.forEach(Candidate::clear);
     }
+
+    @Override
+    public String toString() {
+        return "AssembleFactory{" +
+                "allCandidate=" + allCandidate +
+                ", expressionMap=" + expressionMap +
+                '}';
+    }
 }

@@ -69,7 +69,7 @@ public class ClassMetadataReadingVisitor extends ClassVisitor {
 
     private void setterHandle(String name, Type[] argumentTypes, Type returnType) {
 
-        if (!"VOID".equals(returnType.getClassName())) {
+        if (!"void".equals(returnType.getClassName().toLowerCase())) {
             return;
         }
 
@@ -80,7 +80,7 @@ public class ClassMetadataReadingVisitor extends ClassVisitor {
         String varName = varNameHandle(name.substring(3));
         Setter setter = new Setter();
         setter.setTypePath(parameterTypeName);
-        setter.setSimpleName(varName);
+        setter.setSimpleName(name);
         instantSetters.put(varName, setter);
     }
 
@@ -89,7 +89,8 @@ public class ClassMetadataReadingVisitor extends ClassVisitor {
             return;
         }
         String returnTypeName = returnType.getClassName();
-        if ("VOID".equals(returnTypeName)) {
+        String lowReturnTypeName = returnTypeName.toLowerCase();
+        if ("void".equals(lowReturnTypeName.toLowerCase())) {
             return;
         }
         String varName = varNameHandle(name.substring(3));
