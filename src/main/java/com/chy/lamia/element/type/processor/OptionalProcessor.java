@@ -2,7 +2,6 @@ package com.chy.lamia.element.type.processor;
 
 
 import com.chy.lamia.entity.ParameterType;
-import com.chy.lamia.entity.UnpackResult;
 import com.chy.lamia.utils.JCUtils;
 import com.sun.tools.javac.tree.JCTree;
 
@@ -12,27 +11,38 @@ import java.util.Optional;
 
 public class OptionalProcessor implements ITypeProcessor {
 
+
+    JCUtils jcUtils;
+
+    public OptionalProcessor() {
+        this.jcUtils = JCUtils.instance;
+    }
+
     @Override
     public String[] indexs() {
         return new String[]{Optional.class.getName()};
     }
 
     @Override
-    public UnpackResult unpack(ParameterType parameterType, JCTree.JCExpression expression) {
-        JCUtils jcUtils = JCUtils.instance;
-        List<JCTree.JCExpression> list = new ArrayList();
-        list.add(jcUtils.getNullExpression());
-
-        //生成 语句 optional.orElse(null);
-        JCTree.JCExpression newExpression = jcUtils.execMethod(expression, "orElse", list).getExpression();
-
+    public ParameterType unboxingType(ParameterType parameterType) {
         //获取 optional 里的泛型
         ParameterType genericByOption = getGenericByOption(parameterType);
+        return new ParameterType(parameterType.getName(), genericByOption);
+    }
 
-        ParameterType newParameterType = new ParameterType(parameterType.getName(), genericByOption);
+    @Override
+    public JCTree.JCExpression unboxingExpression(JCTree.JCExpression expression) {
+        List<JCTree.JCExpression> list = new ArrayList();
+        list.add(jcUtils.getNullExpression());
+        //生成 语句 optional.orElse(null);
+        return jcUtils.execMethod(expression, "orElse", list).getExpression();
+    }
 
-        UnpackResult result = new UnpackResult(newExpression, newParameterType);
-        return result;
+
+    @Override
+    public JCTree.JCExpression autoboxingExpression(JCTree.JCExpression expression) {
+        List<JCTree.JCExpression> params = List.of(expression);
+        return jcUtils.execMethod("java.util.Optional", "ofNullable", params).getExpression();
     }
 
     /**

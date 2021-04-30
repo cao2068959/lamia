@@ -13,9 +13,7 @@ import com.chy.lamia.utils.JCUtils;
 import jdk.internal.org.objectweb.asm.ClassReader;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -42,6 +40,8 @@ public class AsmClassDefine implements IClassDefine {
             URL url = ClassPath.getPathFromClass(leadClass);
             ClassReader classReader = new ClassReader(url.openStream());
             classReader.accept(classMetadataReadingVisitor, 0);
+
+
         } catch (IOException e) {
             Logger.throwableLog(e);
             throw new RuntimeException("类 : [" + classPath + "] 无法解析");

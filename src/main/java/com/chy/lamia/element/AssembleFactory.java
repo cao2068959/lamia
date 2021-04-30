@@ -19,12 +19,14 @@ public class AssembleFactory {
     private boolean complete = false;
     private String originalClassPath;
 
-    public AssembleFactory(JCUtils jcUtils, String originalClassPath, List<Constructor> constructors, Map<String, Setter> setterMap) {
+    public AssembleFactory(JCUtils jcUtils, String originalClassPath,
+                           List<Constructor> constructors,
+                           Map<String, Setter> setterMap) {
         this.jcUtils = jcUtils;
         this.originalClassPath = originalClassPath;
 
         //根据构造器来分组
-        // 如有 构造器 -> Z(A,B,C)  setter -> setA setB setC setD   那么 这个组合就成了  Z(A,B,C) And setD
+        // 如有 构造器 -> Z(A,B,C)  setter -> setA setB setC sey6u78ttD   那么 这个组合就成了  Z(A,B,C) And setD
         for (Constructor constructor : constructors) {
             Candidate candidate = new Candidate(constructor, setterMap);
             allCandidate.add(candidate);
@@ -47,9 +49,9 @@ public class AssembleFactory {
         }
         // 如果additional=true 说明名称匹配上了，但是类型不同，类型可能是optional这样的包装类型 ，解析包装后再递归给他一次机会
         if (additional) {
-            UnpackResult unpack = TypeProcessorFactory.instance.unpack(parameterType, expression);
+            TypeProcessorResult unpack = TypeProcessorFactory.instance.unpack(parameterType);
             if (unpack != null) {
-                match(unpack.getParameterType(), unpack.getExpression(), priority);
+                match(unpack.getParameterType(), unpack.getUnboxingFun().getExpression(expression), priority);
             }
         }
     }
@@ -72,7 +74,6 @@ public class AssembleFactory {
             throw new RuntimeException("类 ： [" + originalClassPath + "] 构造器参数不够");
         }
         return doGenerateTree(candidate);
-
     }
 
     private AssembleResult doGenerateTree(Candidate candidate) {
@@ -109,7 +110,6 @@ public class AssembleFactory {
         return varName;
     }
 
-
     private Candidate choose() {
         int score = -1;
         Candidate result = null;
@@ -122,7 +122,6 @@ public class AssembleFactory {
         }
         return result;
     }
-
 
     public void clear() {
         complete = false;

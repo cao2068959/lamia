@@ -17,6 +17,12 @@ import java.util.Set;
  */
 public class Candidate {
 
+    /**
+     * 构造器和setter中可以注入的参数都放入这个map, 如果有同名的, 构造器的优先于setter的参数
+     * UnPackMutliParameterType : 是一个 解包后的符合类型,
+     * 如 ： List<Optional<String>> 他就包含了 List<Optional<String>> ，Optional<String> ，String 三种类型
+     */
+    private Map<String, UnPackMutliParameterType> allParamMap = new HashMap<>();
 
     private Map<String, ParameterType> constructorParamMap = new HashMap<>();
     private Map<String, ParameterType> setterMap = new HashMap<>();
@@ -29,8 +35,13 @@ public class Candidate {
         this.constructor = constructor;
 
         constructor.getParams().stream().forEach(param -> {
+            //TODO 删除
             constructorParamMap.put(param.getName(), param);
+            UnPackMutliParameterType unPackMutliParameterType = new UnPackMutliParameterType(param);
+            allParamMap.put(param.getName(), unPackMutliParameterType);
+
         });
+
 
         allSetter.entrySet().stream()
                 .filter(setter -> !constructorParamMap.containsKey(setter.getKey()))
@@ -38,6 +49,9 @@ public class Candidate {
                     ParameterType result = new ParameterType(setter.getKey(), setter.getValue().getTypePath(),
                             setter.getValue().getSimpleName());
                     setterMap.put(setter.getKey(), result);
+
+                    UnPackMutliParameterType unPackMutliParameterType = new UnPackMutliParameterType(result);
+                    allParamMap.put(setter.getKey(), unPackMutliParameterType);
                 });
     }
 
@@ -64,9 +78,10 @@ public class Candidate {
         }
 
         //只要构造器和setter 中有一个是可能，那么就直接返回
-        if(setterMatchReuslt == MatchReuslt.MAY || constructorMatchReuslt == MatchReuslt.MAY){
+        if (setterMatchReuslt == MatchReuslt.MAY || constructorMatchReuslt == MatchReuslt.MAY) {
             return MatchReuslt.MAY;
         }
+
 
         return MatchReuslt.MISS;
     }

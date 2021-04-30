@@ -3,8 +3,9 @@ package com.chy.lamia.element.type;
 
 import com.chy.lamia.element.type.processor.ITypeProcessor;
 import com.chy.lamia.element.type.processor.OptionalProcessor;
+import com.chy.lamia.entity.ClassType;
 import com.chy.lamia.entity.ParameterType;
-import com.chy.lamia.entity.UnpackResult;
+import com.chy.lamia.entity.TypeProcessorResult;
 import com.sun.tools.javac.tree.JCTree;
 
 import java.util.Arrays;
@@ -37,13 +38,17 @@ public class TypeProcessorFactory {
      *
      * @param parameterType
      */
-    public UnpackResult unpack(ParameterType parameterType, JCTree.JCExpression expression) {
+    public TypeProcessorResult unpack(ParameterType parameterType) {
         String typePath = parameterType.getType().getTypePath();
         ITypeProcessor typeProcessor = processorMap.get(typePath);
         if (typeProcessor == null) {
             return null;
         }
-        return typeProcessor.unpack(parameterType, expression);
+
+        ParameterType newParameterType = typeProcessor.unboxingType(parameterType);
+        ExpressionFunction autoboxingExpression = typeProcessor::autoboxingExpression;
+        ExpressionFunction unboxingExpression = typeProcessor::unboxingExpression;
+        return new TypeProcessorResult(parameterType, newParameterType, unboxingExpression, autoboxingExpression);
     }
 
 

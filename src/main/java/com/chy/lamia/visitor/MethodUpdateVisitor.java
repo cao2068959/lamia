@@ -46,7 +46,7 @@ public class MethodUpdateVisitor extends TreeTranslator {
 
     private void updateMethod(JCTree.JCMethodDecl methodSymbolDecl) {
         Symbol.MethodSymbol methodSymbol = methodSymbolDecl.sym;
-        //确认这个方法是不是应该被修改 及打了注解 @SmartReturn
+        //确认这个方法是不是应该被修改 及打了注解 @Mapping
         if (!markedMethods.contains(methodSymbol.toString())) {
             return;
         }
@@ -57,6 +57,7 @@ public class MethodUpdateVisitor extends TreeTranslator {
         if (returnType.getTag() != TypeTag.CLASS) {
             return;
         }
+
         //解析返回值 的类结构
         ClassElement returnClassElement = ClassElement.getClassElement(returnType.toString(), jcUtils);
         //根据不同的策略获取 返回值的生成工厂
@@ -101,6 +102,7 @@ public class MethodUpdateVisitor extends TreeTranslator {
                 newStatement.add(oldStatement);
                 continue;
             }
+
             //复制到 return语句了, 抛弃老的 return 语句, 把新生成的语句加上去
             for (JCTree.JCStatement treeStatement : assembleResult.getStatements()) {
                 newStatement.add(treeStatement);

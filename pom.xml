@@ -36,6 +36,8 @@
                         <arg>--add-exports=jdk.compiler/com.sun.tools.javac.code=lamia</arg>
                         <arg>--add-exports=jdk.compiler/com.sun.tools.javac.comp=lamia</arg>
                         <arg>--add-exports=java.base/jdk.internal.org.objectweb.asm=lamia</arg>
+                        <arg>--add-exports=java.base/jdk.internal.org.objectweb.asm.signature=lamia</arg>
+
                     </compilerArgs>
                 </configuration>
             </plugin>

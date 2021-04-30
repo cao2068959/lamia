@@ -15,6 +15,8 @@ public class ParameterType {
         this.type = new ClassType(typePath);
     }
 
+
+
     public ParameterType(String name, ParameterType parameterType) {
         this.name = name;
         this.type = parameterType.getType();

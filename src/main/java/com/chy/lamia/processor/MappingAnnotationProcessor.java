@@ -1,6 +1,6 @@
 package com.chy.lamia.processor;
 
-import com.chy.lamia.annotation.SmartReturn;
+import com.chy.lamia.annotation.Mapping;
 import com.chy.lamia.log.Logger;
 import com.chy.lamia.processor.marked.MarkedContext;
 import com.chy.lamia.utils.JCUtils;
@@ -21,9 +21,9 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
 import java.util.*;
 
-@SupportedAnnotationTypes("com.chy.lamia.annotation.SmartReturn")
+@SupportedAnnotationTypes("com.chy.lamia.annotation.Mapping")
 @SupportedSourceVersion(SourceVersion.RELEASE_11)
-public class SmartReturnAnnotationProcessor extends AbstractProcessor {
+public class MappingAnnotationProcessor extends AbstractProcessor {
 
     JavacElements elementUtils;
 
@@ -65,7 +65,7 @@ public class SmartReturnAnnotationProcessor extends AbstractProcessor {
     }
 
     /**
-     * 处理标注了@SmartReturn 的方法， 生成对应的实现代码
+     * 处理标注了@Mapping 的方法， 生成对应的实现代码
      */
     private void handleSignMethod() {
         markedContext.forEach((className, markedMethods) -> {
@@ -77,13 +77,13 @@ public class SmartReturnAnnotationProcessor extends AbstractProcessor {
 
     /**
      * 收集项目里所有类的 Element 对象
-     * 同时把标注了 @SmartReturn 的方法 给存储下来
+     * 同时把标注了 @Mapping 的方法 给存储下来
      *
      * @param annotations
      * @param roundEnv
      */
     private void prepare(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        for (Element element : roundEnv.getElementsAnnotatedWith(SmartReturn.class)) {
+        for (Element element : roundEnv.getElementsAnnotatedWith(Mapping.class)) {
             Symbol.MethodSymbol methodSymbol = (Symbol.MethodSymbol) element;
             String key = methodSymbol.owner.toString();
             markedContext.put(key, methodSymbol);

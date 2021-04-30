@@ -1,10 +1,7 @@
 package com.chy.lamia.element.asm;
 
 
-import com.chy.lamia.entity.Constructor;
-import com.chy.lamia.entity.Getter;
-import com.chy.lamia.entity.Setter;
-import com.chy.lamia.entity.Var;
+import com.chy.lamia.entity.*;
 import jdk.internal.org.objectweb.asm.ClassVisitor;
 import jdk.internal.org.objectweb.asm.MethodVisitor;
 import jdk.internal.org.objectweb.asm.Opcodes;
@@ -16,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 
 import jdk.internal.org.objectweb.asm.Type;
+import jdk.internal.org.objectweb.asm.signature.SignatureReader;
+import jdk.internal.org.objectweb.asm.signature.SignatureVisitor;
 
 public class ClassMetadataReadingVisitor extends ClassVisitor {
 
@@ -52,6 +51,13 @@ public class ClassMetadataReadingVisitor extends ClassVisitor {
         Type returnType = Type.getReturnType(desc);
         Type[] argumentTypes = Type.getArgumentTypes(desc);
 
+        if (signature != null){
+            SignatureSourcer signatureVisitorImp = new SignatureSourcer();
+            SignatureReader signatureReader = new SignatureReader(signature);
+            signatureReader.accept(signatureVisitorImp);
+            System.out.println(signatureVisitorImp);
+        }
+
         //get 开头当做 getter方法处理
         if (name.startsWith("get")) {
             getterHandle(name, argumentTypes, returnType);
@@ -76,6 +82,8 @@ public class ClassMetadataReadingVisitor extends ClassVisitor {
         if (argumentTypes == null || argumentTypes.length != 1) {
             return;
         }
+        Type argumentType = argumentTypes[0];
+
         String parameterTypeName = argumentTypes[0].getClassName();
         String varName = varNameHandle(name.substring(3));
         Setter setter = new Setter();
@@ -97,10 +105,13 @@ public class ClassMetadataReadingVisitor extends ClassVisitor {
         if (varName == null) {
             return;
         }
+
+
         Getter getter = new Getter();
         getter.setSimpleName(name);
         getter.setTypePath(returnTypeName);
         instantGetters.put(varName, getter);
+
     }
 
     /**
