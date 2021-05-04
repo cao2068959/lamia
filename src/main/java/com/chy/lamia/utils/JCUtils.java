@@ -118,11 +118,11 @@ public class JCUtils {
      * @param argAndTypes 构造器的入参
      * @return
      */
-    public JCTree.JCNewClass newClass(String className, java.util.List<PriorityExpression> argAndTypes) {
+    public JCTree.JCNewClass newClass(String className, java.util.List<JCTree.JCExpression> argAndTypes) {
         java.util.List<JCTree.JCExpression> args = new ArrayList();
         int pos = 0;
-        for (PriorityExpression argAndType : argAndTypes) {
-            JCTree.JCExpression expression = argAndType.getExpression();
+        for (JCTree.JCExpression argAndType : argAndTypes) {
+            JCTree.JCExpression expression = argAndType;
             if (pos == 0) {
                 pos = expression.pos;
             } else {

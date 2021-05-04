@@ -2,6 +2,7 @@ package com.chy.lamia.element.tree;
 
 
 import com.chy.lamia.entity.Getter;
+import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.entity.Setter;
 import com.chy.lamia.entity.Var;
 import com.chy.lamia.visitor.InstantMethodVisitor;
@@ -58,7 +59,7 @@ public class GetSetCollect extends InstantMethodVisitor {
         String paramType = fparam.vartype.type.toString();
         Setter setter = new Setter();
         setter.setSimpleName(name);
-        setter.setTypePath(paramType);
+        setter.setParameterType(new ParameterType(paramType));
         setterData.put(varName, setter);
     }
 

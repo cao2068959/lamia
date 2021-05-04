@@ -7,14 +7,10 @@ import jdk.internal.org.objectweb.asm.MethodVisitor;
 import jdk.internal.org.objectweb.asm.Opcodes;
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import jdk.internal.org.objectweb.asm.Type;
 import jdk.internal.org.objectweb.asm.signature.SignatureReader;
-import jdk.internal.org.objectweb.asm.signature.SignatureVisitor;
 
 public class ClassMetadataReadingVisitor extends ClassVisitor {
 
@@ -51,29 +47,23 @@ public class ClassMetadataReadingVisitor extends ClassVisitor {
         Type returnType = Type.getReturnType(desc);
         Type[] argumentTypes = Type.getArgumentTypes(desc);
 
-        if (signature != null){
-            SignatureSourcer signatureVisitorImp = new SignatureSourcer();
-            SignatureReader signatureReader = new SignatureReader(signature);
-            signatureReader.accept(signatureVisitorImp);
-            System.out.println(signatureVisitorImp);
-        }
-
+        ParameterTypeSignatureHandleWarpper signatureHandleWarpper = new ParameterTypeSignatureHandleWarpper(signature);
         //get 开头当做 getter方法处理
         if (name.startsWith("get")) {
-            getterHandle(name, argumentTypes, returnType);
+            getterHandle(name, argumentTypes, returnType, signatureHandleWarpper);
             return null;
         }
 
         //set 开头当做 setter方法处理
         if (name.startsWith("set")) {
-            setterHandle(name, argumentTypes, returnType);
+            setterHandle(name, argumentTypes, returnType, signatureHandleWarpper);
             return null;
         }
 
         return null;
     }
 
-    private void setterHandle(String name, Type[] argumentTypes, Type returnType) {
+    private void setterHandle(String name, Type[] argumentTypes, Type returnType, ParameterTypeSignatureHandleWarpper signatureHandleWarpper) {
 
         if (!"void".equals(returnType.getClassName().toLowerCase())) {
             return;
@@ -84,15 +74,20 @@ public class ClassMetadataReadingVisitor extends ClassVisitor {
         }
         Type argumentType = argumentTypes[0];
 
-        String parameterTypeName = argumentTypes[0].getClassName();
-        String varName = varNameHandle(name.substring(3));
+
         Setter setter = new Setter();
-        setter.setTypePath(parameterTypeName);
+        String parameterTypeName = argumentTypes[0].getClassName();
         setter.setSimpleName(name);
+
+
+        ParameterType parameterType = signatureHandleWarpper.getParameter(0)
+                .orElseGet(() -> new ParameterType(parameterTypeName));
+        setter.setParameterType(parameterType);
+        String varName = varNameHandle(name.substring(3));
         instantSetters.put(varName, setter);
     }
 
-    private void getterHandle(String name, Type[] argumentTypes, Type returnType) {
+    private void getterHandle(String name, Type[] argumentTypes, Type returnType, ParameterTypeSignatureHandleWarpper signatureHandleWarpper) {
         if (argumentTypes != null && argumentTypes.length > 0) {
             return;
         }

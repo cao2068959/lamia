@@ -36,22 +36,11 @@ public class AssembleFactory {
 
     public void match(ParameterType parameterType, JCTree.JCExpression expression, Integer priority) {
 
-        boolean additional = false;
         for (Candidate candidate : allCandidate) {
             MatchReuslt matchReuslt = candidate.match(parameterType);
             //类型和名称都相同了 说明 这个表达式将是构成的一部分，把他存起来
             if (matchReuslt == MatchReuslt.HIT) {
                 updateExpressionMap(parameterType.getName(), expression, priority);
-            }
-            if (matchReuslt == MatchReuslt.MAY) {
-                additional = true;
-            }
-        }
-        // 如果additional=true 说明名称匹配上了，但是类型不同，类型可能是optional这样的包装类型 ，解析包装后再递归给他一次机会
-        if (additional) {
-            TypeProcessorResult unpack = TypeProcessorFactory.instance.unpack(parameterType);
-            if (unpack != null) {
-                match(unpack.getParameterType(), unpack.getUnboxingFun().getExpression(expression), priority);
             }
         }
     }
@@ -88,20 +77,19 @@ public class AssembleFactory {
 
     private void createSetter(Candidate candidate, String instantName, List<JCTree.JCStatement> result) {
         candidate.getHitSetter().forEach((k, v) -> {
-            PriorityExpression expression = expressionMap.get(k);
-            JCTree.JCExpressionStatement setterExpression = jcUtils.execMethod(instantName, v.getMethodName(), expression.getExpression());
+            JCTree.JCExpression wapperExpression = candidate.createdWapperExpression(k, expressionMap.get(k).getExpression());
+            JCTree.JCExpressionStatement setterExpression = jcUtils.execMethod(instantName, v.getMethodName(), wapperExpression);
             result.add(setterExpression);
         });
     }
 
-
     private String createNewInstant(Candidate candidate, List<JCTree.JCStatement> result) {
 
         Constructor constructor = candidate.getConstructor();
-        List<PriorityExpression> paramsExpression = new ArrayList<>();
+        List<JCTree.JCExpression> paramsExpression = new ArrayList<>();
         constructor.getParams().forEach(param -> {
             String name = param.getName();
-            paramsExpression.add(expressionMap.get(name));
+            paramsExpression.add(candidate.createdWapperExpression(name, expressionMap.get(name).getExpression()));
         });
         String varName = "result";
         JCTree.JCNewClass jcNewClass = jcUtils.newClass(originalClassPath, paramsExpression);

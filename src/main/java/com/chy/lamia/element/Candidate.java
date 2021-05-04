@@ -1,14 +1,13 @@
 package com.chy.lamia.element;
 
+import com.chy.lamia.element.type.ExpressionFunction;
 import com.chy.lamia.entity.Constructor;
 import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.entity.Setter;
 import com.chy.lamia.enums.MatchReuslt;
+import com.sun.tools.javac.tree.JCTree;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 候选人对象
@@ -29,13 +28,13 @@ public class Candidate {
     private Constructor constructor;
     private Set<String> constructorHit = new HashSet<>();
     private Set<String> setterHit = new HashSet<>();
+    private Map<String, UnPackTypeMatchResult> hitUnPackTypeMatchResult = new HashMap<>();
 
 
     public Candidate(Constructor constructor, Map<String, Setter> allSetter) {
         this.constructor = constructor;
 
         constructor.getParams().stream().forEach(param -> {
-            //TODO 删除
             constructorParamMap.put(param.getName(), param);
             UnPackMutliParameterType unPackMutliParameterType = new UnPackMutliParameterType(param);
             allParamMap.put(param.getName(), unPackMutliParameterType);
@@ -46,10 +45,9 @@ public class Candidate {
         allSetter.entrySet().stream()
                 .filter(setter -> !constructorParamMap.containsKey(setter.getKey()))
                 .forEach(setter -> {
-                    ParameterType result = new ParameterType(setter.getKey(), setter.getValue().getTypePath(),
+                    ParameterType result = new ParameterType(setter.getKey(), setter.getValue().getParameterType(),
                             setter.getValue().getSimpleName());
                     setterMap.put(setter.getKey(), result);
-
                     UnPackMutliParameterType unPackMutliParameterType = new UnPackMutliParameterType(result);
                     allParamMap.put(setter.getKey(), unPackMutliParameterType);
                 });
@@ -63,41 +61,30 @@ public class Candidate {
      */
     public MatchReuslt match(ParameterType target) {
         String fieldName = target.getName();
-        //获取构造器的字段，然后匹配，匹配上了就放入 hit容器中
-        ParameterType constructor = constructorParamMap.get(fieldName);
-        MatchReuslt constructorMatchReuslt = matchType(fieldName, constructor, target, constructorHit);
-        if (constructorMatchReuslt == MatchReuslt.HIT) {
-            return MatchReuslt.HIT;
-        }
-
-        //获取setter的字段，然后匹配，匹配上了就放入 hit容器中
-        ParameterType setter = setterMap.get(fieldName);
-        MatchReuslt setterMatchReuslt = matchType(fieldName, setter, target, setterHit);
-        if (setterMatchReuslt == MatchReuslt.HIT) {
-            return MatchReuslt.HIT;
-        }
-
-        //只要构造器和setter 中有一个是可能，那么就直接返回
-        if (setterMatchReuslt == MatchReuslt.MAY || constructorMatchReuslt == MatchReuslt.MAY) {
-            return MatchReuslt.MAY;
-        }
-
-
-        return MatchReuslt.MISS;
-    }
-
-
-    private MatchReuslt matchType(String fieldName, ParameterType componentType,
-                                  ParameterType target, Set<String> his) {
-        if (componentType == null) {
+        //使用字段的名称去匹配有没对应的setter或者构造器
+        UnPackMutliParameterType unPackMutliParameterType = allParamMap.get(fieldName);
+        //没有匹配上
+        if (unPackMutliParameterType == null) {
             return MatchReuslt.MISS;
         }
-        if (componentType.matchType(target)) {
-            his.add(fieldName);
-            return MatchReuslt.HIT;
+        //去对比类型是否相同
+        UnPackTypeMatchResult unPackTypeMatchResult = unPackMutliParameterType.matchType(target);
+        //类型不对, 没有匹配上
+        if (!unPackTypeMatchResult.isMatch()) {
+            return MatchReuslt.MISS;
         }
-        return MatchReuslt.MAY;
+
+        //记录一下是构造器命中的,还是setter方法命中的
+        if (constructorParamMap.containsKey(fieldName)) {
+            constructorHit.add(fieldName);
+        } else {
+            setterHit.add(fieldName);
+        }
+        //把匹配的结构记录一下
+        hitUnPackTypeMatchResult.put(fieldName, unPackTypeMatchResult);
+        return MatchReuslt.HIT;
     }
+
 
     public int score() {
         //如果 构造器都没满足则不及格
@@ -122,7 +109,30 @@ public class Candidate {
     public void clear() {
         constructorHit = new HashSet<>();
         setterHit = new HashSet<>();
+        hitUnPackTypeMatchResult = new HashMap<>();
     }
+
+    public JCTree.JCExpression createdWapperExpression(String name, JCTree.JCExpression expression) {
+        UnPackTypeMatchResult unPackTypeMatchResult = hitUnPackTypeMatchResult.get(name);
+        if (unPackTypeMatchResult == null) {
+            return expression;
+        }
+        List<ExpressionFunction> unpackFunChain = unPackTypeMatchResult.getUnpackFunChain();
+        if (unpackFunChain != null) {
+            for (ExpressionFunction unpackFun : unpackFunChain) {
+                expression = unpackFun.getExpression(expression);
+            }
+        }
+
+        List<ExpressionFunction> boxingFunChain = unPackTypeMatchResult.getBoxingFunChain();
+        if (boxingFunChain != null) {
+            for (int i = boxingFunChain.size() - 1; i >= 0; i--) {
+                expression = boxingFunChain.get(i).getExpression(expression);
+            }
+        }
+        return expression;
+    }
+
 
     @Override
     public String toString() {
@@ -134,4 +144,6 @@ public class Candidate {
                 ", setterHit=" + setterHit +
                 '}';
     }
+
+
 }

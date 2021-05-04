@@ -1,13 +1,16 @@
 package com.chy.lamia.element.asm;
 
 
+import com.chy.lamia.entity.ParameterType;
 import jdk.internal.org.objectweb.asm.Opcodes;
 import jdk.internal.org.objectweb.asm.Type;
 import jdk.internal.org.objectweb.asm.signature.SignatureVisitor;
 
 import java.util.ArrayList;
+import java.util.Optional;
+import java.util.Stack;
 
-class SignatureSourcer extends SignatureVisitor {
+class ParameterTypeSignatureHandle extends SignatureVisitor {
 
     /**
      * Buffer used to construct the signature.
@@ -33,29 +36,33 @@ class SignatureSourcer extends SignatureVisitor {
     private int mArgumentStack;
 
     /**
-     * {@link SignatureSourcer} generated when parsing the return type of <em>this</em>
+     * {@link ParameterTypeSignatureHandle} generated when parsing the return type of <em>this</em>
      * signature. Initially null.
      */
-    private SignatureSourcer mReturnType;
+    private ParameterTypeSignatureHandle mReturnType;
 
     /**
-     * {@link SignatureSourcer} generated when parsing the super class of <em>this</em>
+     * {@link ParameterTypeSignatureHandle} generated when parsing the super class of <em>this</em>
      * signature. Initially null.
      */
-    private SignatureSourcer mSuperClass;
+    private ParameterTypeSignatureHandle mSuperClass;
 
     /**
-     * {@link SignatureSourcer}s for each parameters generated when parsing the method parameters
+     * {@link ParameterTypeSignatureHandle}s for each parameters generated when parsing the method parameters
      * of <em>this</em> signature. Initially empty but not null.
      */
-    private ArrayList<SignatureSourcer> mParameters = new ArrayList<SignatureSourcer>();
-
-
+    private ArrayList<ParameterTypeSignatureHandle> mParameters = new ArrayList<ParameterTypeSignatureHandle>();
 
     /**
-     * Constructs a new {@link SignatureWriter} object.
+     * 把整个泛型以 ParameterType 类型的形式去存储
      */
-    public SignatureSourcer() {
+    ParameterType parameterType;
+    /**
+     * 栈顶元素就是当前正常处理的 泛型对象
+     */
+    Stack<ParameterType> currentOperateGeneric = new Stack<>();
+
+    public ParameterTypeSignatureHandle() {
         super(Opcodes.ASM5);
     }
 
@@ -74,12 +81,12 @@ class SignatureSourcer extends SignatureVisitor {
     }
 
 
-    public SignatureSourcer getReturnType() {
+    public ParameterTypeSignatureHandle getReturnType() {
         return mReturnType;
     }
 
 
-    public ArrayList<SignatureSourcer> getParameters() {
+    public ArrayList<ParameterTypeSignatureHandle> getParameters() {
         return mParameters;
     }
 
@@ -93,8 +100,12 @@ class SignatureSourcer extends SignatureVisitor {
     }
 
 
-    public SignatureSourcer getSuperClass() {
+    public ParameterTypeSignatureHandle getSuperClass() {
         return mSuperClass;
+    }
+
+    public ParameterType getParameterType() {
+        return parameterType;
     }
 
     // ------------------------------------------------------------------------
@@ -128,7 +139,7 @@ class SignatureSourcer extends SignatureVisitor {
     @Override
     public SignatureVisitor visitSuperclass() {
         endFormals();
-        SignatureSourcer sourcer = new SignatureSourcer();
+        ParameterTypeSignatureHandle sourcer = new ParameterTypeSignatureHandle();
         assert mSuperClass == null;
         mSuperClass = sourcer;
         return sourcer;
@@ -142,7 +153,7 @@ class SignatureSourcer extends SignatureVisitor {
     @Override
     public SignatureVisitor visitParameterType() {
         endFormals();
-        SignatureSourcer sourcer = new SignatureSourcer();
+        ParameterTypeSignatureHandle sourcer = new ParameterTypeSignatureHandle();
         mParameters.add(sourcer);
         return sourcer;
     }
@@ -150,7 +161,7 @@ class SignatureSourcer extends SignatureVisitor {
     @Override
     public SignatureVisitor visitReturnType() {
         endFormals();
-        SignatureSourcer sourcer = new SignatureSourcer();
+        ParameterTypeSignatureHandle sourcer = new ParameterTypeSignatureHandle();
         assert mReturnType == null;
         mReturnType = sourcer;
         return sourcer;
@@ -180,8 +191,27 @@ class SignatureSourcer extends SignatureVisitor {
 
     @Override
     public void visitClassType(final String name) {
-        getBuf().append(name.replace('/', '.'));
+        String classPath = name.replace('/', '.');
+        getBuf().append(classPath);
+        ParameterType newParameterType = new ParameterType(classPath);
+        if (this.parameterType == null) {
+            this.parameterType = newParameterType;
+        }
+        getTopParameterType(false).ifPresent(vt -> vt.addGeneric(newParameterType));
+
+        currentOperateGeneric.push(newParameterType);
         mArgumentStack *= 2;
+    }
+
+    private Optional<ParameterType> getTopParameterType(boolean isRemove) {
+        if (currentOperateGeneric.empty()) {
+            return Optional.empty();
+        }
+        if (isRemove) {
+            return Optional.of(currentOperateGeneric.pop());
+        } else {
+            return Optional.of(currentOperateGeneric.peek());
+        }
     }
 
     @Override
@@ -199,6 +229,7 @@ class SignatureSourcer extends SignatureVisitor {
             getBuf().append('<');
         } else {
             getBuf().append(", ");
+            getTopParameterType(true);
         }
         getBuf().append('*');
     }
@@ -210,6 +241,7 @@ class SignatureSourcer extends SignatureVisitor {
             getBuf().append('<');
         } else {
             getBuf().append(", ");
+            getTopParameterType(true);
         }
         if (wildcard != '=') {
             if (wildcard == '+') {
@@ -248,6 +280,7 @@ class SignatureSourcer extends SignatureVisitor {
      */
     private void endArguments() {
         if (mArgumentStack % 2 != 0) {
+            getTopParameterType(true);
             getBuf().append('>');
         }
         mArgumentStack /= 2;

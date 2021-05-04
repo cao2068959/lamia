@@ -1,5 +1,6 @@
 package com.chy.lamia.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ParameterType {
@@ -15,6 +16,10 @@ public class ParameterType {
         this.type = new ClassType(typePath);
     }
 
+    public ParameterType(String typePath) {
+        this.name = "";
+        this.type = new ClassType(typePath);
+    }
 
 
     public ParameterType(String name, ParameterType parameterType) {
@@ -24,17 +29,27 @@ public class ParameterType {
         this.generic = parameterType.generic;
     }
 
-    public ParameterType(String name, String typePath, String methodName) {
-        this(name, typePath);
+    public ParameterType(String name, ParameterType parameterType, String methodName) {
+        this(name, parameterType);
         this.methodName = methodName;
     }
+
 
     public boolean matchType(ParameterType parameterType) {
         return type.matchType(parameterType.getType());
     }
 
+
+
     public List<ParameterType> getGeneric() {
         return generic;
+    }
+
+    public void addGeneric(ParameterType parameterType) {
+        if (generic == null) {
+            generic = new ArrayList<>();
+        }
+        generic.add(parameterType);
     }
 
     public void setGeneric(List<ParameterType> generic) {
@@ -45,8 +60,8 @@ public class ParameterType {
         return type;
     }
 
-    public String getTypePatch(){
-        if(type == null){
+    public String getTypePatch() {
+        if (type == null) {
             return null;
         }
         return type.typePath;
@@ -60,7 +75,6 @@ public class ParameterType {
     public String getMethodName() {
         return methodName;
     }
-
 
 
 }
