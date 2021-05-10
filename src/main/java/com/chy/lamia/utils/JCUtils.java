@@ -5,10 +5,7 @@ import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.TypeTag;
-import com.sun.tools.javac.comp.Attr;
-import com.sun.tools.javac.comp.AttrContext;
-import com.sun.tools.javac.comp.Enter;
-import com.sun.tools.javac.comp.Env;
+import com.sun.tools.javac.comp.*;
 import com.sun.tools.javac.model.JavacElements;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeMaker;
@@ -22,16 +19,21 @@ public class JCUtils {
 
     private final Attr attr;
     private final Enter enter;
+    private final Annotate annotate;
     TreeMaker treeMaker;
     JavacElements elementUtils;
     public static JCUtils instance;
 
+    public Annotate getAnnotate() {
+        return annotate;
+    }
 
-    public JCUtils(TreeMaker treeMaker, JavacElements elementUtils, Attr attr, Enter enter) {
+    public JCUtils(TreeMaker treeMaker, JavacElements elementUtils, Annotate annotate, Attr attr, Enter enter) {
         this.treeMaker = treeMaker;
         this.elementUtils = elementUtils;
         this.attr = attr;
         this.enter = enter;
+        this.annotate = annotate;
     }
 
     public Type attribType(JCTree node, JCTree.JCVariableDecl variable) {

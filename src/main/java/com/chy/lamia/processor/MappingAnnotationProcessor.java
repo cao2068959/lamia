@@ -5,10 +5,12 @@ import com.chy.lamia.log.Logger;
 import com.chy.lamia.processor.marked.MarkedContext;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.visitor.MethodUpdateVisitor;
+import com.sun.tools.javac.comp.Annotate;
 import com.sun.tools.javac.comp.Attr;
 import com.sun.source.util.Trees;
 import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.comp.Enter;
+import com.sun.tools.javac.comp.Env;
 import com.sun.tools.javac.model.JavacElements;
 import com.sun.tools.javac.processing.JavacProcessingEnvironment;
 import com.sun.tools.javac.tree.JCTree;
@@ -43,7 +45,8 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
         trees = (JavacTrees) Trees.instance(processingEnv);
         Attr attr = Attr.instance(context);
         Enter enter = Enter.instance(context);
-        jcUtils = new JCUtils(treeMaker, elementUtils, attr, enter);
+        Annotate annotate = Annotate.instance(context);
+        jcUtils = new JCUtils(treeMaker, elementUtils, annotate, attr, enter);
         JCUtils.instance = jcUtils;
     }
 

@@ -1,11 +1,14 @@
 package com.chy.lamia.element;
 
 
+import com.chy.lamia.annotation.MapMember;
 import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.utils.SymbolUtils;
 import com.chy.lamia.visitor.AbstractBlockVisitor;
+import com.sun.tools.javac.code.Attribute;
 import com.sun.tools.javac.code.Type;
+import com.sun.tools.javac.comp.Annotate;
 import com.sun.tools.javac.tree.JCTree;
 
 import java.util.LinkedList;
@@ -56,7 +59,6 @@ public class LooseBlockVisitor extends AbstractBlockVisitor {
         result.add(looseBlock);
     }
 
-
     public List<LooseBlock> getResult() {
         analyzeResult(this);
         return result;
@@ -65,6 +67,11 @@ public class LooseBlockVisitor extends AbstractBlockVisitor {
 
     @Override
     public void variableVisit(JCTree.JCVariableDecl statement) {
+
+        com.sun.tools.javac.util.List<Attribute.TypeCompound> typeCompounds = JCUtils.instance.getAnnotate().fromAnnotations(statement.getModifiers().getAnnotations());
+
+
+
         Type type = JCUtils.instance.attribType(classTree, statement);
         String name = statement.getName().toString();
         ParameterType parameterType = new ParameterType(name, type.toString());

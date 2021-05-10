@@ -11,6 +11,7 @@ public class ParameterType {
     List<ParameterType> generic;
 
 
+
     public ParameterType(String name, String typePath) {
         this.name = name;
         this.type = new ClassType(typePath);

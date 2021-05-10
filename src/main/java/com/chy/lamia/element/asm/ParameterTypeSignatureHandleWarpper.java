@@ -31,6 +31,10 @@ public class ParameterTypeSignatureHandleWarpper {
 
     public Optional<ParameterType> getParameter(int index) {
         ParameterTypeSignatureHandle handle = getHandle();
+        if (handle == null){
+            return Optional.empty();
+        }
+
         ArrayList<ParameterTypeSignatureHandle> parameters = handle.getParameters();
         if (parameters.size() < index) {
             return Optional.empty();
