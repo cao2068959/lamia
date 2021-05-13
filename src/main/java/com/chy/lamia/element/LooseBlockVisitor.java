@@ -8,11 +8,17 @@ import com.chy.lamia.utils.SymbolUtils;
 import com.chy.lamia.visitor.AbstractBlockVisitor;
 import com.sun.tools.javac.code.Attribute;
 import com.sun.tools.javac.code.Type;
+import com.sun.tools.javac.code.TypeMetadata;
 import com.sun.tools.javac.comp.Annotate;
+import com.sun.tools.javac.model.AnnotationProxyMaker;
 import com.sun.tools.javac.tree.JCTree;
+import sun.reflect.annotation.AnnotationParser;
 
+import java.lang.annotation.Annotation;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 
 public class LooseBlockVisitor extends AbstractBlockVisitor {
@@ -67,10 +73,13 @@ public class LooseBlockVisitor extends AbstractBlockVisitor {
 
     @Override
     public void variableVisit(JCTree.JCVariableDecl statement) {
-
-        com.sun.tools.javac.util.List<Attribute.TypeCompound> typeCompounds = JCUtils.instance.getAnnotate().fromAnnotations(statement.getModifiers().getAnnotations());
-
-
+        Map map = new HashMap();
+        map.put("value","2131414");
+        MapMember annotation = (MapMember) AnnotationParser.annotationForMap(MapMember.class, map);
+        annotation.spread();
+        for (Attribute.TypeCompound annotationMirror : statement.type.getAnnotationMirrors()) {
+            System.out.println(annotationMirror);
+        }
 
         Type type = JCUtils.instance.attribType(classTree, statement);
         String name = statement.getName().toString();
@@ -87,4 +96,5 @@ public class LooseBlockVisitor extends AbstractBlockVisitor {
     public List<ParameterType> getVars() {
         return vars;
     }
+
 }

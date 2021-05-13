@@ -10,7 +10,6 @@ import jdk.internal.org.objectweb.asm.Opcodes;
 import java.util.*;
 
 import jdk.internal.org.objectweb.asm.Type;
-import jdk.internal.org.objectweb.asm.signature.SignatureReader;
 
 public class ClassMetadataReadingVisitor extends ClassVisitor {
 
@@ -100,8 +99,6 @@ public class ClassMetadataReadingVisitor extends ClassVisitor {
         if (varName == null) {
             return;
         }
-
-
         Getter getter = new Getter();
         getter.setSimpleName(name);
         getter.setTypePath(returnTypeName);

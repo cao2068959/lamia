@@ -59,7 +59,7 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
                 prepare(annotations, roundEnv);
             }
             return true;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             Logger.throwableLog(e);
             throw e;
         } finally {
@@ -87,6 +87,7 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
      */
     private void prepare(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         for (Element element : roundEnv.getElementsAnnotatedWith(Mapping.class)) {
+            Mapping annotation = element.getAnnotation(Mapping.class);
             Symbol.MethodSymbol methodSymbol = (Symbol.MethodSymbol) element;
             String key = methodSymbol.owner.toString();
             markedContext.put(key, methodSymbol);
