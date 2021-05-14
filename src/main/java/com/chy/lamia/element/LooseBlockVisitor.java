@@ -2,6 +2,7 @@ package com.chy.lamia.element;
 
 
 import com.chy.lamia.annotation.MapMember;
+import com.chy.lamia.element.annotation.AnnotationProxyFactory;
 import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.utils.SymbolUtils;
@@ -15,10 +16,7 @@ import com.sun.tools.javac.tree.JCTree;
 import sun.reflect.annotation.AnnotationParser;
 
 import java.lang.annotation.Annotation;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class LooseBlockVisitor extends AbstractBlockVisitor {
@@ -73,14 +71,17 @@ public class LooseBlockVisitor extends AbstractBlockVisitor {
 
     @Override
     public void variableVisit(JCTree.JCVariableDecl statement) {
-        Map map = new HashMap();
-        map.put("value","2131414");
-        MapMember annotation = (MapMember) AnnotationParser.annotationForMap(MapMember.class, map);
-        annotation.spread();
-        for (Attribute.TypeCompound annotationMirror : statement.type.getAnnotationMirrors()) {
-            System.out.println(annotationMirror);
-        }
+        //查找这一行语句上面有没有@MapMember
+        Optional<MapMember> mapMemberOptional = AnnotationProxyFactory
+                .createdAnnotation(classTree, statement.getModifiers().getAnnotations(), MapMember.class);
 
+        //没标记注解的就不处理了
+        if (mapMemberOptional.isEmpty()){
+            return;
+        }
+        MapMember mapMember = mapMemberOptional.get();
+        System.out.println(mapMember.value());
+        mapMember.spread();
         Type type = JCUtils.instance.attribType(classTree, statement);
         String name = statement.getName().toString();
         ParameterType parameterType = new ParameterType(name, type.toString());

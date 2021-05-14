@@ -36,13 +36,38 @@ public class JCUtils {
         this.annotate = annotate;
     }
 
+    /**
+     * String等类的简写还原成 全路径
+     *
+     * @param node
+     * @param variable
+     * @return
+     */
     public Type attribType(JCTree node, JCTree.JCVariableDecl variable) {
+        return attribType(node, variable.vartype);
+    }
+
+    /**
+     * String等类的简写还原成 全路径
+     *
+     * @param node
+     * @param ident
+     * @return
+     */
+    public Type attribType(JCTree node, String ident) {
+        if (ident == null) {
+            return null;
+        }
+        return attribType(node, memberAccess(ident));
+    }
+
+    public Type attribType(JCTree node, JCTree.JCExpression expression) {
         if (!(node instanceof JCTree.JCClassDecl)) {
             return null;
         }
         JCTree.JCClassDecl jcClassDecl = (JCTree.JCClassDecl) node;
         Env<AttrContext> classEnv = enter.getClassEnv(jcClassDecl.sym);
-        return attr.attribType(variable.vartype, classEnv);
+        return attr.attribType(expression, classEnv);
     }
 
     public JCTree.JCExpression memberAccess(String components) {
