@@ -1,10 +1,12 @@
 package com.chy.lamia.visitor;
 
 
+import com.chy.lamia.annotation.MapMember;
 import com.chy.lamia.element.AssembleFactory;
 import com.chy.lamia.element.ClassElement;
 import com.chy.lamia.element.LooseBlock;
 import com.chy.lamia.element.LooseBlockVisitor;
+import com.chy.lamia.element.annotation.AnnotationProxyFactory;
 import com.chy.lamia.entity.AssembleResult;
 import com.chy.lamia.entity.Getter;
 import com.chy.lamia.entity.ParameterType;
@@ -21,6 +23,7 @@ import com.sun.tools.javac.tree.TreeTranslator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.chy.lamia.constant.PriorityConstant.*;
 
@@ -160,14 +163,35 @@ public class MethodUpdateVisitor extends TreeTranslator {
             return;
         }
         params.forEach(varSymbol -> {
-            ParameterType parameterType = new ParameterType(varSymbol.name.toString(), varSymbol.type.toString());
+            String paramsTypeClassPath = varSymbol.type.tsym.toString();
+            Optional<MapMember> mapMember = AnnotationProxyFactory
+                    .createdAnnotation(varSymbol.type.getAnnotationMirrors(), MapMember.class);
+            String name = mapMember.map(_mapMember -> {
+                String result = _mapMember.value();
+                if ("".equals(result)) {
+                    return varSymbol.name.toString();
+                }
+                return result;
+            }).orElse(varSymbol.name.toString());
+            Boolean spread = mapMember.map(MapMember::spread).orElse(true);
+
+            ParameterType parameterType = new ParameterType(name, paramsTypeClassPath);
+            //把这个字段原本的字段名称塞进去
+            parameterType.setFieldName(varSymbol.name.toString());
+            //这个参数可能会有泛型
             List<ParameterType> generic = SymbolUtils.getGeneric(varSymbol);
             parameterType.setGeneric(generic);
             //先把 这个参数本身给塞入工厂
-            assembleFactory.match(parameterType, jcUtils.memberAccess(parameterType.getName()), PARAMETERS);
-            //解析这个类里面所有的 getter setter 塞入构造工厂中
-            anatomyClassToAssembleFactory(parameterType.getTypePatch(), parameterType.getName(),
-                    assembleFactory, jcUtils, PARAMETERS_IN_VAR);
+            assembleFactory.match(parameterType, jcUtils.memberAccess(parameterType.getFieldName()), PARAMETERS);
+
+
+            //如果需要扩展这个对象里的参数，那么就去解析这个class
+            if (spread) {
+                //解析这个类里面所有的 getter setter 塞入构造工厂中
+                anatomyClassToAssembleFactory(parameterType.getTypePatch(), parameterType.getFieldName(),
+                        assembleFactory, jcUtils, PARAMETERS_IN_VAR);
+            }
+
         });
     }
 

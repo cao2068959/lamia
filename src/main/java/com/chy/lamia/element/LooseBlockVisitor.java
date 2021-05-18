@@ -13,6 +13,7 @@ import com.sun.tools.javac.code.TypeMetadata;
 import com.sun.tools.javac.comp.Annotate;
 import com.sun.tools.javac.model.AnnotationProxyMaker;
 import com.sun.tools.javac.tree.JCTree;
+import com.sun.tools.javac.util.StringUtils;
 import sun.reflect.annotation.AnnotationParser;
 
 import java.lang.annotation.Annotation;
@@ -76,15 +77,17 @@ public class LooseBlockVisitor extends AbstractBlockVisitor {
                 .createdAnnotation(classTree, statement.getModifiers().getAnnotations(), MapMember.class);
 
         //没标记注解的就不处理了
-        if (mapMemberOptional.isEmpty()){
+        if (mapMemberOptional.isEmpty()) {
             return;
         }
+
         MapMember mapMember = mapMemberOptional.get();
-        System.out.println(mapMember.value());
-        mapMember.spread();
+        String mapName = mapMember.value();
+        if ("".equals(mapName)) {
+            mapName = statement.getName().toString();
+        }
         Type type = JCUtils.instance.attribType(classTree, statement);
-        String name = statement.getName().toString();
-        ParameterType parameterType = new ParameterType(name, type.toString());
+        ParameterType parameterType = new ParameterType(mapName, type.toString());
         parameterType.setGeneric(SymbolUtils.getGeneric(type));
         vars.add(parameterType);
     }

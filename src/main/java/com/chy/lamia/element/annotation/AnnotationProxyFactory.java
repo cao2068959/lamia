@@ -2,9 +2,12 @@ package com.chy.lamia.element.annotation;
 
 
 import com.chy.lamia.utils.JCUtils;
+import com.sun.tools.javac.code.Attribute;
+import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.util.List;
+import com.sun.tools.javac.util.Pair;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Proxy;
@@ -13,6 +16,43 @@ import java.util.Map;
 import java.util.Optional;
 
 public class AnnotationProxyFactory {
+
+
+    public static <T extends Annotation> Optional<T> createdAnnotation(List<Attribute.TypeCompound> typeCompounds,
+                                                                       Class<T> annotationClass) {
+
+        if (typeCompounds == null) {
+            return Optional.empty();
+        }
+        for (Attribute.TypeCompound typeCompound : typeCompounds) {
+            if (!annotationClass.getName().equals(typeCompound.type.toString())) {
+                continue;
+            }
+
+            Map<String, String> argsMap = typeCompoundToMap(typeCompound.values);
+            SimpleAnnotationInvocationHandler invocationHandler =
+                    new SimpleAnnotationInvocationHandler(annotationClass, argsMap);
+            T proxyInstance = (T) Proxy.newProxyInstance(annotationClass.getClassLoader(),
+                    new Class<?>[]{annotationClass}, invocationHandler);
+            return Optional.of(proxyInstance);
+        }
+        return Optional.empty();
+    }
+
+    private static Map<String, String> typeCompoundToMap(List<Pair<Symbol.MethodSymbol, Attribute>> values) {
+        Map<String, String> result = new HashMap<>();
+        if (values == null || values.isEmpty()) {
+            return result;
+        }
+        for (Pair<Symbol.MethodSymbol, Attribute> attribute : values) {
+            Object value = attribute.snd.getValue();
+            if (value == null) {
+                continue;
+            }
+            result.put(attribute.fst.name.toString(), value.toString());
+        }
+        return result;
+    }
 
 
     public static <T extends Annotation> Optional<T> createdAnnotation(JCTree classTree, List<JCTree.JCAnnotation> annotations,

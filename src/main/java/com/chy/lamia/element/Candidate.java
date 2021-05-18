@@ -6,6 +6,7 @@ import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.entity.Setter;
 import com.chy.lamia.enums.MatchReuslt;
 import com.sun.tools.javac.tree.JCTree;
+import com.sun.tools.javac.util.Pair;
 
 import java.util.*;
 
@@ -28,7 +29,7 @@ public class Candidate {
     private Constructor constructor;
     private Set<String> constructorHit = new HashSet<>();
     private Set<String> setterHit = new HashSet<>();
-    private Map<String, UnPackTypeMatchResult> hitUnPackTypeMatchResult = new HashMap<>();
+    private Map<String, Pair<Integer, UnPackTypeMatchResult>> hitUnPackTypeMatchResult = new HashMap<>();
 
 
     public Candidate(Constructor constructor, Map<String, Setter> allSetter) {
@@ -59,7 +60,7 @@ public class Candidate {
      *
      * @return
      */
-    public MatchReuslt match(ParameterType target) {
+    public MatchReuslt match(ParameterType target, Integer priority) {
         String fieldName = target.getName();
         //使用字段的名称去匹配有没对应的setter或者构造器
         UnPackMutliParameterType unPackMutliParameterType = allParamMap.get(fieldName);
@@ -81,8 +82,28 @@ public class Candidate {
             setterHit.add(fieldName);
         }
         //把匹配的结构记录一下
-        hitUnPackTypeMatchResult.put(fieldName, unPackTypeMatchResult);
+        updateHitUnPackTypeMatchResult(fieldName, unPackTypeMatchResult, priority);
         return MatchReuslt.HIT;
+    }
+
+    /**
+     * 根据优先级来判断是否去更新 HitUnPackTypeMatchResult 容器
+     *
+     * @param fieldName
+     * @param unPackTypeMatchResult
+     * @param priority
+     */
+    private void updateHitUnPackTypeMatchResult(String fieldName, UnPackTypeMatchResult unPackTypeMatchResult,
+                                                Integer priority) {
+        Pair<Integer, UnPackTypeMatchResult> integerUnPackTypeMatchResultPair = hitUnPackTypeMatchResult.get(fieldName);
+        if (integerUnPackTypeMatchResultPair != null) {
+            Integer oldPriority = integerUnPackTypeMatchResultPair.fst;
+            if (priority < oldPriority) {
+                return;
+            }
+        }
+        Pair<Integer, UnPackTypeMatchResult> result = Pair.of(priority, unPackTypeMatchResult);
+        hitUnPackTypeMatchResult.put(fieldName, result);
     }
 
 
@@ -113,10 +134,11 @@ public class Candidate {
     }
 
     public JCTree.JCExpression createdWapperExpression(String name, JCTree.JCExpression expression) {
-        UnPackTypeMatchResult unPackTypeMatchResult = hitUnPackTypeMatchResult.get(name);
-        if (unPackTypeMatchResult == null) {
+        Pair<Integer, UnPackTypeMatchResult> integerUnPackTypeMatchResultPair = hitUnPackTypeMatchResult.get(name);
+        if (integerUnPackTypeMatchResultPair == null) {
             return expression;
         }
+        UnPackTypeMatchResult unPackTypeMatchResult = integerUnPackTypeMatchResultPair.snd;
         List<ExpressionFunction> unpackFunChain = unPackTypeMatchResult.getUnpackFunChain();
         if (unpackFunChain != null) {
             for (ExpressionFunction unpackFun : unpackFunChain) {

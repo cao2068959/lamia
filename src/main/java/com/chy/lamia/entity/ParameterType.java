@@ -6,25 +6,28 @@ import java.util.List;
 public class ParameterType {
 
     final String name;
+    String fieldName;
     final ClassType type;
     String methodName;
     List<ParameterType> generic;
 
-
-
     public ParameterType(String name, String typePath) {
         this.name = name;
+        this.fieldName = name;
         this.type = new ClassType(typePath);
     }
 
+
     public ParameterType(String typePath) {
         this.name = "";
+        this.fieldName = "";
         this.type = new ClassType(typePath);
     }
 
 
     public ParameterType(String name, ParameterType parameterType) {
         this.name = name;
+        this.fieldName = name;
         this.type = parameterType.getType();
         this.methodName = parameterType.methodName;
         this.generic = parameterType.generic;
@@ -39,7 +42,6 @@ public class ParameterType {
     public boolean matchType(ParameterType parameterType) {
         return type.matchType(parameterType.getType());
     }
-
 
 
     public List<ParameterType> getGeneric() {
@@ -78,4 +80,11 @@ public class ParameterType {
     }
 
 
+    public String getFieldName() {
+        return fieldName;
+    }
+
+    public void setFieldName(String fieldName) {
+        this.fieldName = fieldName;
+    }
 }

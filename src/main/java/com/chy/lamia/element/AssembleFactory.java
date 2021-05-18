@@ -37,7 +37,7 @@ public class AssembleFactory {
     public void match(ParameterType parameterType, JCTree.JCExpression expression, Integer priority) {
 
         for (Candidate candidate : allCandidate) {
-            MatchReuslt matchReuslt = candidate.match(parameterType);
+            MatchReuslt matchReuslt = candidate.match(parameterType, priority);
             //类型和名称都相同了 说明 这个表达式将是构成的一部分，把他存起来
             if (matchReuslt == MatchReuslt.HIT) {
                 updateExpressionMap(parameterType.getName(), expression, priority);
