@@ -1,7 +1,23 @@
 package com.chy.lamia.entity;
 
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class ClassType {
+
+    static Map<String, String> boxTypes = new HashMap<>();
+
+    static {
+        boxTypes.put("boolean", Boolean.class.getName());
+        boxTypes.put("int", Integer.class.getName());
+        boxTypes.put("char", Character.class.getName());
+        boxTypes.put("byte", Byte.class.getName());
+        boxTypes.put("double", Double.class.getName());
+        boxTypes.put("long", Long.class.getName());
+        boxTypes.put("float", Float.class.getName());
+        boxTypes.put("short", Short.class.getName());
+    }
 
     final String typePath;
 
@@ -29,10 +45,18 @@ public class ClassType {
         if (type == null) {
             return false;
         }
-        if (type.equals(typePath)) {
-            return true;
+
+        String targetBoxType = boxTypes.get(type);
+        if (targetBoxType == null) {
+            targetBoxType = type;
         }
-        return false;
+
+        String thisBoxType = boxTypes.get(typePath);
+        if (thisBoxType == null) {
+            thisBoxType = typePath;
+        }
+
+        return thisBoxType.equals(targetBoxType);
     }
 
     public boolean matchType(ClassType type) {
