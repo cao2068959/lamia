@@ -154,7 +154,7 @@ public class MethodUpdateVisitor extends TreeTranslator {
             return;
         }
         methodBodyVars.forEach(methodBodyVar -> {
-            assembleFactory.match(methodBodyVar, jcUtils.memberAccess(methodBodyVar.getName()), METHOD_BODY_VAR);
+            assembleFactory.match(methodBodyVar, jcUtils.memberAccess(methodBodyVar.getFieldName()), METHOD_BODY_VAR);
         });
     }
 

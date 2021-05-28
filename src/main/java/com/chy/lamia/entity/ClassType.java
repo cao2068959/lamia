@@ -63,10 +63,8 @@ public class ClassType {
         return matchType(type.getTypePath());
     }
 
-
     public String getTypePath() {
         return typePath;
     }
-
 
 }

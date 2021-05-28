@@ -81,13 +81,14 @@ public class LooseBlockVisitor extends AbstractBlockVisitor {
             return;
         }
 
+        Type type = JCUtils.instance.attribType(classTree, statement);
+        ParameterType parameterType = new ParameterType(statement.getName().toString(), type.toString());
         MapMember mapMember = mapMemberOptional.get();
         String mapName = mapMember.value();
-        if ("".equals(mapName)) {
-            mapName = statement.getName().toString();
+        if (!"".equals(mapName)) {
+            parameterType.setName(mapName);
         }
-        Type type = JCUtils.instance.attribType(classTree, statement);
-        ParameterType parameterType = new ParameterType(mapName, type.toString());
+
         parameterType.setGeneric(SymbolUtils.getGeneric(type));
         vars.add(parameterType);
     }

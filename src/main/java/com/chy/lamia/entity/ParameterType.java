@@ -5,7 +5,7 @@ import java.util.List;
 
 public class ParameterType {
 
-    final String name;
+    String name;
     String fieldName;
     final ClassType type;
     String methodName;
@@ -86,5 +86,9 @@ public class ParameterType {
 
     public void setFieldName(String fieldName) {
         this.fieldName = fieldName;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
