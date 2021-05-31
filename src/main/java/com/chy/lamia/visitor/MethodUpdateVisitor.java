@@ -215,7 +215,7 @@ public class MethodUpdateVisitor extends TreeTranslator {
             //生成 a.getXX() 的表达式
             JCTree.JCExpressionStatement getterExpression = jcUtils.execMethod(instanceName, v.getSimpleName(),
                     new LinkedList<>());
-            ParameterType parameterType = new ParameterType(k, v.getTypePath());
+            ParameterType parameterType = new ParameterType(k, v.getParameterType());
             //将表达式放入 合成工厂去匹配
             assembleFactory.match(parameterType, getterExpression.expr, priority);
         });

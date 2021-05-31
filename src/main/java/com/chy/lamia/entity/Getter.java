@@ -3,14 +3,14 @@ package com.chy.lamia.entity;
 public class Getter {
 
     private String simpleName;
-    private String typePath;
+    private ParameterType parameterType;
 
-    public String getTypePath() {
-        return typePath;
+    public ParameterType getParameterType() {
+        return parameterType;
     }
 
-    public void setTypePath(String typePath) {
-        this.typePath = typePath;
+    public void setParameterType(ParameterType parameterType) {
+        this.parameterType = parameterType;
     }
 
     public String getSimpleName() {

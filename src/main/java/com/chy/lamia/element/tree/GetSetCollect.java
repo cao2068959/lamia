@@ -5,6 +5,7 @@ import com.chy.lamia.entity.Getter;
 import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.entity.Setter;
 import com.chy.lamia.entity.Var;
+import com.chy.lamia.utils.SymbolUtils;
 import com.chy.lamia.visitor.InstantMethodVisitor;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.TypeTag;
@@ -56,10 +57,14 @@ public class GetSetCollect extends InstantMethodVisitor {
         }
 
         JCTree.JCVariableDecl fparam = parameters.get(0);
-        String paramType = fparam.vartype.type.toString();
+        Type paramType = fparam.vartype.type;
+        ParameterType parameterType = new ParameterType(paramType.toString());
+        //去解析一下这个类型里面有没泛型
+        java.util.List<ParameterType> generic = SymbolUtils.getGeneric(paramType);
+        parameterType.setGeneric(generic);
         Setter setter = new Setter();
         setter.setSimpleName(name);
-        setter.setParameterType(new ParameterType(paramType));
+        setter.setParameterType(parameterType);
         setterData.put(varName, setter);
     }
 
@@ -83,11 +88,15 @@ public class GetSetCollect extends InstantMethodVisitor {
             return;
         }
 
-        String returnTypePath = returnType.type.toString();
+        Type type = returnType.type;
+        java.util.List<ParameterType> generic = SymbolUtils.getGeneric(type);
+        ParameterType parameterType = new ParameterType(type.toString());
+        parameterType.setGeneric(generic);
+
 
         Getter getter = new Getter();
         getter.setSimpleName(name);
-        getter.setTypePath(returnTypePath);
+        getter.setParameterType(parameterType);
         getterData.put(varName, getter);
     }
 

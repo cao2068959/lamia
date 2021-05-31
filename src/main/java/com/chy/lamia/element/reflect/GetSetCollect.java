@@ -9,6 +9,10 @@ import java.lang.reflect.Parameter;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 使用反射去收集getter以及setter方法
+ *
+ */
 public class GetSetCollect {
 
     Map<String, Getter> instantGetters = new HashMap<>();
@@ -62,7 +66,7 @@ public class GetSetCollect {
         }
         Getter getter = new Getter();
         getter.setSimpleName(name);
-        getter.setTypePath(returnTypeName);
+        //getter.setTypePath(returnTypeName);
         instantGetters.put(varName, getter);
     }
 

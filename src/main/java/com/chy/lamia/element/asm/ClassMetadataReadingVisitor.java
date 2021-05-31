@@ -99,9 +99,12 @@ public class ClassMetadataReadingVisitor extends ClassVisitor {
         if (varName == null) {
             return;
         }
+
+        ParameterType parameterType = signatureHandleWarpper.getReturnType()
+                .orElse(new ParameterType(returnTypeName));
         Getter getter = new Getter();
         getter.setSimpleName(name);
-        getter.setTypePath(returnTypeName);
+        getter.setParameterType(parameterType);
         instantGetters.put(varName, getter);
 
     }

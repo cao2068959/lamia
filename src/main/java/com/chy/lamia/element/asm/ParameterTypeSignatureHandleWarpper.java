@@ -31,16 +31,43 @@ public class ParameterTypeSignatureHandleWarpper {
 
     public Optional<ParameterType> getParameter(int index) {
         ParameterTypeSignatureHandle handle = getHandle();
-        if (handle == null){
+        if (handle == null) {
             return Optional.empty();
         }
 
         ArrayList<ParameterTypeSignatureHandle> parameters = handle.getParameters();
-        if (parameters.size() < index) {
+        if (parameters.size() < index + 1) {
             return Optional.empty();
         }
         ParameterTypeSignatureHandle parameterTypeSignatureHandle = parameters.get(index);
         return Optional.ofNullable(parameterTypeSignatureHandle.getParameterType());
     }
+
+    public Optional<ParameterType> getSuperClass() {
+        ParameterTypeSignatureHandle handle = getHandle();
+        if (handle == null) {
+            return Optional.empty();
+        }
+
+        ParameterTypeSignatureHandle superClass = handle.getSuperClass();
+        if (superClass == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(superClass.getParameterType());
+    }
+
+    public Optional<ParameterType> getReturnType() {
+        ParameterTypeSignatureHandle handle = getHandle();
+        if (handle == null) {
+            return Optional.empty();
+        }
+
+        ParameterTypeSignatureHandle returnType = handle.getReturnType();
+        if (returnType == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(returnType.getParameterType());
+    }
+
 
 }
