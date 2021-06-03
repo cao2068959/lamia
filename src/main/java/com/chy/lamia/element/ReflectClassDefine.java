@@ -1,13 +1,13 @@
 package com.chy.lamia.element;
 
 
+import com.chy.lamia.element.assemble.ValueObjectAssembleFactory;
 import com.chy.lamia.element.reflect.GetSetCollect;
 import com.chy.lamia.entity.Constructor;
 import com.chy.lamia.entity.Getter;
 import com.chy.lamia.entity.Setter;
 import com.chy.lamia.entity.Var;
 import com.chy.lamia.utils.JCUtils;
-import com.sun.tools.javac.tree.JCTree;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -76,7 +76,7 @@ public class ReflectClassDefine implements IClassDefine {
     }
 
     @Override
-    public AssembleFactory getAssembleFactory() {
+    public ValueObjectAssembleFactory getAssembleFactory() {
         return null;
     }
 

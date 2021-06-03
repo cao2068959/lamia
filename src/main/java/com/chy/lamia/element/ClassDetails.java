@@ -1,6 +1,8 @@
 package com.chy.lamia.element;
 
+import com.chy.lamia.element.assemble.ValueObjectAssembleFactory;
 import com.chy.lamia.entity.Getter;
+import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.entity.Var;
 import com.chy.lamia.utils.JCUtils;
 import com.sun.tools.javac.tree.JCTree;
@@ -8,29 +10,32 @@ import com.sun.tools.javac.tree.JCTree;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ClassElement {
+public class ClassDetails {
 
-    String classPath;
+
     IClassDefine classDefine;
-    private static Map<String, ClassElement> classElementCache = new HashMap<>();
+    ParameterType parameterType;
+
+    private static Map<ParameterType, ClassDetails> classElementCache = new HashMap<>();
 
 
-    public ClassElement(JCUtils jcUtils, String classPath) {
-        this.classPath = classPath;
-        JCTree tree = jcUtils.getTree(classPath);
+    public ClassDetails(ParameterType parameterType) {
+        this.parameterType = parameterType;
+        JCUtils jcUtils = JCUtils.instance;
+        JCTree tree = jcUtils.getTree(parameterType.getTypePatch());
         if (tree != null) {
             classDefine = new TreeClassDefine(jcUtils, tree);
             return;
         }
 
         //没有对应的源码，说明对应的java文件已经生成了 class文件 那么使用 ASM  解析
-        Class<?> classForReflect = getClassForReflect(classPath);
+        Class<?> classForReflect = getClassForReflect(parameterType.getTypePatch());
         if (classForReflect != null) {
             classDefine = new AsmClassDefine(jcUtils, classForReflect);
             return;
         }
 
-        throw new RuntimeException("无法解析类： " + classPath);
+        throw new RuntimeException("无法解析类： " + parameterType.getTypePatch());
 
     }
 
@@ -53,7 +58,7 @@ public class ClassElement {
         return classDefine.getInstantVars();
     }
 
-    public AssembleFactory getAssembleFactory() {
+    public ValueObjectAssembleFactory getAssembleFactory() {
         return classDefine.getAssembleFactory();
     }
 
@@ -62,14 +67,13 @@ public class ClassElement {
     }
 
 
-    public static ClassElement getClassElement(String classPath, JCUtils jcUtils) {
-
-        ClassElement result = classElementCache.get(classPath);
+    public static ClassDetails getClassElement(ParameterType parameterType) {
+        ClassDetails result = classElementCache.get(parameterType);
         if (result != null) {
             return result;
         }
-        result = new ClassElement(jcUtils, classPath);
-        classElementCache.put(classPath, result);
+        result = new ClassDetails(parameterType);
+        classElementCache.put(parameterType, result);
         return result;
     }
 

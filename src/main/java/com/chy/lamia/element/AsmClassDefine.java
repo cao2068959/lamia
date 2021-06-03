@@ -2,7 +2,7 @@ package com.chy.lamia.element;
 
 
 import com.chy.lamia.element.asm.ClassMetadataReadingVisitor;
-import com.chy.lamia.element.reflect.GetSetCollect;
+import com.chy.lamia.element.assemble.ValueObjectAssembleFactory;
 import com.chy.lamia.entity.Constructor;
 import com.chy.lamia.entity.Getter;
 import com.chy.lamia.entity.Setter;
@@ -50,8 +50,8 @@ public class AsmClassDefine implements IClassDefine {
 
 
     @Override
-    public AssembleFactory getAssembleFactory() {
-        return new AssembleFactory(jcUtils, classPath, getConstructors(), getInstantSetters());
+    public ValueObjectAssembleFactory getAssembleFactory() {
+        return new ValueObjectAssembleFactory(jcUtils, classPath, getConstructors(), getInstantSetters());
     }
 
     @Override

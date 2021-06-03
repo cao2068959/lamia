@@ -34,11 +34,10 @@ public class ClassMetadataReadingVisitor extends ClassVisitor {
         super(Opcodes.ASM5);
     }
 
-
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
 
-        //构造器, 构造器需要去获取 参数的名字 所以使用 MethodVisitor去解析
+        //构造器, 构造器需要去获取 参数的名字 所以使用 MethodVisitor去解 析
         if ("<init>".equals(name)) {
             return new ConstructorCollectMethodVisitor(constructors);
         }
@@ -72,7 +71,6 @@ public class ClassMetadataReadingVisitor extends ClassVisitor {
             return;
         }
         Type argumentType = argumentTypes[0];
-
 
         Setter setter = new Setter();
         String parameterTypeName = argumentTypes[0].getClassName();

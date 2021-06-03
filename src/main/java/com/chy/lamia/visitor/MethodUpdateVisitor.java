@@ -2,8 +2,8 @@ package com.chy.lamia.visitor;
 
 
 import com.chy.lamia.annotation.MapMember;
-import com.chy.lamia.element.AssembleFactory;
-import com.chy.lamia.element.ClassElement;
+import com.chy.lamia.element.assemble.ValueObjectAssembleFactory;
+import com.chy.lamia.element.ClassDetails;
 import com.chy.lamia.element.LooseBlock;
 import com.chy.lamia.element.LooseBlockVisitor;
 import com.chy.lamia.element.annotation.AnnotationProxyFactory;
@@ -61,40 +61,41 @@ public class MethodUpdateVisitor extends TreeTranslator {
             return;
         }
 
+        ParameterType returnParameterType = new ParameterType(returnType);
         //解析返回值 的类结构
-        ClassElement returnClassElement = ClassElement.getClassElement(returnType.toString(), jcUtils);
+        ClassDetails returnClassDetails = ClassDetails.getClassElement(returnParameterType);
         //根据不同的策略获取 返回值的生成工厂
-        AssembleFactory assembleFactory = returnClassElement.getAssembleFactory();
+        ValueObjectAssembleFactory valueObjectAssembleFactory = returnClassDetails.getAssembleFactory();
         //获取方法中所有的入参
         SunList<Symbol.VarSymbol> paramList = new SunList<>(methodSymbolDecl.sym.getParameters());
         //解析原来方法中的方法体,计算出 所有的通路
         List<LooseBlock> looseBlocks = untieBlock(methodSymbolDecl);
         for (LooseBlock looseBlock : looseBlocks) {
-            assemble(looseBlock, paramList, assembleFactory);
+            assemble(looseBlock, paramList, valueObjectAssembleFactory);
         }
     }
 
-    private void assemble(LooseBlock looseBlock, SunList<Symbol.VarSymbol> paramList, AssembleFactory assembleFactory) {
+    private void assemble(LooseBlock looseBlock, SunList<Symbol.VarSymbol> paramList, ValueObjectAssembleFactory valueObjectAssembleFactory) {
         //先清空
-        assembleFactory.clear();
+        valueObjectAssembleFactory.clear();
         //先把方法入参当做材料添加进入 工厂中
-        addMaterialsFromParameters(paramList, assembleFactory);
+        addMaterialsFromParameters(paramList, valueObjectAssembleFactory);
         //把方法体中能访问到的所有参数当做材料添加进入 工厂中
-        addMaterialsFromMethodBodyVar(looseBlock.getVars(), assembleFactory);
+        addMaterialsFromMethodBodyVar(looseBlock.getVars(), valueObjectAssembleFactory);
         //去修改老的方法的 方法体
-        modifyMethodBody(looseBlock, assembleFactory);
+        modifyMethodBody(looseBlock, valueObjectAssembleFactory);
     }
 
     /**
      * 去修改 方法体里的内容
      *
      * @param looseBlock
-     * @param assembleFactory
+     * @param valueObjectAssembleFactory
      */
-    private void modifyMethodBody(LooseBlock looseBlock, AssembleFactory assembleFactory) {
+    private void modifyMethodBody(LooseBlock looseBlock, ValueObjectAssembleFactory valueObjectAssembleFactory) {
 
         //获取 结果对象的 生成的语句
-        AssembleResult assembleResult = assembleFactory.generateTree();
+        AssembleResult assembleResult = valueObjectAssembleFactory.generateTree();
 
         //要去修改之前的方法,要先把之前的方法给拿出来
         JCTree.JCBlock oldBlock = looseBlock.getBlock();
@@ -149,16 +150,16 @@ public class MethodUpdateVisitor extends TreeTranslator {
         return looseBlocks;
     }
 
-    private void addMaterialsFromMethodBodyVar(List<ParameterType> methodBodyVars, AssembleFactory assembleFactory) {
+    private void addMaterialsFromMethodBodyVar(List<ParameterType> methodBodyVars, ValueObjectAssembleFactory valueObjectAssembleFactory) {
         if (methodBodyVars == null || methodBodyVars.size() == 0) {
             return;
         }
         methodBodyVars.forEach(methodBodyVar -> {
-            assembleFactory.match(methodBodyVar, jcUtils.memberAccess(methodBodyVar.getFieldName()), METHOD_BODY_VAR);
+            valueObjectAssembleFactory.match(methodBodyVar, jcUtils.memberAccess(methodBodyVar.getFieldName()), METHOD_BODY_VAR);
         });
     }
 
-    private void addMaterialsFromParameters(SunList<Symbol.VarSymbol> params, AssembleFactory assembleFactory) {
+    private void addMaterialsFromParameters(SunList<Symbol.VarSymbol> params, ValueObjectAssembleFactory valueObjectAssembleFactory) {
         if (params == null || params.size() == 0) {
             return;
         }
@@ -182,14 +183,14 @@ public class MethodUpdateVisitor extends TreeTranslator {
             List<ParameterType> generic = SymbolUtils.getGeneric(varSymbol);
             parameterType.setGeneric(generic);
             //先把 这个参数本身给塞入工厂
-            assembleFactory.match(parameterType, jcUtils.memberAccess(parameterType.getFieldName()), PARAMETERS);
+            valueObjectAssembleFactory.match(parameterType, jcUtils.memberAccess(parameterType.getFieldName()), PARAMETERS);
 
 
             //如果需要扩展这个对象里的参数，那么就去解析这个class
             if (spread) {
                 //解析这个类里面所有的 getter setter 塞入构造工厂中
-                anatomyClassToAssembleFactory(parameterType.getTypePatch(), parameterType.getFieldName(),
-                        assembleFactory, jcUtils, PARAMETERS_IN_VAR);
+                anatomyClassToAssembleFactory(parameterType, parameterType.getFieldName(),
+                        valueObjectAssembleFactory, jcUtils, PARAMETERS_IN_VAR);
             }
 
         });
@@ -199,25 +200,25 @@ public class MethodUpdateVisitor extends TreeTranslator {
     /**
      * 解析类里面所有的 getter方法，把这些 getter方法放入 AssembleFactory 去匹配
      *
-     * @param classpath
+     * @param type
      * @param instanceName
-     * @param assembleFactory
+     * @param valueObjectAssembleFactory
      * @param jcUtils
      */
-    private void anatomyClassToAssembleFactory(String classpath, String instanceName,
-                                               AssembleFactory assembleFactory, JCUtils jcUtils,
+    private void anatomyClassToAssembleFactory(ParameterType type, String instanceName,
+                                               ValueObjectAssembleFactory valueObjectAssembleFactory, JCUtils jcUtils,
                                                Integer priority) {
         //先把 类型转成 ClassElement 方便获取 getter setter 等一系列的方法
-        ClassElement classElement = ClassElement.getClassElement(classpath, jcUtils);
+        ClassDetails classDetails = ClassDetails.getClassElement(type);
         //获取这个类里面所有的 getter 方法
-        Map<String, Getter> getters = classElement.getInstantGetters();
+        Map<String, Getter> getters = classDetails.getInstantGetters();
         getters.forEach((k, v) -> {
             //生成 a.getXX() 的表达式
             JCTree.JCExpressionStatement getterExpression = jcUtils.execMethod(instanceName, v.getSimpleName(),
                     new LinkedList<>());
             ParameterType parameterType = new ParameterType(k, v.getParameterType());
             //将表达式放入 合成工厂去匹配
-            assembleFactory.match(parameterType, getterExpression.expr, priority);
+            valueObjectAssembleFactory.match(parameterType, getterExpression.expr, priority);
         });
     }
 

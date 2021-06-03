@@ -1,6 +1,6 @@
-package com.chy.lamia.element;
+package com.chy.lamia.element.assemble;
 
-import com.chy.lamia.element.type.TypeProcessorFactory;
+import com.chy.lamia.element.Candidate;
 import com.chy.lamia.entity.*;
 import com.chy.lamia.enums.MatchReuslt;
 import com.chy.lamia.utils.JCUtils;
@@ -9,24 +9,25 @@ import com.sun.tools.javac.tree.JCTree;
 import java.util.*;
 
 /**
- * 组装工厂,使用 构造器或者 setter 去组装一个对象出来
+ * 值对象组装工厂
+ * 使用 构造器或者 setter 去组装一个对象出来
  * 不同的构造器和不同的 setter方法决定了 拥有不同的组装方式, 这里可以根据传入进来的 组装 材料来决定使用什么样的组合才是最优解
  */
-public class AssembleFactory {
+public class ValueObjectAssembleFactory {
     List<Candidate> allCandidate = new ArrayList<>();
     Map<String, PriorityExpression> expressionMap = new HashMap<>();
     JCUtils jcUtils;
     private boolean complete = false;
     private String originalClassPath;
 
-    public AssembleFactory(JCUtils jcUtils, String originalClassPath,
-                           List<Constructor> constructors,
-                           Map<String, Setter> setterMap) {
+    public ValueObjectAssembleFactory(JCUtils jcUtils, String originalClassPath,
+                                      List<Constructor> constructors,
+                                      Map<String, Setter> setterMap) {
         this.jcUtils = jcUtils;
         this.originalClassPath = originalClassPath;
 
         //根据构造器来分组
-        // 如有 构造器 -> Z(A,B,C)  setter -> setA setB setC sey6u78ttD   那么 这个组合就成了  Z(A,B,C) And setD
+        // 如有 构造器 -> Z(A,B,C)  setter -> setA setB setC setD   那么 这个组合就成了  Z(A,B,C) And setD
         for (Constructor constructor : constructors) {
             Candidate candidate = new Candidate(constructor, setterMap);
             allCandidate.add(candidate);
@@ -35,7 +36,6 @@ public class AssembleFactory {
 
 
     public void match(ParameterType parameterType, JCTree.JCExpression expression, Integer priority) {
-
         for (Candidate candidate : allCandidate) {
             MatchReuslt matchReuslt = candidate.match(parameterType, priority);
             //类型和名称都相同了 说明 这个表达式将是构成的一部分，把他存起来

@@ -1,5 +1,8 @@
 package com.chy.lamia.entity;
 
+import com.chy.lamia.utils.SymbolUtils;
+import com.sun.tools.javac.code.Type;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +39,11 @@ public class ParameterType {
     public ParameterType(String name, ParameterType parameterType, String methodName) {
         this(name, parameterType);
         this.methodName = methodName;
+    }
+
+    public ParameterType(Type type) {
+        this("", type.tsym.toString());
+        generic = SymbolUtils.getGeneric(type);
     }
 
 
@@ -90,5 +98,23 @@ public class ParameterType {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ParameterType that = (ParameterType) o;
+
+        if (!type.equals(that.type)) return false;
+        return generic.equals(that.generic);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = type.hashCode();
+        result = 31 * result + generic.hashCode();
+        return result;
     }
 }

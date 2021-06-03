@@ -1,5 +1,6 @@
 package com.chy.lamia.element;
 
+import com.chy.lamia.element.assemble.ValueObjectAssembleFactory;
 import com.chy.lamia.element.tree.ConstructorCollect;
 import com.chy.lamia.element.tree.GetSetCollect;
 import com.chy.lamia.element.tree.VarCollect;
@@ -8,8 +9,6 @@ import com.chy.lamia.entity.Getter;
 import com.chy.lamia.entity.Setter;
 import com.chy.lamia.entity.Var;
 import com.chy.lamia.utils.JCUtils;
-import com.sun.tools.javac.api.JavacTrees;
-import com.sun.tools.javac.model.JavacElements;
 import com.sun.tools.javac.tree.JCTree;
 
 import java.util.List;
@@ -49,9 +48,9 @@ public class TreeClassDefine implements IClassDefine {
     }
 
     @Override
-    public AssembleFactory getAssembleFactory() {
+    public ValueObjectAssembleFactory getAssembleFactory() {
         String classPath = ((JCTree.JCClassDecl) jcTree).sym.toString();
-        return new AssembleFactory(jcUtils, classPath, getConstructors(), getInstantSetters());
+        return new ValueObjectAssembleFactory(jcUtils, classPath, getConstructors(), getInstantSetters());
     }
 
     @Override
