@@ -1,6 +1,7 @@
-package com.chy.lamia.element.assemble;
+package com.chy.lamia.element.assemble.valobj;
 
-import com.chy.lamia.element.Candidate;
+import com.chy.lamia.element.assemble.AssembleResult;
+import com.chy.lamia.element.assemble.IAssembleFactory;
 import com.chy.lamia.entity.*;
 import com.chy.lamia.enums.MatchReuslt;
 import com.chy.lamia.utils.JCUtils;
@@ -13,7 +14,7 @@ import java.util.*;
  * 使用 构造器或者 setter 去组装一个对象出来
  * 不同的构造器和不同的 setter方法决定了 拥有不同的组装方式, 这里可以根据传入进来的 组装 材料来决定使用什么样的组合才是最优解
  */
-public class ValueObjectAssembleFactory {
+public class ValueObjectAssembleFactory implements IAssembleFactory {
     List<Candidate> allCandidate = new ArrayList<>();
     Map<String, PriorityExpression> expressionMap = new HashMap<>();
     JCUtils jcUtils;
@@ -34,8 +35,8 @@ public class ValueObjectAssembleFactory {
         }
     }
 
-
-    public void match(ParameterType parameterType, JCTree.JCExpression expression, Integer priority) {
+    @Override
+    public void addMaterial(ParameterType parameterType, JCTree.JCExpression expression, Integer priority) {
         for (Candidate candidate : allCandidate) {
             MatchReuslt matchReuslt = candidate.match(parameterType, priority);
             //类型和名称都相同了 说明 这个表达式将是构成的一部分，把他存起来
@@ -57,7 +58,8 @@ public class ValueObjectAssembleFactory {
         return;
     }
 
-    public AssembleResult generateTree() {
+    @Override
+    public AssembleResult generate() {
         Candidate candidate = choose();
         if (candidate == null) {
             throw new RuntimeException("类 ： [" + originalClassPath + "] 构造器参数不够");
@@ -84,7 +86,6 @@ public class ValueObjectAssembleFactory {
     }
 
     private String createNewInstant(Candidate candidate, List<JCTree.JCStatement> result) {
-
         Constructor constructor = candidate.getConstructor();
         List<JCTree.JCExpression> paramsExpression = new ArrayList<>();
         constructor.getParams().forEach(param -> {
@@ -111,6 +112,7 @@ public class ValueObjectAssembleFactory {
         return result;
     }
 
+    @Override
     public void clear() {
         complete = false;
         expressionMap = new HashMap<>();

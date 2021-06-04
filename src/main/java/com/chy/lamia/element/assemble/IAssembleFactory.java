@@ -14,4 +14,17 @@ public interface IAssembleFactory {
      * @param priority
      */
     void addMaterial(ParameterType parameterType, JCTree.JCExpression expression, Integer priority);
+
+    /**
+     * 生成结果
+     *
+     * @return
+     */
+    AssembleResult generate();
+
+    /**
+     * 清空整个工厂
+     *
+     */
+    void clear();
 }

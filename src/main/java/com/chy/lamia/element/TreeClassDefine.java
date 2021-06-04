@@ -1,6 +1,6 @@
 package com.chy.lamia.element;
 
-import com.chy.lamia.element.assemble.ValueObjectAssembleFactory;
+import com.chy.lamia.element.assemble.valobj.ValueObjectAssembleFactory;
 import com.chy.lamia.element.tree.ConstructorCollect;
 import com.chy.lamia.element.tree.GetSetCollect;
 import com.chy.lamia.element.tree.VarCollect;

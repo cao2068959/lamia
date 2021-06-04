@@ -2,12 +2,12 @@ package com.chy.lamia.visitor;
 
 
 import com.chy.lamia.annotation.MapMember;
-import com.chy.lamia.element.assemble.ValueObjectAssembleFactory;
+import com.chy.lamia.element.assemble.IAssembleFactory;
 import com.chy.lamia.element.ClassDetails;
 import com.chy.lamia.element.LooseBlock;
 import com.chy.lamia.element.LooseBlockVisitor;
 import com.chy.lamia.element.annotation.AnnotationProxyFactory;
-import com.chy.lamia.entity.AssembleResult;
+import com.chy.lamia.element.assemble.AssembleResult;
 import com.chy.lamia.entity.Getter;
 import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.entity.SunList;
@@ -65,37 +65,37 @@ public class MethodUpdateVisitor extends TreeTranslator {
         //解析返回值 的类结构
         ClassDetails returnClassDetails = ClassDetails.getClassElement(returnParameterType);
         //根据不同的策略获取 返回值的生成工厂
-        ValueObjectAssembleFactory valueObjectAssembleFactory = returnClassDetails.getAssembleFactory();
+        IAssembleFactory assembleFactory = returnClassDetails.getAssembleFactory();
         //获取方法中所有的入参
         SunList<Symbol.VarSymbol> paramList = new SunList<>(methodSymbolDecl.sym.getParameters());
         //解析原来方法中的方法体,计算出 所有的通路
         List<LooseBlock> looseBlocks = untieBlock(methodSymbolDecl);
         for (LooseBlock looseBlock : looseBlocks) {
-            assemble(looseBlock, paramList, valueObjectAssembleFactory);
+            assemble(looseBlock, paramList, assembleFactory);
         }
     }
 
-    private void assemble(LooseBlock looseBlock, SunList<Symbol.VarSymbol> paramList, ValueObjectAssembleFactory valueObjectAssembleFactory) {
+    private void assemble(LooseBlock looseBlock, SunList<Symbol.VarSymbol> paramList, IAssembleFactory assembleFactory) {
         //先清空
-        valueObjectAssembleFactory.clear();
+        assembleFactory.clear();
         //先把方法入参当做材料添加进入 工厂中
-        addMaterialsFromParameters(paramList, valueObjectAssembleFactory);
+        addMaterialsFromParameters(paramList, assembleFactory);
         //把方法体中能访问到的所有参数当做材料添加进入 工厂中
-        addMaterialsFromMethodBodyVar(looseBlock.getVars(), valueObjectAssembleFactory);
+        addMaterialsFromMethodBodyVar(looseBlock.getVars(), assembleFactory);
         //去修改老的方法的 方法体
-        modifyMethodBody(looseBlock, valueObjectAssembleFactory);
+        modifyMethodBody(looseBlock, assembleFactory);
     }
 
     /**
      * 去修改 方法体里的内容
      *
      * @param looseBlock
-     * @param valueObjectAssembleFactory
+     * @param assembleFactory
      */
-    private void modifyMethodBody(LooseBlock looseBlock, ValueObjectAssembleFactory valueObjectAssembleFactory) {
+    private void modifyMethodBody(LooseBlock looseBlock, IAssembleFactory assembleFactory) {
 
         //获取 结果对象的 生成的语句
-        AssembleResult assembleResult = valueObjectAssembleFactory.generateTree();
+        AssembleResult assembleResult = assembleFactory.generate();
 
         //要去修改之前的方法,要先把之前的方法给拿出来
         JCTree.JCBlock oldBlock = looseBlock.getBlock();
@@ -150,16 +150,16 @@ public class MethodUpdateVisitor extends TreeTranslator {
         return looseBlocks;
     }
 
-    private void addMaterialsFromMethodBodyVar(List<ParameterType> methodBodyVars, ValueObjectAssembleFactory valueObjectAssembleFactory) {
+    private void addMaterialsFromMethodBodyVar(List<ParameterType> methodBodyVars, IAssembleFactory assembleFactory) {
         if (methodBodyVars == null || methodBodyVars.size() == 0) {
             return;
         }
         methodBodyVars.forEach(methodBodyVar -> {
-            valueObjectAssembleFactory.match(methodBodyVar, jcUtils.memberAccess(methodBodyVar.getFieldName()), METHOD_BODY_VAR);
+            assembleFactory.addMaterial(methodBodyVar, jcUtils.memberAccess(methodBodyVar.getFieldName()), METHOD_BODY_VAR);
         });
     }
 
-    private void addMaterialsFromParameters(SunList<Symbol.VarSymbol> params, ValueObjectAssembleFactory valueObjectAssembleFactory) {
+    private void addMaterialsFromParameters(SunList<Symbol.VarSymbol> params, IAssembleFactory assembleFactory) {
         if (params == null || params.size() == 0) {
             return;
         }
@@ -183,14 +183,14 @@ public class MethodUpdateVisitor extends TreeTranslator {
             List<ParameterType> generic = SymbolUtils.getGeneric(varSymbol);
             parameterType.setGeneric(generic);
             //先把 这个参数本身给塞入工厂
-            valueObjectAssembleFactory.match(parameterType, jcUtils.memberAccess(parameterType.getFieldName()), PARAMETERS);
+            assembleFactory.addMaterial(parameterType, jcUtils.memberAccess(parameterType.getFieldName()), PARAMETERS);
 
 
             //如果需要扩展这个对象里的参数，那么就去解析这个class
             if (spread) {
                 //解析这个类里面所有的 getter setter 塞入构造工厂中
                 anatomyClassToAssembleFactory(parameterType, parameterType.getFieldName(),
-                        valueObjectAssembleFactory, jcUtils, PARAMETERS_IN_VAR);
+                        assembleFactory, jcUtils, PARAMETERS_IN_VAR);
             }
 
         });
@@ -202,11 +202,11 @@ public class MethodUpdateVisitor extends TreeTranslator {
      *
      * @param type
      * @param instanceName
-     * @param valueObjectAssembleFactory
+     * @param assembleFactory
      * @param jcUtils
      */
     private void anatomyClassToAssembleFactory(ParameterType type, String instanceName,
-                                               ValueObjectAssembleFactory valueObjectAssembleFactory, JCUtils jcUtils,
+                                               IAssembleFactory assembleFactory, JCUtils jcUtils,
                                                Integer priority) {
         //先把 类型转成 ClassElement 方便获取 getter setter 等一系列的方法
         ClassDetails classDetails = ClassDetails.getClassElement(type);
@@ -218,7 +218,7 @@ public class MethodUpdateVisitor extends TreeTranslator {
                     new LinkedList<>());
             ParameterType parameterType = new ParameterType(k, v.getParameterType());
             //将表达式放入 合成工厂去匹配
-            valueObjectAssembleFactory.match(parameterType, getterExpression.expr, priority);
+            assembleFactory.addMaterial(parameterType, getterExpression.expr, priority);
         });
     }
 
