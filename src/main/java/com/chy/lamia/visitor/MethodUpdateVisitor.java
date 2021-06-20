@@ -95,7 +95,7 @@ public class MethodUpdateVisitor extends TreeTranslator {
     private void modifyMethodBody(LooseBlock looseBlock, IAssembleFactory assembleFactory) {
 
         //获取 结果对象的 生成的语句
-        AssembleResult assembleResult = assembleFactory.generate();
+        AssembleResult assembleResult = assembleFactory.generate(null);
 
         //要去修改之前的方法,要先把之前的方法给拿出来
         JCTree.JCBlock oldBlock = looseBlock.getBlock();

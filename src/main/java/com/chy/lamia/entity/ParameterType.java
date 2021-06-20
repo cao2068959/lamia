@@ -117,4 +117,19 @@ public class ParameterType {
         result = 31 * result + generic.hashCode();
         return result;
     }
+
+    @Override
+    public String toString() {
+        String typePatch = getTypePatch();
+        typePatch = typePatch == null ? "null" : typePatch;
+        StringBuilder result = new StringBuilder(typePatch);
+        if (generic != null && generic.size() != 0) {
+            result.append("<");
+            for (ParameterType parameterType : generic) {
+                result.append(parameterType.toString());
+            }
+            result.append(">");
+        }
+        return result.toString();
+    }
 }

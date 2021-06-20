@@ -1,6 +1,6 @@
 package com.chy.lamia.element;
 
-import com.chy.lamia.element.assemble.valobj.ValueObjectAssembleFactory;
+import com.chy.lamia.element.assemble.IAssembleFactory;
 import com.chy.lamia.entity.Constructor;
 import com.chy.lamia.entity.Getter;
 import com.chy.lamia.entity.Setter;
@@ -12,7 +12,7 @@ import java.util.Map;
 public interface IClassDefine {
 
 
-    ValueObjectAssembleFactory getAssembleFactory();
+    IAssembleFactory getAssembleFactory();
 
     Map<String, Var> getInstantVars();
 

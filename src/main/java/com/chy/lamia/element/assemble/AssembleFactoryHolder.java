@@ -14,20 +14,24 @@ public class AssembleFactoryHolder implements IAssembleFactory {
      */
     List<IAssembleFactory> assembleFactories = new ArrayList<>();
 
-    @Override
-    public void addMaterial(ParameterType parameterType, JCTree.JCExpression expression, Integer priority) {
-
+    public AssembleFactoryHolder(List<IAssembleFactory> assembleFactories) {
+        this.assembleFactories = assembleFactories;
     }
 
     @Override
-    public AssembleResult generate() {
-        foreachBackward(((assembleFactory, lastResult) -> {
-            AssembleResult generate = assembleFactory.generate();
+    public void addMaterial(ParameterType parameterType, JCTree.JCExpression expression, Integer priority) {
+        foreachBackward((assembleFactory, Void) -> {
+            assembleFactory.addMaterial(parameterType, expression, priority);
+            return null;
+        });
+    }
 
+    @Override
+    public AssembleResult generate(AssembleResult assembleResult) {
+        return foreachBackward(((assembleFactory, lastResult) -> {
+            AssembleResult generate = assembleFactory.generate(lastResult);
             return generate;
         }));
-
-        return null;
     }
 
     private <T> T foreachBackward(Function<IAssembleFactory, T, T> consumer) {
@@ -41,7 +45,14 @@ public class AssembleFactoryHolder implements IAssembleFactory {
 
     @Override
     public void clear() {
+        foreachBackward((assembleFactory, Void) -> {
+            assembleFactory.clear();
+            return null;
+        });
+    }
 
+    public void addAssembleFactorie(IAssembleFactory iAssembleFactory){
+        assembleFactories.add(iAssembleFactory);
     }
 
     interface Function<A, B, C> {

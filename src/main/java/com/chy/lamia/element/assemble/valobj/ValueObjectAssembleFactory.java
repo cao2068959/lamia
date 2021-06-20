@@ -59,7 +59,7 @@ public class ValueObjectAssembleFactory implements IAssembleFactory {
     }
 
     @Override
-    public AssembleResult generate() {
+    public AssembleResult generate(AssembleResult assembleResult) {
         Candidate candidate = choose();
         if (candidate == null) {
             throw new RuntimeException("类 ： [" + originalClassPath + "] 构造器参数不够");

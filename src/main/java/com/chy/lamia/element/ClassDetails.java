@@ -1,26 +1,34 @@
 package com.chy.lamia.element;
 
-import com.chy.lamia.element.assemble.valobj.ValueObjectAssembleFactory;
+import com.chy.lamia.element.assemble.AssembleFactoryHolder;
+import com.chy.lamia.element.assemble.IAssembleFactory;
 import com.chy.lamia.entity.Getter;
 import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.entity.Var;
 import com.chy.lamia.utils.JCUtils;
 import com.sun.tools.javac.tree.JCTree;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class ClassDetails {
 
 
     IClassDefine classDefine;
     ParameterType parameterType;
+    List<ClassDetails> generic = new LinkedList<>();
 
-    private static Map<ParameterType, ClassDetails> classElementCache = new HashMap<>();
+    private static Map<String, ClassDetails> classElementCache = new HashMap<>();
 
 
     public ClassDetails(ParameterType parameterType) {
         this.parameterType = parameterType;
+        List<ParameterType> parameterTypeGenerics = parameterType.getGeneric();
+        if (parameterTypeGenerics != null) {
+            generic = parameterTypeGenerics.stream().map(ClassDetails::getClassElement)
+                    .collect(Collectors.toList());
+        }
+
         JCUtils jcUtils = JCUtils.instance;
         JCTree tree = jcUtils.getTree(parameterType.getTypePatch());
         if (tree != null) {
@@ -38,6 +46,11 @@ public class ClassDetails {
         throw new RuntimeException("无法解析类： " + parameterType.getTypePatch());
 
     }
+
+    public IClassDefine getClassDefine(){
+
+    }
+
 
     /**
      * 通过反射去获取对应的 class对象
@@ -58,8 +71,10 @@ public class ClassDetails {
         return classDefine.getInstantVars();
     }
 
-    public ValueObjectAssembleFactory getAssembleFactory() {
-        return classDefine.getAssembleFactory();
+    public IAssembleFactory getAssembleFactory() {
+        List<IAssembleFactory> assembleFactorys = new ArrayList<>();
+        assembleFactorys.add(classDefine.getAssembleFactory());
+        return new AssembleFactoryHolder(assembleFactorys);
     }
 
     public Map<String, Getter> getInstantGetters() {
@@ -68,14 +83,14 @@ public class ClassDetails {
 
 
     public static ClassDetails getClassElement(ParameterType parameterType) {
-        ClassDetails result = classElementCache.get(parameterType);
+        String key = parameterType.toString();
+        ClassDetails result = classElementCache.get(key);
         if (result != null) {
             return result;
         }
         result = new ClassDetails(parameterType);
-        classElementCache.put(parameterType, result);
+        classElementCache.put(key, result);
         return result;
     }
-
 
 }

@@ -20,7 +20,7 @@ public interface IAssembleFactory {
      *
      * @return
      */
-    AssembleResult generate();
+    AssembleResult generate(AssembleResult lastAssembleResult);
 
     /**
      * 清空整个工厂
