@@ -2,7 +2,7 @@ package com.chy.lamia.visitor;
 
 
 import com.chy.lamia.annotation.MapMember;
-import com.chy.lamia.element.assemble.IAssembleFactory;
+import com.chy.lamia.element.assemble.AssembleFactoryHolder;
 import com.chy.lamia.element.ClassDetails;
 import com.chy.lamia.element.LooseBlock;
 import com.chy.lamia.element.LooseBlockVisitor;
@@ -65,7 +65,7 @@ public class MethodUpdateVisitor extends TreeTranslator {
         //解析返回值 的类结构
         ClassDetails returnClassDetails = ClassDetails.getClassElement(returnParameterType);
         //根据不同的策略获取 返回值的生成工厂
-        IAssembleFactory assembleFactory = returnClassDetails.getAssembleFactory();
+        AssembleFactoryHolder assembleFactory = returnClassDetails.getAssembleFactory();
         //获取方法中所有的入参
         SunList<Symbol.VarSymbol> paramList = new SunList<>(methodSymbolDecl.sym.getParameters());
         //解析原来方法中的方法体,计算出 所有的通路
@@ -75,7 +75,7 @@ public class MethodUpdateVisitor extends TreeTranslator {
         }
     }
 
-    private void assemble(LooseBlock looseBlock, SunList<Symbol.VarSymbol> paramList, IAssembleFactory assembleFactory) {
+    private void assemble(LooseBlock looseBlock, SunList<Symbol.VarSymbol> paramList, AssembleFactoryHolder assembleFactory) {
         //先清空
         assembleFactory.clear();
         //先把方法入参当做材料添加进入 工厂中
@@ -92,10 +92,10 @@ public class MethodUpdateVisitor extends TreeTranslator {
      * @param looseBlock
      * @param assembleFactory
      */
-    private void modifyMethodBody(LooseBlock looseBlock, IAssembleFactory assembleFactory) {
+    private void modifyMethodBody(LooseBlock looseBlock, AssembleFactoryHolder assembleFactory) {
 
         //获取 结果对象的 生成的语句
-        AssembleResult assembleResult = assembleFactory.generate(null);
+        AssembleResult assembleResult = assembleFactory.generate();
 
         //要去修改之前的方法,要先把之前的方法给拿出来
         JCTree.JCBlock oldBlock = looseBlock.getBlock();
@@ -150,7 +150,7 @@ public class MethodUpdateVisitor extends TreeTranslator {
         return looseBlocks;
     }
 
-    private void addMaterialsFromMethodBodyVar(List<ParameterType> methodBodyVars, IAssembleFactory assembleFactory) {
+    private void addMaterialsFromMethodBodyVar(List<ParameterType> methodBodyVars, AssembleFactoryHolder assembleFactory) {
         if (methodBodyVars == null || methodBodyVars.size() == 0) {
             return;
         }
@@ -159,7 +159,7 @@ public class MethodUpdateVisitor extends TreeTranslator {
         });
     }
 
-    private void addMaterialsFromParameters(SunList<Symbol.VarSymbol> params, IAssembleFactory assembleFactory) {
+    private void addMaterialsFromParameters(SunList<Symbol.VarSymbol> params, AssembleFactoryHolder assembleFactory) {
         if (params == null || params.size() == 0) {
             return;
         }
@@ -206,7 +206,7 @@ public class MethodUpdateVisitor extends TreeTranslator {
      * @param jcUtils
      */
     private void anatomyClassToAssembleFactory(ParameterType type, String instanceName,
-                                               IAssembleFactory assembleFactory, JCUtils jcUtils,
+                                               AssembleFactoryHolder assembleFactory, JCUtils jcUtils,
                                                Integer priority) {
         //先把 类型转成 ClassElement 方便获取 getter setter 等一系列的方法
         ClassDetails classDetails = ClassDetails.getClassElement(type);

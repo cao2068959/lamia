@@ -1,9 +1,11 @@
 package com.chy.lamia.element.assemble.valobj;
 
+import com.chy.lamia.element.assemble.AssembleFactoryChain;
 import com.chy.lamia.element.assemble.AssembleResult;
 import com.chy.lamia.element.assemble.IAssembleFactory;
 import com.chy.lamia.entity.*;
 import com.chy.lamia.enums.MatchReuslt;
+import com.chy.lamia.utils.CommonUtils;
 import com.chy.lamia.utils.JCUtils;
 import com.sun.tools.javac.tree.JCTree;
 
@@ -36,7 +38,8 @@ public class ValueObjectAssembleFactory implements IAssembleFactory {
     }
 
     @Override
-    public void addMaterial(ParameterType parameterType, JCTree.JCExpression expression, Integer priority) {
+    public void addMaterial(ParameterType parameterType, JCTree.JCExpression expression,
+                            Integer priority, AssembleFactoryChain chian) {
         for (Candidate candidate : allCandidate) {
             MatchReuslt matchReuslt = candidate.match(parameterType, priority);
             //类型和名称都相同了 说明 这个表达式将是构成的一部分，把他存起来
@@ -44,6 +47,7 @@ public class ValueObjectAssembleFactory implements IAssembleFactory {
                 updateExpressionMap(parameterType.getName(), expression, priority);
             }
         }
+        chian.addMaterial(parameterType, expression, priority, chian);
     }
 
     private void updateExpressionMap(String name, JCTree.JCExpression expression, Integer priority) {
@@ -59,13 +63,15 @@ public class ValueObjectAssembleFactory implements IAssembleFactory {
     }
 
     @Override
-    public AssembleResult generate(AssembleResult assembleResult) {
+    public AssembleResult generate(AssembleFactoryChain chain) {
+        chain.generate(chain);
         Candidate candidate = choose();
         if (candidate == null) {
             throw new RuntimeException("类 ： [" + originalClassPath + "] 构造器参数不够");
         }
         return doGenerateTree(candidate);
     }
+
 
     private AssembleResult doGenerateTree(Candidate candidate) {
         List<JCTree.JCStatement> statements = new ArrayList<>();
@@ -92,9 +98,10 @@ public class ValueObjectAssembleFactory implements IAssembleFactory {
             String name = param.getName();
             paramsExpression.add(candidate.createdWapperExpression(name, expressionMap.get(name).getExpression()));
         });
-        String varName = "result";
+        String varName = CommonUtils.generateVarName("result");
+
         JCTree.JCNewClass jcNewClass = jcUtils.newClass(originalClassPath, paramsExpression);
-        JCTree.JCVariableDecl newVar = jcUtils.createVar("result", originalClassPath, jcNewClass);
+        JCTree.JCVariableDecl newVar = jcUtils.createVar(varName, originalClassPath, jcNewClass);
         result.add(newVar);
         return varName;
     }
@@ -113,10 +120,11 @@ public class ValueObjectAssembleFactory implements IAssembleFactory {
     }
 
     @Override
-    public void clear() {
+    public void clear(AssembleFactoryChain chain) {
         complete = false;
         expressionMap = new HashMap<>();
         allCandidate.forEach(Candidate::clear);
+        chain.clear(chain);
     }
 
     @Override

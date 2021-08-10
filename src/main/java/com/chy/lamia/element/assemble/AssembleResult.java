@@ -14,6 +14,7 @@ public class AssembleResult {
      */
     String newInstantName;
 
+
     public AssembleResult(List<JCTree.JCStatement> statements, String newInstantName) {
         this.statements = statements;
         this.newInstantName = newInstantName;

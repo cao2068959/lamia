@@ -1,5 +1,7 @@
 package com.chy.lamia.utils;
 
+import com.chy.lamia.entity.ClassType;
+import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.entity.PriorityExpression;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Symbol;
@@ -191,6 +193,14 @@ public class JCUtils {
      */
     public JCTree.JCVariableDecl createVar(String varName, String varClass, JCTree.JCExpression varValue) {
         return createVar(varName, varClass, varValue, Flags.PARAMETER);
+    }
+
+
+    public JCTree.JCEnhancedForLoop createForeachLoop(ParameterType forVarType, String collectionVar, java.util.List<JCTree.JCStatement> body) {
+        String forVarName = CommonUtils.generateVarName("forVar");
+        JCTree.JCVariableDecl forVar = createVar(forVarName, forVarType.getTypePatch(), null);
+        JCTree.JCBlock block = createBlock(body);
+        return treeMaker.ForeachLoop(forVar, memberAccess(collectionVar), block);
     }
 
 

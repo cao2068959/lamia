@@ -6,54 +6,55 @@ import com.sun.tools.javac.tree.JCTree;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-public class AssembleFactoryHolder implements IAssembleFactory {
+public class AssembleFactoryHolder {
 
     /**
      * 所有需要执行assembleFactory的列表, 排在前面的是最外层的 assembleFactory
      */
     List<IAssembleFactory> assembleFactories = new ArrayList<>();
+    AssembleFactoryChain assembleFactoryChain;
+
 
     public AssembleFactoryHolder(List<IAssembleFactory> assembleFactories) {
         this.assembleFactories = assembleFactories;
+        this.assembleFactoryChain = new AssembleFactoryChain(this);
     }
 
-    @Override
     public void addMaterial(ParameterType parameterType, JCTree.JCExpression expression, Integer priority) {
-        foreachBackward((assembleFactory, Void) -> {
-            assembleFactory.addMaterial(parameterType, expression, priority);
-            return null;
-        });
+        assembleFactoryChain.resetIndex();
+        assembleFactoryChain.addMaterial(parameterType, expression, priority, assembleFactoryChain);
     }
 
-    @Override
-    public AssembleResult generate(AssembleResult assembleResult) {
-        return foreachBackward(((assembleFactory, lastResult) -> {
-            AssembleResult generate = assembleFactory.generate(lastResult);
-            return generate;
-        }));
+    public AssembleResult generate() {
+        assembleFactoryChain.resetIndex();
+        return assembleFactoryChain.generate(assembleFactoryChain);
     }
 
-    private <T> T foreachBackward(Function<IAssembleFactory, T, T> consumer) {
-        T result = null;
-        for (int i = assembleFactories.size(); i > 0; i--) {
-            IAssembleFactory assembleFactory = assembleFactories.get(i - 1);
-            result = consumer.apply(assembleFactory, result);
-        }
-        return result;
-    }
 
-    @Override
+
     public void clear() {
-        foreachBackward((assembleFactory, Void) -> {
-            assembleFactory.clear();
-            return null;
-        });
+        assembleFactoryChain.resetIndex();
+         assembleFactoryChain.clear(assembleFactoryChain);
     }
 
-    public void addAssembleFactorie(IAssembleFactory iAssembleFactory){
+    public void addAssembleFactorie(IAssembleFactory iAssembleFactory) {
         assembleFactories.add(iAssembleFactory);
     }
+
+    protected Optional<IAssembleFactory> getIAssembleFactory(int index) {
+        if (getIAssembleFactoryLen() <= index) {
+            return Optional.empty();
+        }
+        return Optional.of(assembleFactories.get(index));
+    }
+
+    protected int getIAssembleFactoryLen() {
+        return assembleFactories.size();
+
+    }
+
 
     interface Function<A, B, C> {
         C apply(A a, B b);

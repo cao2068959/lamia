@@ -13,18 +13,17 @@ public interface IAssembleFactory {
      * @param expression
      * @param priority
      */
-    void addMaterial(ParameterType parameterType, JCTree.JCExpression expression, Integer priority);
+    void addMaterial(ParameterType parameterType, JCTree.JCExpression expression, Integer priority, AssembleFactoryChain chain);
 
     /**
      * 生成结果
      *
      * @return
      */
-    AssembleResult generate(AssembleResult lastAssembleResult);
+    AssembleResult generate(AssembleFactoryChain chain);
 
     /**
      * 清空整个工厂
-     *
      */
-    void clear();
+    void clear(AssembleFactoryChain chain);
 }

@@ -47,10 +47,6 @@ public class ClassDetails {
 
     }
 
-    public IClassDefine getClassDefine(){
-
-    }
-
 
     /**
      * 通过反射去获取对应的 class对象
@@ -66,16 +62,18 @@ public class ClassDetails {
         return null;
     }
 
-
     public Map<String, Var> getInstantVarName() {
         return classDefine.getInstantVars();
     }
 
-    public IAssembleFactory getAssembleFactory() {
+    public AssembleFactoryHolder getAssembleFactory() {
         List<IAssembleFactory> assembleFactorys = new ArrayList<>();
         assembleFactorys.add(classDefine.getAssembleFactory());
         return new AssembleFactoryHolder(assembleFactorys);
     }
+
+
+
 
     public Map<String, Getter> getInstantGetters() {
         return classDefine.getInstantGetters();
