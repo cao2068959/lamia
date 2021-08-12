@@ -2,6 +2,7 @@ package com.chy.lamia.element;
 
 import com.chy.lamia.element.assemble.AssembleFactoryHolder;
 import com.chy.lamia.element.assemble.IAssembleFactory;
+import com.chy.lamia.element.assemble.list.ListAssembleFactory;
 import com.chy.lamia.entity.Getter;
 import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.entity.Var;
@@ -68,11 +69,21 @@ public class ClassDetails {
 
     public AssembleFactoryHolder getAssembleFactory() {
         List<IAssembleFactory> assembleFactorys = new ArrayList<>();
-        assembleFactorys.add(classDefine.getAssembleFactory());
+
+        ClassDetails baseClassDetails = this;
+        //是否需要 list处理
+        if (generic.size() == 1 && ListAssembleFactory.isNeedDeal(parameterType)) {
+            assembleFactorys.add(new ListAssembleFactory(baseClassDetails.parameterType));
+            baseClassDetails = generic.get(0);
+        }
+
+        assembleFactorys.add(baseClassDetails.getBaseAssembleFactory());
         return new AssembleFactoryHolder(assembleFactorys);
     }
 
-
+    private IAssembleFactory getBaseAssembleFactory() {
+        return classDefine.getAssembleFactory();
+    }
 
 
     public Map<String, Getter> getInstantGetters() {

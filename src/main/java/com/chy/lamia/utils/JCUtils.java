@@ -15,6 +15,7 @@ import com.sun.tools.javac.util.List;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.function.Function;
 
 
 public class JCUtils {
@@ -196,12 +197,39 @@ public class JCUtils {
     }
 
 
-    public JCTree.JCEnhancedForLoop createForeachLoop(ParameterType forVarType, String collectionVar, java.util.List<JCTree.JCStatement> body) {
+    /**
+     * 生成 增强for循环
+     *
+     * @param forVarType
+     * @param collectionVar
+     * @param blockFun
+     * @return
+     */
+    public JCTree.JCEnhancedForLoop createForeachLoop(ParameterType forVarType, String collectionVar,
+                                                      Function<JCTree.JCVariableDecl, java.util.List<JCTree.JCStatement>> blockFun) {
         String forVarName = CommonUtils.generateVarName("forVar");
         JCTree.JCVariableDecl forVar = createVar(forVarName, forVarType.getTypePatch(), null);
-        JCTree.JCBlock block = createBlock(body);
+        JCTree.JCBlock block = createBlock(blockFun.apply(forVar));
         return treeMaker.ForeachLoop(forVar, memberAccess(collectionVar), block);
     }
+
+    /**
+     * 生成 增强for循环
+     *
+     * @param collectionExpression 需要循环的变量的表达式
+     * @param itemType             需要循环的变量的类型
+     * @param itemName             每一个 item对应的名称
+     * @param statements
+     * @return
+     */
+    public JCTree.JCEnhancedForLoop createForeachLoop(JCTree.JCExpression collectionExpression, ParameterType itemType,
+                                                      String itemName, java.util.List<JCTree.JCStatement> statements) {
+
+        JCTree.JCVariableDecl forVar = createVar(itemName, itemType.getTypePatch(), null);
+        JCTree.JCBlock block = createBlock(statements);
+        return treeMaker.ForeachLoop(forVar, collectionExpression, block);
+    }
+
 
 
     private <T> List<T> toSunList(java.util.List<T> list) {

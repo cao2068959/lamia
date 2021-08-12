@@ -3,6 +3,7 @@ package com.chy.lamia.entity;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class ClassType {
 
@@ -20,6 +21,7 @@ public class ClassType {
     }
 
     final String typePath;
+    private Optional<Class<?>> reflectClass;
 
     public ClassType(String typePath) {
         typePath = typePathPurify(typePath);
@@ -66,5 +68,22 @@ public class ClassType {
     public String getTypePath() {
         return typePath;
     }
+
+    public Optional<Class<?>> getReflectClass() {
+        if (reflectClass == null) {
+            reflectClass = tryGenReflectClass();
+        }
+        return reflectClass;
+    }
+
+    private Optional<Class<?>> tryGenReflectClass() {
+        try {
+            Optional.of(Class.forName(typePath));
+        } catch (ClassNotFoundException e) {
+            return Optional.empty();
+        }
+        return Optional.empty();
+    }
+
 
 }

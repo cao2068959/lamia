@@ -13,6 +13,7 @@ import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.entity.SunList;
 import com.chy.lamia.processor.marked.MarkedMethods;
 import com.chy.lamia.utils.JCUtils;
+import com.chy.lamia.utils.ParameterTypeUtils;
 import com.chy.lamia.utils.SymbolUtils;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
@@ -208,11 +209,8 @@ public class MethodUpdateVisitor extends TreeTranslator {
     private void anatomyClassToAssembleFactory(ParameterType type, String instanceName,
                                                AssembleFactoryHolder assembleFactory, JCUtils jcUtils,
                                                Integer priority) {
-        //先把 类型转成 ClassElement 方便获取 getter setter 等一系列的方法
-        ClassDetails classDetails = ClassDetails.getClassElement(type);
-        //获取这个类里面所有的 getter 方法
-        Map<String, Getter> getters = classDetails.getInstantGetters();
-        getters.forEach((k, v) -> {
+
+        ParameterTypeUtils.parameterGetterSpread(type, (k, v) -> {
             //生成 a.getXX() 的表达式
             JCTree.JCExpressionStatement getterExpression = jcUtils.execMethod(instanceName, v.getSimpleName(),
                     new LinkedList<>());
@@ -220,6 +218,7 @@ public class MethodUpdateVisitor extends TreeTranslator {
             //将表达式放入 合成工厂去匹配
             assembleFactory.addMaterial(parameterType, getterExpression.expr, priority);
         });
+
     }
 
 

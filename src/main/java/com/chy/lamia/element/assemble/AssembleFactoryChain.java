@@ -16,6 +16,12 @@ public class AssembleFactoryChain implements IAssembleFactory {
         this.holder = holder;
     }
 
+
+    public AssembleFactoryChain(AssembleFactoryHolder holder, int index) {
+        this.holder = holder;
+        this.index = index;
+    }
+
     @Override
     public void addMaterial(ParameterType parameterType, JCTree.JCExpression expression, Integer priority, AssembleFactoryChain chain) {
         Optional<IAssembleFactory> iAssembleFactory = holder.getIAssembleFactory(index);
@@ -23,12 +29,13 @@ public class AssembleFactoryChain implements IAssembleFactory {
         iAssembleFactory.ifPresent(assembleFactory -> assembleFactory.addMaterial(parameterType, expression, priority, this));
     }
 
+
     @Override
     public AssembleResult generate(AssembleFactoryChain chain) {
 
         Optional<IAssembleFactory> iAssembleFactory = holder.getIAssembleFactory(index);
         index++;
-        if (iAssembleFactory.isPresent()){
+        if (iAssembleFactory.isPresent()) {
             return iAssembleFactory.get().generate(this);
         }
         return null;
@@ -48,5 +55,7 @@ public class AssembleFactoryChain implements IAssembleFactory {
         index = 0;
     }
 
-
+    public AssembleFactoryChain mirror() {
+        return new AssembleFactoryChain(holder, index);
+    }
 }

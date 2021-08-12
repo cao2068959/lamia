@@ -5,6 +5,7 @@ import com.sun.tools.javac.code.Type;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ParameterType {
 
@@ -79,6 +80,10 @@ public class ParameterType {
 
     }
 
+    public Optional<Class<?>> getTypeReflectClass() {
+        return type.getReflectClass();
+    }
+
     public String getName() {
         return name;
     }
@@ -132,8 +137,6 @@ public class ParameterType {
         }
         return result.toString();
     }
-
-
 
 
 }
