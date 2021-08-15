@@ -85,4 +85,8 @@ public class AssembleMaterial {
     public void setMapMember(Optional<MapMember> mapMember) {
         this.mapMember = mapMember;
     }
+
+    public AssembleMaterialSource getSource() {
+        return source;
+    }
 }

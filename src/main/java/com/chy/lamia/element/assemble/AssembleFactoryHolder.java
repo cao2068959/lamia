@@ -1,10 +1,14 @@
 package com.chy.lamia.element.assemble;
 
 
+import com.chy.lamia.annotation.MapMember;
 import com.chy.lamia.entity.ParameterType;
+import com.chy.lamia.utils.JCUtils;
+import com.chy.lamia.utils.ParameterTypeUtils;
 import com.sun.tools.javac.tree.JCTree;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,9 +27,52 @@ public class AssembleFactoryHolder {
     }
 
     public void addMaterial(AssembleMaterial material) {
+        boolean spread = isSpread(material);
+
+
+    }
+
+    private boolean isSpread(AssembleMaterial material){
+        return material.getMapMember().map(MapMember::spread)
+                .orElseGet(()->{
+                    if(material.getSource() == AssembleMaterialSource.PARAMETER){
+                        return true;
+                    }
+                    return false;
+                });
+    }
+
+
+    public void doAddMaterial(AssembleMaterial material) {
         assembleFactoryChain.resetIndex();
         assembleFactoryChain.addMaterial(material, assembleFactoryChain);
     }
+
+    /**
+     * 扩散这个类中的所有属性, 只会扩散拥有getter的字段
+     *
+     * @param assembleMaterial
+     * @param instanceName
+     * @param assembleFactory
+     * @param jcUtils
+     */
+    private void doSpread(AssembleMaterial assembleMaterial, String instanceName,
+                                               AssembleFactoryHolder assembleFactory, JCUtils jcUtils,
+                                               Integer priority) {
+
+        ParameterTypeUtils.parameterGetterSpread(assembleMaterial.getParameterType(), (k, v) -> {
+            //生成 a.getXX() 的表达式
+            JCTree.JCExpressionStatement getterExpression = jcUtils.execMethod(instanceName, v.getSimpleName(),
+                    new LinkedList<>());
+            ParameterType parameterType = new ParameterType(k, v.getParameterType());
+            //将表达式放入 合成工厂去匹配
+            AssembleMaterial childrenAssembleMaterial = new AssembleMaterial(parameterType, getterExpression.expr, priority);
+            assembleMaterial.setParent(assembleMaterial);
+            assembleFactory.addMaterial(childrenAssembleMaterial);
+        });
+
+    }
+
 
     public AssembleResult generate() {
         assembleFactoryChain.resetIndex();

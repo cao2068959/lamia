@@ -22,6 +22,7 @@ import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.TypeTag;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeTranslator;
+import com.sun.tools.javac.util.Pair;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -153,13 +154,17 @@ public class MethodUpdateVisitor extends TreeTranslator {
         return looseBlocks;
     }
 
-    private void addMaterialsFromMethodBodyVar(List<ParameterType> methodBodyVars, AssembleFactoryHolder assembleFactory) {
+    private void addMaterialsFromMethodBodyVar(List<Pair<ParameterType, MapMember>> methodBodyVars,
+                                               AssembleFactoryHolder assembleFactory) {
         if (methodBodyVars == null || methodBodyVars.size() == 0) {
             return;
         }
-        methodBodyVars.forEach(methodBodyVar -> {
+        methodBodyVars.forEach(methodBodyVarPair -> {
+            ParameterType methodBodyVar = methodBodyVarPair.fst;
+            MapMember mapMember = methodBodyVarPair.snd;
             AssembleMaterial assembleMaterial = new AssembleMaterial(methodBodyVar,
                     jcUtils.memberAccess(methodBodyVar.getFieldName()), AssembleMaterialSource.METHOD_VAR);
+            assembleMaterial.setMapMember(mapMember);
             assembleFactory.addMaterial(assembleMaterial);
         });
     }
@@ -205,30 +210,7 @@ public class MethodUpdateVisitor extends TreeTranslator {
     }
 
 
-    /**
-     * 解析类里面所有的 getter方法，把这些 getter方法放入 AssembleFactory 去匹配
-     *
-     * @param assembleMaterial
-     * @param instanceName
-     * @param assembleFactory
-     * @param jcUtils
-     */
-    private void anatomyClassToAssembleFactory(AssembleMaterial assembleMaterial, String instanceName,
-                                               AssembleFactoryHolder assembleFactory, JCUtils jcUtils,
-                                               Integer priority) {
 
-        ParameterTypeUtils.parameterGetterSpread(assembleMaterial.getParameterType(), (k, v) -> {
-            //生成 a.getXX() 的表达式
-            JCTree.JCExpressionStatement getterExpression = jcUtils.execMethod(instanceName, v.getSimpleName(),
-                    new LinkedList<>());
-            ParameterType parameterType = new ParameterType(k, v.getParameterType());
-            //将表达式放入 合成工厂去匹配
-            AssembleMaterial childrenAssembleMaterial = new AssembleMaterial(parameterType, getterExpression.expr, priority);
-            assembleMaterial.setParent(assembleMaterial);
-            assembleFactory.addMaterial(childrenAssembleMaterial);
-        });
-
-    }
 
 
 }

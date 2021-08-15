@@ -13,6 +13,7 @@ import com.sun.tools.javac.code.TypeMetadata;
 import com.sun.tools.javac.comp.Annotate;
 import com.sun.tools.javac.model.AnnotationProxyMaker;
 import com.sun.tools.javac.tree.JCTree;
+import com.sun.tools.javac.util.Pair;
 import com.sun.tools.javac.util.StringUtils;
 import sun.reflect.annotation.AnnotationParser;
 
@@ -23,7 +24,7 @@ import java.util.*;
 public class LooseBlockVisitor extends AbstractBlockVisitor {
 
     private boolean haveReturn = false;
-    private final List<ParameterType> vars;
+    private final List<Pair<ParameterType, MapMember>> vars;
     private final List<LooseBlock> result;
 
     public LooseBlockVisitor() {
@@ -31,7 +32,7 @@ public class LooseBlockVisitor extends AbstractBlockVisitor {
         result = new LinkedList<>();
     }
 
-    public LooseBlockVisitor(List<ParameterType> vars, List<LooseBlock> result) {
+    public LooseBlockVisitor(List<Pair<ParameterType, MapMember>> vars, List<LooseBlock> result) {
         this.vars = new LinkedList<>(vars);
         this.result = result;
     }
@@ -84,13 +85,8 @@ public class LooseBlockVisitor extends AbstractBlockVisitor {
         Type type = JCUtils.instance.attribType(classTree, statement);
         ParameterType parameterType = new ParameterType(statement.getName().toString(), type.toString());
         MapMember mapMember = mapMemberOptional.get();
-        String mapName = mapMember.value();
-        if (!"".equals(mapName)) {
-            parameterType.setName(mapName);
-        }
-
         parameterType.setGeneric(SymbolUtils.getGeneric(type));
-        vars.add(parameterType);
+        vars.add(Pair.of(parameterType, mapMember));
     }
 
     @Override
@@ -98,7 +94,7 @@ public class LooseBlockVisitor extends AbstractBlockVisitor {
         haveReturn = true;
     }
 
-    public List<ParameterType> getVars() {
+    public List<Pair<ParameterType, MapMember>> getVars() {
         return vars;
     }
 
