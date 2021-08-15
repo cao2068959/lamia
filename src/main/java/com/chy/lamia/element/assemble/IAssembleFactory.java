@@ -9,11 +9,10 @@ public interface IAssembleFactory {
     /**
      * 添加原料
      *
-     * @param parameterType
-     * @param expression
-     * @param priority
+     * @param assembleMaterial
+     * @param chain
      */
-    void addMaterial(ParameterType parameterType, JCTree.JCExpression expression, Integer priority, AssembleFactoryChain chain);
+    void addMaterial(AssembleMaterial assembleMaterial, AssembleFactoryChain chain);
 
     /**
      * 生成结果

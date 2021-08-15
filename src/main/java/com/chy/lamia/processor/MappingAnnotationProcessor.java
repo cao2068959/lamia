@@ -78,6 +78,7 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
     }
 
 
+
     /**
      * 收集项目里所有类的 Element 对象
      * 同时把标注了 @Mapping 的方法 给存储下来
@@ -92,6 +93,10 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
             String key = methodSymbol.owner.toString();
             markedContext.put(key, methodSymbol);
         }
+    }
+
+    public static void main(String[] args) {
+        System.out.println("111");
     }
 
 }

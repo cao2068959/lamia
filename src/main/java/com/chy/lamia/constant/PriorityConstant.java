@@ -9,4 +9,6 @@ public class PriorityConstant {
 
     public static final int PARAMETERS_IN_VAR = 10;
 
+    public static final int OTHER = 1;
+
 }

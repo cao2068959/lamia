@@ -3,6 +3,7 @@ package com.chy.lamia.element;
 import com.chy.lamia.element.assemble.AssembleFactoryHolder;
 import com.chy.lamia.element.assemble.IAssembleFactory;
 import com.chy.lamia.element.assemble.list.ListAssembleFactory;
+import com.chy.lamia.element.assemble.map.MapAssembleFactory;
 import com.chy.lamia.entity.Getter;
 import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.entity.Var;
@@ -82,9 +83,12 @@ public class ClassDetails {
     }
 
     private IAssembleFactory getBaseAssembleFactory() {
+        //返回值是一个 map, 那么就使用map的组合工厂处理
+        if (MapAssembleFactory.isNeedDeal(parameterType)) {
+            return new MapAssembleFactory(parameterType);
+        }
         return classDefine.getAssembleFactory();
     }
-
 
     public Map<String, Getter> getInstantGetters() {
         return classDefine.getInstantGetters();

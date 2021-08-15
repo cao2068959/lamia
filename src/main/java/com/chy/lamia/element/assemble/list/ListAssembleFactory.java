@@ -1,8 +1,6 @@
 package com.chy.lamia.element.assemble.list;
 
-import com.chy.lamia.element.assemble.AssembleFactoryChain;
-import com.chy.lamia.element.assemble.AssembleResult;
-import com.chy.lamia.element.assemble.IAssembleFactory;
+import com.chy.lamia.element.assemble.*;
 import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.utils.CommonUtils;
 import com.chy.lamia.utils.JCUtils;
@@ -30,15 +28,17 @@ public class ListAssembleFactory implements IAssembleFactory {
     }
 
     @Override
-    public void addMaterial(ParameterType parameterType, JCTree.JCExpression expression,
-                            Integer priority, AssembleFactoryChain chain) {
+    public void addMaterial(AssembleMaterial material, AssembleFactoryChain chain) {
 
-        doAddMaterial(parameterType, expression, priority, chain);
-        chain.addMaterial(parameterType, expression, priority, chain);
+        doAddMaterial(material, chain);
+        chain.addMaterial(material, chain);
     }
 
-    public void doAddMaterial(ParameterType parameterType, JCTree.JCExpression expression,
-                              Integer priority, AssembleFactoryChain chain) {
+    public void doAddMaterial(AssembleMaterial material, AssembleFactoryChain chain) {
+        ParameterType parameterType = material.getParameterType();
+        JCTree.JCExpression expression = material.getExpression();
+        Integer priority = material.getPriority();
+
 
         if (!isNeedDeal(parameterType)) {
             return;
@@ -50,18 +50,19 @@ public class ListAssembleFactory implements IAssembleFactory {
         }
         ParameterType genericType = generic.get(0);
 
+
         String iterableVar = CommonUtils.generateVarName("iterable");
         //把list中的泛型中的类型的所有属性给塞入其他的组装工厂
         ParameterTypeUtils.parameterGetterSpread(genericType, (methodName, getter) -> {
             AssembleFactoryChain mirrorChain = chain.mirror();
             JCTree.JCExpressionStatement jcExpressionStatement = jcUtils.execMethod(iterableVar,
                     getter.getSimpleName(), new LinkedList<>());
-
-            mirrorChain.addMaterial(new ParameterType(methodName, getter.getParameterType()),
-                    jcExpressionStatement.expr, priority, mirrorChain);
+            AssembleMaterial assembleMaterial = new AssembleMaterial(new ParameterType(methodName, getter.getParameterType()),
+                    jcExpressionStatement.expr, AssembleMaterialSource.OTHER);
+            mirrorChain.addMaterial(assembleMaterial, mirrorChain);
         });
-        ListMaterial material = new ListMaterial(parameterType, genericType, expression, iterableVar);
-        allMaterial.add(material);
+        ListMaterial listMaterial = new ListMaterial(parameterType, genericType, expression, iterableVar);
+        allMaterial.add(listMaterial);
     }
 
 

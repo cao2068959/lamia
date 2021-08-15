@@ -23,10 +23,10 @@ public class AssembleFactoryChain implements IAssembleFactory {
     }
 
     @Override
-    public void addMaterial(ParameterType parameterType, JCTree.JCExpression expression, Integer priority, AssembleFactoryChain chain) {
+    public void addMaterial(AssembleMaterial assembleMaterial, AssembleFactoryChain chain) {
         Optional<IAssembleFactory> iAssembleFactory = holder.getIAssembleFactory(index);
         index++;
-        iAssembleFactory.ifPresent(assembleFactory -> assembleFactory.addMaterial(parameterType, expression, priority, this));
+        iAssembleFactory.ifPresent(assembleFactory -> assembleFactory.addMaterial(assembleMaterial, this));
     }
 
 

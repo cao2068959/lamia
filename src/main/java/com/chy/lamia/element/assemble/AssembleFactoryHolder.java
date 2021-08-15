@@ -22,9 +22,9 @@ public class AssembleFactoryHolder {
         this.assembleFactoryChain = new AssembleFactoryChain(this);
     }
 
-    public void addMaterial(ParameterType parameterType, JCTree.JCExpression expression, Integer priority) {
+    public void addMaterial(AssembleMaterial material) {
         assembleFactoryChain.resetIndex();
-        assembleFactoryChain.addMaterial(parameterType, expression, priority, assembleFactoryChain);
+        assembleFactoryChain.addMaterial(material, assembleFactoryChain);
     }
 
     public AssembleResult generate() {

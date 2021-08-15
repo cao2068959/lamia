@@ -1,6 +1,7 @@
 package com.chy.lamia.element.assemble.valobj;
 
 import com.chy.lamia.element.assemble.AssembleFactoryChain;
+import com.chy.lamia.element.assemble.AssembleMaterial;
 import com.chy.lamia.element.assemble.AssembleResult;
 import com.chy.lamia.element.assemble.IAssembleFactory;
 import com.chy.lamia.entity.*;
@@ -38,8 +39,10 @@ public class ValueObjectAssembleFactory implements IAssembleFactory {
     }
 
     @Override
-    public void addMaterial(ParameterType parameterType, JCTree.JCExpression expression,
-                            Integer priority, AssembleFactoryChain chian) {
+    public void addMaterial(AssembleMaterial assembleMaterial, AssembleFactoryChain chian) {
+        ParameterType parameterType = assembleMaterial.getParameterType();
+        JCTree.JCExpression expression = assembleMaterial.getExpression();
+        Integer priority = assembleMaterial.getPriority();
         for (Candidate candidate : allCandidate) {
             MatchReuslt matchReuslt = candidate.match(parameterType, priority);
             //类型和名称都相同了 说明 这个表达式将是构成的一部分，把他存起来
@@ -47,7 +50,7 @@ public class ValueObjectAssembleFactory implements IAssembleFactory {
                 updateExpressionMap(parameterType.getName(), expression, priority);
             }
         }
-        chian.addMaterial(parameterType, expression, priority, chian);
+        chian.addMaterial(assembleMaterial, chian);
     }
 
     private void updateExpressionMap(String name, JCTree.JCExpression expression, Integer priority) {

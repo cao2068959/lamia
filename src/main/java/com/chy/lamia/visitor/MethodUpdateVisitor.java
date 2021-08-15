@@ -7,6 +7,8 @@ import com.chy.lamia.element.ClassDetails;
 import com.chy.lamia.element.LooseBlock;
 import com.chy.lamia.element.LooseBlockVisitor;
 import com.chy.lamia.element.annotation.AnnotationProxyFactory;
+import com.chy.lamia.element.assemble.AssembleMaterial;
+import com.chy.lamia.element.assemble.AssembleMaterialSource;
 import com.chy.lamia.element.assemble.AssembleResult;
 import com.chy.lamia.entity.Getter;
 import com.chy.lamia.entity.ParameterType;
@@ -156,9 +158,12 @@ public class MethodUpdateVisitor extends TreeTranslator {
             return;
         }
         methodBodyVars.forEach(methodBodyVar -> {
-            assembleFactory.addMaterial(methodBodyVar, jcUtils.memberAccess(methodBodyVar.getFieldName()), METHOD_BODY_VAR);
+            AssembleMaterial assembleMaterial = new AssembleMaterial(methodBodyVar,
+                    jcUtils.memberAccess(methodBodyVar.getFieldName()), AssembleMaterialSource.METHOD_VAR);
+            assembleFactory.addMaterial(assembleMaterial);
         });
     }
+
 
     private void addMaterialsFromParameters(SunList<Symbol.VarSymbol> params, AssembleFactoryHolder assembleFactory) {
         if (params == null || params.size() == 0) {
@@ -175,7 +180,6 @@ public class MethodUpdateVisitor extends TreeTranslator {
                 }
                 return result;
             }).orElse(varSymbol.name.toString());
-            Boolean spread = mapMember.map(MapMember::spread).orElse(true);
 
             ParameterType parameterType = new ParameterType(name, paramsTypeClassPath);
             //把这个字段原本的字段名称塞进去
@@ -184,13 +188,16 @@ public class MethodUpdateVisitor extends TreeTranslator {
             List<ParameterType> generic = SymbolUtils.getGeneric(varSymbol);
             parameterType.setGeneric(generic);
             //先把 这个参数本身给塞入工厂
-            assembleFactory.addMaterial(parameterType, jcUtils.memberAccess(parameterType.getFieldName()), PARAMETERS);
+            AssembleMaterial assembleMaterial = new AssembleMaterial(parameterType,
+                    jcUtils.memberAccess(parameterType.getFieldName()), AssembleMaterialSource.PARAMETER);
+            assembleMaterial.setMapMember(mapMember);
+            assembleFactory.addMaterial(assembleMaterial);
 
 
             //如果需要扩展这个对象里的参数，那么就去解析这个class
             if (spread) {
                 //解析这个类里面所有的 getter setter 塞入构造工厂中
-                anatomyClassToAssembleFactory(parameterType, parameterType.getFieldName(),
+                anatomyClassToAssembleFactory(assembleMaterial, parameterType.getFieldName(),
                         assembleFactory, jcUtils, PARAMETERS_IN_VAR);
             }
 
@@ -201,22 +208,24 @@ public class MethodUpdateVisitor extends TreeTranslator {
     /**
      * 解析类里面所有的 getter方法，把这些 getter方法放入 AssembleFactory 去匹配
      *
-     * @param type
+     * @param assembleMaterial
      * @param instanceName
      * @param assembleFactory
      * @param jcUtils
      */
-    private void anatomyClassToAssembleFactory(ParameterType type, String instanceName,
+    private void anatomyClassToAssembleFactory(AssembleMaterial assembleMaterial, String instanceName,
                                                AssembleFactoryHolder assembleFactory, JCUtils jcUtils,
                                                Integer priority) {
 
-        ParameterTypeUtils.parameterGetterSpread(type, (k, v) -> {
+        ParameterTypeUtils.parameterGetterSpread(assembleMaterial.getParameterType(), (k, v) -> {
             //生成 a.getXX() 的表达式
             JCTree.JCExpressionStatement getterExpression = jcUtils.execMethod(instanceName, v.getSimpleName(),
                     new LinkedList<>());
             ParameterType parameterType = new ParameterType(k, v.getParameterType());
             //将表达式放入 合成工厂去匹配
-            assembleFactory.addMaterial(parameterType, getterExpression.expr, priority);
+            AssembleMaterial childrenAssembleMaterial = new AssembleMaterial(parameterType, getterExpression.expr, priority);
+            assembleMaterial.setParent(assembleMaterial);
+            assembleFactory.addMaterial(childrenAssembleMaterial);
         });
 
     }

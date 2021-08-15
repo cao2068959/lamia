@@ -87,6 +87,11 @@ public class JCUtils {
         return literal;
     }
 
+    public JCTree.JCExpression geStringExpression(String data) {
+        return treeMaker.Literal(data);
+    }
+
+
     /**
      * @param methodInstanceName 方法所在对象的名称 / 全路径的类名称
      * @param methodName         方法名称
