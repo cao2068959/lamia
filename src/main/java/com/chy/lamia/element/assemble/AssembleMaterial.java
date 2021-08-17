@@ -13,7 +13,7 @@ public class AssembleMaterial {
     ParameterType parameterType;
     JCTree.JCExpression expression;
     Integer priority;
-
+    //如果是一个对象中的字段,那么就会存在对应的 parent
     Optional<AssembleMaterial> parent = Optional.empty();
     Optional<MapMember> mapMember = Optional.empty();
     AssembleMaterialSource source;
@@ -21,7 +21,7 @@ public class AssembleMaterial {
     public AssembleMaterial(ParameterType parameterType, JCTree.JCExpression expression, AssembleMaterialSource source) {
         this.parameterType = parameterType;
         this.expression = expression;
-
+        this.source = source;
         if (source == AssembleMaterialSource.PARAMETER) {
             this.priority = PARAMETERS;
         } else if (source == AssembleMaterialSource.METHOD_VAR) {
@@ -37,6 +37,27 @@ public class AssembleMaterial {
         this.source = AssembleMaterialSource.OTHER;
         this.priority = OTHER;
     }
+
+    /**
+     * 获取最顶层的 parent
+     *
+     * @return
+     */
+    public Optional<AssembleMaterial> getTopParent() {
+        if (!parent.isPresent()) {
+            return parent;
+        }
+        Optional<AssembleMaterial> result = parent;
+        while (true) {
+            Optional<AssembleMaterial> newParent = result.get().getParent();
+            //到头了
+            if (!newParent.isPresent()) {
+                return result;
+            }
+            result = newParent;
+        }
+    }
+
 
     public ParameterType getParameterType() {
         return parameterType;
@@ -89,4 +110,6 @@ public class AssembleMaterial {
     public AssembleMaterialSource getSource() {
         return source;
     }
+
+
 }

@@ -1,8 +1,7 @@
 package com.chy.lamia.utils;
 
-import com.chy.lamia.entity.ClassType;
 import com.chy.lamia.entity.ParameterType;
-import com.chy.lamia.entity.PriorityExpression;
+import com.chy.lamia.visitor.RandomMethodCreateVisitor;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
@@ -12,9 +11,11 @@ import com.sun.tools.javac.model.JavacElements;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeMaker;
 import com.sun.tools.javac.util.List;
+import com.sun.tools.javac.util.Names;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Optional;
 import java.util.function.Function;
 
 
@@ -23,6 +24,7 @@ public class JCUtils {
     private final Attr attr;
     private final Enter enter;
     private final Annotate annotate;
+    private final Names names;
     TreeMaker treeMaker;
     JavacElements elementUtils;
     public static JCUtils instance;
@@ -31,12 +33,13 @@ public class JCUtils {
         return annotate;
     }
 
-    public JCUtils(TreeMaker treeMaker, JavacElements elementUtils, Annotate annotate, Attr attr, Enter enter) {
+    public JCUtils(TreeMaker treeMaker, JavacElements elementUtils, Annotate annotate, Attr attr, Enter enter, Names names) {
         this.treeMaker = treeMaker;
         this.elementUtils = elementUtils;
         this.attr = attr;
         this.enter = enter;
         this.annotate = annotate;
+        this.names = names;
     }
 
     /**
@@ -127,7 +130,12 @@ public class JCUtils {
     }
 
     public JCTree.JCReturn createReturn(String returnName) {
+
         return treeMaker.Return(treeMaker.Ident(elementUtils.getName(returnName)));
+    }
+
+    public JCTree.JCReturn createReturnToStringType(String returnContext) {
+        return treeMaker.Return(geStringExpression(returnContext));
     }
 
     public JCTree.JCExpressionStatement execMethod(String methodInstanceName, String methodName,
@@ -235,6 +243,32 @@ public class JCUtils {
         return treeMaker.ForeachLoop(forVar, collectionExpression, block);
     }
 
+
+    public Optional<String> genRandomMethod(String className) {
+        JCTree tree = elementUtils.getTree(elementUtils.getTypeElement(className));
+        if (tree == null) {
+            return Optional.empty();
+        }
+        RandomMethodCreateVisitor visitor = new RandomMethodCreateVisitor();
+        tree.accept(visitor);
+        return Optional.ofNullable(visitor.getRandomMethodName());
+    }
+
+    public JCTree.JCMethodDecl createMethod(String methodName, String returnType, java.util.List<JCTree.JCStatement> statements,
+                                            java.util.List<JCTree.JCVariableDecl> methodParam) {
+
+        JCTree.JCBlock block = treeMaker.Block(0, toSunList(statements));
+        // 生成返回对象
+        JCTree.JCExpression methodType;
+        if (returnType == null) {
+            methodType = treeMaker.Type(new Type.JCVoidType());
+        } else {
+            methodType = memberAccess(returnType);
+        }
+
+        return treeMaker.MethodDef(treeMaker.Modifiers(Flags.PUBLIC), names.fromString(methodName), methodType, List.nil(),
+                toSunList(methodParam), List.nil(), block, null);
+    }
 
 
     private <T> List<T> toSunList(java.util.List<T> list) {

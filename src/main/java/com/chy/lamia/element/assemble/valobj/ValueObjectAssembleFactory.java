@@ -8,6 +8,7 @@ import com.chy.lamia.entity.*;
 import com.chy.lamia.enums.MatchReuslt;
 import com.chy.lamia.utils.CommonUtils;
 import com.chy.lamia.utils.JCUtils;
+import com.chy.lamia.utils.Lists;
 import com.sun.tools.javac.tree.JCTree;
 
 import java.util.*;
@@ -19,7 +20,7 @@ import java.util.*;
  */
 public class ValueObjectAssembleFactory implements IAssembleFactory {
     List<Candidate> allCandidate = new ArrayList<>();
-    Map<String, PriorityExpression> expressionMap = new HashMap<>();
+    Map<String, AssembleMaterial> expressionMap = new HashMap<>();
     JCUtils jcUtils;
     private boolean complete = false;
     private String originalClassPath;
@@ -41,26 +42,25 @@ public class ValueObjectAssembleFactory implements IAssembleFactory {
     @Override
     public void addMaterial(AssembleMaterial assembleMaterial, AssembleFactoryChain chian) {
         ParameterType parameterType = assembleMaterial.getParameterType();
-        JCTree.JCExpression expression = assembleMaterial.getExpression();
         Integer priority = assembleMaterial.getPriority();
         for (Candidate candidate : allCandidate) {
             MatchReuslt matchReuslt = candidate.match(parameterType, priority);
             //类型和名称都相同了 说明 这个表达式将是构成的一部分，把他存起来
             if (matchReuslt == MatchReuslt.HIT) {
-                updateExpressionMap(parameterType.getName(), expression, priority);
+                updateExpressionMap(parameterType.getName(), assembleMaterial);
             }
         }
         chian.addMaterial(assembleMaterial, chian);
     }
 
-    private void updateExpressionMap(String name, JCTree.JCExpression expression, Integer priority) {
-        PriorityExpression priorityExpression = expressionMap.get(name);
-        if (priorityExpression == null) {
-            expressionMap.put(name, new PriorityExpression(expression, priority));
+    private void updateExpressionMap(String name, AssembleMaterial assembleMaterial) {
+        AssembleMaterial existAssembleMaterial = expressionMap.get(name);
+        if (existAssembleMaterial == null) {
+            expressionMap.put(name, assembleMaterial);
             return;
         }
-        if (priority > priorityExpression.getPriority()) {
-            expressionMap.put(name, new PriorityExpression(expression, priority));
+        if (assembleMaterial.getPriority() > existAssembleMaterial.getPriority()) {
+            expressionMap.put(name, assembleMaterial);
         }
         return;
     }
@@ -78,28 +78,65 @@ public class ValueObjectAssembleFactory implements IAssembleFactory {
 
     private AssembleResult doGenerateTree(Candidate candidate) {
         List<JCTree.JCStatement> statements = new ArrayList<>();
+        Map<String, AssembleMaterial> dependentVar = new HashMap<>();
+
         //先使用构造器生成要返回的 空 对象
-        String newInstant = createNewInstant(candidate, statements);
+        String newInstant = createNewInstant(candidate, statements, dependentVar);
         //生成对应的 set 方法
-        createSetter(candidate, newInstant, statements);
+        createSetter(candidate, newInstant, statements, dependentVar);
+
+        //给依赖的对象生成一个随机方法,然后和转化方法建立一个连接, 用来解决idea增量编译的问题
+        createFunicle(dependentVar, statements);
+
         AssembleResult result = new AssembleResult(statements, newInstant);
         return result;
     }
 
-    private void createSetter(Candidate candidate, String instantName, List<JCTree.JCStatement> result) {
+    private void createFunicle(Map<String, AssembleMaterial> dependentVar, List<JCTree.JCStatement> result) {
+        dependentVar.forEach((varName, assembleMaterial) -> {
+            Optional<String> randomMethodName = jcUtils.genRandomMethod(assembleMaterial.getParameterType().getTypePatch());
+            if (!randomMethodName.isPresent()) {
+                return;
+            }
+
+            //生成新方法的调用语句
+            JCTree.JCStatement jcExpressionStatement = jcUtils.execMethod(varName, randomMethodName.get(), Lists.of());
+            result.add(jcExpressionStatement);
+        });
+    }
+
+    private void createSetter(Candidate candidate, String instantName,
+                              List<JCTree.JCStatement> result, Map<String, AssembleMaterial> dependentVar) {
         candidate.getHitSetter().forEach((k, v) -> {
-            JCTree.JCExpression wapperExpression = candidate.createdWapperExpression(k, expressionMap.get(k).getExpression());
+            AssembleMaterial assembleMaterial = expressionMap.get(k);
+            gatherDependent(assembleMaterial, dependentVar);
+            JCTree.JCExpression wapperExpression = candidate.createdWapperExpression(k, assembleMaterial.getExpression());
             JCTree.JCExpressionStatement setterExpression = jcUtils.execMethod(instantName, v.getMethodName(), wapperExpression);
             result.add(setterExpression);
         });
     }
 
-    private String createNewInstant(Candidate candidate, List<JCTree.JCStatement> result) {
+    /**
+     * 收集依赖到了什么 对象
+     *
+     * @param assembleMaterial
+     */
+    private void gatherDependent(AssembleMaterial assembleMaterial, Map<String, AssembleMaterial> result) {
+        assembleMaterial.getTopParent().ifPresent(am -> {
+            result.put(am.getExpression().toString(), am);
+        });
+    }
+
+    private String createNewInstant(Candidate candidate, List<JCTree.JCStatement> result,
+                                    Map<String, AssembleMaterial> dependentVar) {
         Constructor constructor = candidate.getConstructor();
         List<JCTree.JCExpression> paramsExpression = new ArrayList<>();
         constructor.getParams().forEach(param -> {
             String name = param.getName();
-            paramsExpression.add(candidate.createdWapperExpression(name, expressionMap.get(name).getExpression()));
+            AssembleMaterial assembleMaterial = expressionMap.get(name);
+            gatherDependent(assembleMaterial, dependentVar);
+
+            paramsExpression.add(candidate.createdWapperExpression(name, assembleMaterial.getExpression()));
         });
         String varName = CommonUtils.generateVarName("result");
 

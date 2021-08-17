@@ -17,6 +17,7 @@ import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeMaker;
 import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.code.Symbol;
+import com.sun.tools.javac.util.Names;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -46,7 +47,8 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
         Attr attr = Attr.instance(context);
         Enter enter = Enter.instance(context);
         Annotate annotate = Annotate.instance(context);
-        jcUtils = new JCUtils(treeMaker, elementUtils, annotate, attr, enter);
+        Names names = Names.instance(context);
+        jcUtils = new JCUtils(treeMaker, elementUtils, annotate, attr, enter, names);
         JCUtils.instance = jcUtils;
     }
 
@@ -78,7 +80,6 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
     }
 
 
-
     /**
      * 收集项目里所有类的 Element 对象
      * 同时把标注了 @Mapping 的方法 给存储下来
@@ -93,10 +94,6 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
             String key = methodSymbol.owner.toString();
             markedContext.put(key, methodSymbol);
         }
-    }
-
-    public static void main(String[] args) {
-        System.out.println("111");
     }
 
 }

@@ -197,15 +197,6 @@ public class MethodUpdateVisitor extends TreeTranslator {
                     jcUtils.memberAccess(parameterType.getFieldName()), AssembleMaterialSource.PARAMETER);
             assembleMaterial.setMapMember(mapMember);
             assembleFactory.addMaterial(assembleMaterial);
-
-
-            //如果需要扩展这个对象里的参数，那么就去解析这个class
-            if (spread) {
-                //解析这个类里面所有的 getter setter 塞入构造工厂中
-                anatomyClassToAssembleFactory(assembleMaterial, parameterType.getFieldName(),
-                        assembleFactory, jcUtils, PARAMETERS_IN_VAR);
-            }
-
         });
     }
 
