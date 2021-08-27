@@ -199,9 +199,4 @@ public class MethodUpdateVisitor extends TreeTranslator {
             assembleFactory.addMaterial(assembleMaterial);
         });
     }
-
-
-
-
-
 }

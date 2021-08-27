@@ -10,7 +10,7 @@ public abstract class InstantMethodVisitor extends JCTree.Visitor {
     @Override
     public void visitMethodDef(JCTree.JCMethodDecl that) {
         //静态属性就不处理了
-        if(Flags.isStatic(that.sym)){
+        if (that.sym == null || Flags.isStatic(that.sym)) {
             return;
         }
         visitInstanttMethod(that);
@@ -24,13 +24,11 @@ public abstract class InstantMethodVisitor extends JCTree.Visitor {
     public void visitClassDef(JCTree.JCClassDecl that) {
         List<JCTree> members = that.getMembers();
         members.forEach(jcTree -> {
-            if(jcTree instanceof JCTree.JCMethodDecl){
+            if (jcTree instanceof JCTree.JCMethodDecl) {
                 jcTree.accept(this);
             }
         });
     }
-
-
 
 
 }

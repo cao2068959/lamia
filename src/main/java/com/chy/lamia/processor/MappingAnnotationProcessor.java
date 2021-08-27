@@ -24,7 +24,7 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
 import java.util.*;
 
-@SupportedAnnotationTypes("com.chy.lamia.annotation.Mapping")
+@SupportedAnnotationTypes({"com.chy.lamia.annotation.Mapping"})
 @SupportedSourceVersion(SourceVersion.RELEASE_11)
 public class MappingAnnotationProcessor extends AbstractProcessor {
 
@@ -55,6 +55,8 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         try {
+            Logger.log("执行--------->");
+
             if (roundEnv.processingOver()) {
                 handleSignMethod();
             } else {

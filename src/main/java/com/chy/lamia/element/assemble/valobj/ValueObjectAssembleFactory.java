@@ -4,6 +4,7 @@ import com.chy.lamia.element.assemble.AssembleFactoryChain;
 import com.chy.lamia.element.assemble.AssembleMaterial;
 import com.chy.lamia.element.assemble.AssembleResult;
 import com.chy.lamia.element.assemble.IAssembleFactory;
+import com.chy.lamia.element.funicle.FunicleFactory;
 import com.chy.lamia.entity.*;
 import com.chy.lamia.enums.MatchReuslt;
 import com.chy.lamia.utils.CommonUtils;
@@ -78,21 +79,16 @@ public class ValueObjectAssembleFactory implements IAssembleFactory {
 
     private AssembleResult doGenerateTree(Candidate candidate) {
         List<JCTree.JCStatement> statements = new ArrayList<>();
-        Map<String, AssembleMaterial> dependentVar = new HashMap<>();
+        Set<String> dependentClassPath = new HashSet<>();
 
         //先使用构造器生成要返回的 空 对象
-        String newInstant = createNewInstant(candidate, statements, dependentVar);
+        String newInstant = createNewInstant(candidate, statements, dependentClassPath);
         //生成对应的 set 方法
-        createSetter(candidate, newInstant, statements, dependentVar);
-
-        //给依赖的对象生成一个随机方法,然后和转化方法建立一个连接, 用来解决idea增量编译的问题
-        createFunicle(dependentVar, statements);
-
-        AssembleResult result = new AssembleResult(statements, newInstant);
+        createSetter(candidate, newInstant, statements, dependentClassPath);
+        AssembleResult result = new AssembleResult(statements, newInstant, dependentClassPath);
         return result;
     }
-
-    private void createFunicle(Map<String, AssembleMaterial> dependentVar, List<JCTree.JCStatement> result) {
+   /* private void createFunicle(Map<String, AssembleMaterial> dependentVar, List<JCTree.JCStatement> result) {
         dependentVar.forEach((varName, assembleMaterial) -> {
             Optional<String> randomMethodName = jcUtils.genRandomMethod(assembleMaterial.getParameterType().getTypePatch());
             if (!randomMethodName.isPresent()) {
@@ -103,10 +99,10 @@ public class ValueObjectAssembleFactory implements IAssembleFactory {
             JCTree.JCStatement jcExpressionStatement = jcUtils.execMethod(varName, randomMethodName.get(), Lists.of());
             result.add(jcExpressionStatement);
         });
-    }
+    }*/
 
     private void createSetter(Candidate candidate, String instantName,
-                              List<JCTree.JCStatement> result, Map<String, AssembleMaterial> dependentVar) {
+                              List<JCTree.JCStatement> result, Set<String> dependentVar) {
         candidate.getHitSetter().forEach((k, v) -> {
             AssembleMaterial assembleMaterial = expressionMap.get(k);
             gatherDependent(assembleMaterial, dependentVar);
@@ -121,14 +117,14 @@ public class ValueObjectAssembleFactory implements IAssembleFactory {
      *
      * @param assembleMaterial
      */
-    private void gatherDependent(AssembleMaterial assembleMaterial, Map<String, AssembleMaterial> result) {
+    private void gatherDependent(AssembleMaterial assembleMaterial, Set<String> result) {
         assembleMaterial.getTopParent().ifPresent(am -> {
-            result.put(am.getExpression().toString(), am);
+            result.add(am.getParameterType().getTypePatch());
         });
     }
 
     private String createNewInstant(Candidate candidate, List<JCTree.JCStatement> result,
-                                    Map<String, AssembleMaterial> dependentVar) {
+                                    Set<String> dependentVar) {
         Constructor constructor = candidate.getConstructor();
         List<JCTree.JCExpression> paramsExpression = new ArrayList<>();
         constructor.getParams().forEach(param -> {
