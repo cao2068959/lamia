@@ -84,7 +84,7 @@ public class MapAssembleFactory implements IAssembleFactory {
                     "put", Lists.of(jcUtils.geStringExpression(k), expression));
             statements.add(expressionStatement);
         });
-        return new AssembleResult(statements, returnName);
+        return new AssembleResult(statements, returnName, null);
     }
 
 

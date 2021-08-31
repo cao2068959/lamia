@@ -6,6 +6,7 @@ import com.chy.lamia.element.assemble.list.ListAssembleFactory;
 import com.chy.lamia.element.assemble.map.MapAssembleFactory;
 import com.chy.lamia.entity.Getter;
 import com.chy.lamia.entity.ParameterType;
+import com.chy.lamia.entity.SimpleMethod;
 import com.chy.lamia.entity.Var;
 import com.chy.lamia.utils.JCUtils;
 import com.sun.tools.javac.tree.JCTree;
@@ -18,6 +19,7 @@ public class ClassDetails {
 
     IClassDefine classDefine;
     ParameterType parameterType;
+    boolean canUpdate = true;
     List<ClassDetails> generic = new LinkedList<>();
 
     private static Map<String, ClassDetails> classElementCache = new HashMap<>();
@@ -38,13 +40,13 @@ public class ClassDetails {
             return;
         }
 
+        canUpdate = false;
         //没有对应的源码，说明对应的java文件已经生成了 class文件 那么使用 ASM  解析
         Class<?> classForReflect = getClassForReflect(parameterType.getTypePatch());
         if (classForReflect != null) {
             classDefine = new AsmClassDefine(jcUtils, classForReflect);
             return;
         }
-
         throw new RuntimeException("无法解析类： " + parameterType.getTypePatch());
 
     }
@@ -105,5 +107,10 @@ public class ClassDetails {
         classElementCache.put(key, result);
         return result;
     }
+
+    public List<SimpleMethod> getAllMethod() {
+        return classDefine.getAllMethod();
+    }
+
 
 }

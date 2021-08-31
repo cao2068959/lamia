@@ -2,6 +2,7 @@ package com.chy.lamia.element.asm;
 
 
 import com.chy.lamia.entity.*;
+import com.sun.tools.javac.code.Flags;
 import jdk.internal.org.objectweb.asm.ClassVisitor;
 import jdk.internal.org.objectweb.asm.MethodVisitor;
 import jdk.internal.org.objectweb.asm.Opcodes;
@@ -26,6 +27,11 @@ public class ClassMetadataReadingVisitor extends ClassVisitor {
     private Map<String, Setter> instantSetters = new HashMap<>();
 
     /**
+     * 所有的方法，不包括构造器
+     */
+    private List<SimpleMethod> allMethod = new LinkedList<>();
+
+    /**
      * 实例中所有的构造器
      */
     private List<Constructor> constructors = new ArrayList<>();
@@ -42,10 +48,19 @@ public class ClassMetadataReadingVisitor extends ClassVisitor {
             return new ConstructorCollectMethodVisitor(constructors);
         }
 
+
         Type returnType = Type.getReturnType(desc);
         Type[] argumentTypes = Type.getArgumentTypes(desc);
-
         ParameterTypeSignatureHandleWarpper signatureHandleWarpper = new ParameterTypeSignatureHandleWarpper(signature);
+
+        //是否是 static
+        boolean isStatic = (access & 1 << 3) != 0;
+
+        SimpleMethod simpleMethod = new SimpleMethod(name, new ParameterType(returnType.getClassName()));
+        simpleMethod.setParams(signatureHandleWarpper.getParameters());
+        simpleMethod.setStatic(isStatic);
+        allMethod.add(simpleMethod);
+
         //get 开头当做 getter方法处理
         if (name.startsWith("get")) {
             getterHandle(name, argumentTypes, returnType, signatureHandleWarpper);
@@ -145,5 +160,9 @@ public class ClassMetadataReadingVisitor extends ClassVisitor {
 
     public List<Constructor> getConstructors() {
         return constructors;
+    }
+
+    public List<SimpleMethod> getAllMethod() {
+        return allMethod;
     }
 }

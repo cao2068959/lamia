@@ -83,8 +83,7 @@ public class ListAssembleFactory implements IAssembleFactory {
         AssembleResult assembleResult = chain.generate(chain);
         List<JCTree.JCStatement> statements = assembleResult.getStatements();
         List<ListMaterial> listMaterials = chooseMaterial(statements);
-
-        return generateAssembleResult(listMaterials, statements);
+        return generateAssembleResult(listMaterials, statements, assembleResult);
     }
 
     private List<ListMaterial> chooseMaterial(List<JCTree.JCStatement> statements) {
@@ -102,7 +101,7 @@ public class ListAssembleFactory implements IAssembleFactory {
         return result;
     }
 
-    private AssembleResult generateAssembleResult(List<ListMaterial> listMaterials, List<JCTree.JCStatement> statements) {
+    private AssembleResult generateAssembleResult(List<ListMaterial> listMaterials, List<JCTree.JCStatement> statements, AssembleResult assembleResult) {
         List<JCTree.JCStatement> resultBlock = new LinkedList<>();
 
         String returnImpTypePatch = returnType.getTypePatch();
@@ -120,7 +119,7 @@ public class ListAssembleFactory implements IAssembleFactory {
         //没有使用过
         if (listMaterials.size() == 0) {
             resultBlock.addAll(statements);
-            return new AssembleResult(resultBlock, returnName);
+            return new AssembleResult(resultBlock, returnName, assembleResult.getDependentClassPath());
         }
 
 
@@ -134,7 +133,7 @@ public class ListAssembleFactory implements IAssembleFactory {
             JCTree.JCEnhancedForLoop foreachLoop = jcUtils.createForeachLoop(material.expression,
                     material.genericType, material.iterableVar, statements);
             resultBlock.add(foreachLoop);
-            return new AssembleResult(resultBlock, returnName);
+            return new AssembleResult(resultBlock, returnName, assembleResult.getDependentClassPath());
         }
         //TODO
         throw new RuntimeException("暂时不支持多list转换");

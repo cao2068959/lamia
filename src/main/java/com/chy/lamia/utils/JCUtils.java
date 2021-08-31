@@ -249,12 +249,30 @@ public class JCUtils {
         if (tree == null) {
             return Optional.empty();
         }
-        RandomMethodCreateVisitor visitor = new RandomMethodCreateVisitor();
+        RandomMethodCreateVisitor visitor = new RandomMethodCreateVisitor("random", false);
         tree.accept(visitor);
         return Optional.ofNullable(visitor.getRandomMethodName());
     }
 
-    public JCTree.JCMethodDecl createMethod(String methodName, String returnType, java.util.List<JCTree.JCStatement> statements,
+    /**
+     * 生成一个静态的随机方法
+     *
+     * @param className
+     * @return
+     */
+    public Optional<String> genStaticRandomMethod(String className, String methodType) {
+        JCTree tree = elementUtils.getTree(elementUtils.getTypeElement(className));
+        if (tree == null) {
+            return Optional.empty();
+        }
+        RandomMethodCreateVisitor visitor = new RandomMethodCreateVisitor(methodType, true);
+        tree.accept(visitor);
+        return Optional.ofNullable(visitor.getRandomMethodName());
+    }
+
+
+    public JCTree.JCMethodDecl createMethod(String methodName, String returnType, boolean isStatic,
+                                            java.util.List<JCTree.JCStatement> statements,
                                             java.util.List<JCTree.JCVariableDecl> methodParam) {
 
         JCTree.JCBlock block = treeMaker.Block(0, toSunList(statements));
@@ -265,8 +283,13 @@ public class JCUtils {
         } else {
             methodType = memberAccess(returnType);
         }
+        int flags = Flags.PUBLIC;
+        if (isStatic) {
+            flags = flags | Flags.STATIC;
+        }
 
-        return treeMaker.MethodDef(treeMaker.Modifiers(Flags.PUBLIC), names.fromString(methodName), methodType, List.nil(),
+
+        return treeMaker.MethodDef(treeMaker.Modifiers(flags), names.fromString(methodName), methodType, List.nil(),
                 toSunList(methodParam), List.nil(), block, null);
     }
 

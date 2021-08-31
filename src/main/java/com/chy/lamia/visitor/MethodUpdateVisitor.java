@@ -10,6 +10,7 @@ import com.chy.lamia.element.annotation.AnnotationProxyFactory;
 import com.chy.lamia.element.assemble.AssembleMaterial;
 import com.chy.lamia.element.assemble.AssembleMaterialSource;
 import com.chy.lamia.element.assemble.AssembleResult;
+import com.chy.lamia.element.funicle.FunicleFactory;
 import com.chy.lamia.entity.Getter;
 import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.entity.SunList;
@@ -77,6 +78,11 @@ public class MethodUpdateVisitor extends TreeTranslator {
         for (LooseBlock looseBlock : looseBlocks) {
             assemble(looseBlock, paramList, assembleFactory);
         }
+
+        //最后如果这个类中依赖了其他对象，那么生成对应的脐带方法，解决idea增量编译的问题
+
+
+
     }
 
     private void assemble(LooseBlock looseBlock, SunList<Symbol.VarSymbol> paramList, AssembleFactoryHolder assembleFactory) {
@@ -120,6 +126,8 @@ public class MethodUpdateVisitor extends TreeTranslator {
             String newInstantName = assembleResult.getNewInstantName();
             JCTree.JCReturn aReturn = jcUtils.createReturn(newInstantName);
             newStatement.add(aReturn);
+
+            FunicleFactory.addDependent(classTree.toString(), assembleResult.getDependentClassPath());
         }
 
         JCTree.JCBlock block = jcUtils.createBlock(newStatement);

@@ -4,7 +4,10 @@ import com.chy.lamia.entity.ParameterType;
 import jdk.internal.org.objectweb.asm.signature.SignatureReader;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class ParameterTypeSignatureHandleWarpper {
 
@@ -42,6 +45,17 @@ public class ParameterTypeSignatureHandleWarpper {
         ParameterTypeSignatureHandle parameterTypeSignatureHandle = parameters.get(index);
         return Optional.ofNullable(parameterTypeSignatureHandle.getParameterType());
     }
+
+
+    public List<ParameterType> getParameters() {
+        ParameterTypeSignatureHandle handle = getHandle();
+        if (handle == null) {
+            return new LinkedList<>();
+        }
+        return handle.getParameters().stream().map(ParameterTypeSignatureHandle::getParameterType).
+                collect(Collectors.toList());
+    }
+
 
     public Optional<ParameterType> getSuperClass() {
         ParameterTypeSignatureHandle handle = getHandle();

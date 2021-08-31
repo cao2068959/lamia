@@ -5,8 +5,11 @@ import java.util.Random;
 
 public class CommonUtils {
 
+
+    public static String lamiaPrefix = "lamia$$";
+
     public static String generateVarName(String type) {
-        StringBuilder result = new StringBuilder("lamia$$");
+        StringBuilder result = new StringBuilder(lamiaPrefix);
         String randomString = getRandomString(6);
         if (type != null) {
             result.append(type).append("$$");

@@ -4,11 +4,9 @@ import com.chy.lamia.element.assemble.valobj.ValueObjectAssembleFactory;
 import com.chy.lamia.element.tree.ConstructorCollect;
 import com.chy.lamia.element.tree.GetSetCollect;
 import com.chy.lamia.element.tree.VarCollect;
-import com.chy.lamia.entity.Constructor;
-import com.chy.lamia.entity.Getter;
-import com.chy.lamia.entity.Setter;
-import com.chy.lamia.entity.Var;
+import com.chy.lamia.entity.*;
 import com.chy.lamia.utils.JCUtils;
+import com.chy.lamia.visitor.SimpleMethodCollect;
 import com.sun.tools.javac.tree.JCTree;
 
 import java.util.List;
@@ -36,11 +34,14 @@ public class TreeClassDefine implements IClassDefine {
     private Map<String, Setter> instantSetters;
 
 
+
+
     /**
      * 实例中所有的构造器
      */
     private List<Constructor> constructors;
 
+    private List<SimpleMethod> allMethod;
 
     public TreeClassDefine(JCUtils jcUtils, JCTree jcTree) {
         this.jcUtils = jcUtils;
@@ -95,5 +96,15 @@ public class TreeClassDefine implements IClassDefine {
             constructors = constructorCollect.getData();
         }
         return constructors;
+    }
+
+    @Override
+    public List<SimpleMethod> getAllMethod() {
+        if (allMethod == null){
+            SimpleMethodCollect simpleMethodCollect = new SimpleMethodCollect();
+            jcTree.accept(simpleMethodCollect);
+            allMethod = simpleMethodCollect.getData();
+        }
+        return allMethod;
     }
 }

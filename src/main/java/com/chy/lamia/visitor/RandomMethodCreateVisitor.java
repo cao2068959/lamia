@@ -12,6 +12,13 @@ public class RandomMethodCreateVisitor extends TreeTranslator {
 
     String randomMethodName;
     JCUtils jcUtils = JCUtils.instance;
+    String methodType;
+    boolean isStatic = false;
+
+    public RandomMethodCreateVisitor(String methodType, boolean isStatic) {
+        this.methodType = methodType;
+        this.isStatic = isStatic;
+    }
 
     @Override
     public void visitClassDef(JCTree.JCClassDecl tree) {
@@ -19,9 +26,10 @@ public class RandomMethodCreateVisitor extends TreeTranslator {
             super.visitClassDef(tree);
             return;
         }
-        String funicleMethodName = CommonUtils.generateVarName("FunicleMethod");
+        String funicleMethodName = CommonUtils.generateVarName(methodType);
         List<JCTree.JCStatement> context = Lists.of(jcUtils.createReturnToStringType(funicleMethodName));
-        JCTree.JCMethodDecl method = jcUtils.createMethod(funicleMethodName, "java.lang.String", context, null);
+        JCTree.JCMethodDecl method = jcUtils.createMethod(funicleMethodName, "java.lang.String", isStatic,
+                context, null);
         //添加方法
         tree.defs = tree.defs.prepend(method);
         this.randomMethodName = funicleMethodName;
