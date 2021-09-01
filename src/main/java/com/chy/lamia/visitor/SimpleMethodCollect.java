@@ -18,12 +18,17 @@ public class SimpleMethodCollect extends AllMethodVisitor {
     @Override
     public void visitMethod(JCTree.JCMethodDecl that) {
 
+        if ("<init>".equals(that.name.toString())) {
+            return;
+        }
+
+
         boolean isStatic = that.sym != null && Flags.isStatic(that.sym);
 
 
         JCTree returnType = that.getReturnType();
         ParameterType returnParameterType = null;
-        if (returnType.type.getTag() != TypeTag.VOID) {
+        if (returnType != null && returnType.type != null && returnType.type.getTag() != TypeTag.VOID) {
             returnParameterType = new ParameterType(returnType.type.toString());
         }
 

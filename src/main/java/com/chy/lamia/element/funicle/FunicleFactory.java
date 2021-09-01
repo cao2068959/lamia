@@ -7,6 +7,7 @@ import com.chy.lamia.entity.SimpleMethod;
 import com.chy.lamia.log.Logger;
 import com.chy.lamia.utils.CommonUtils;
 import com.chy.lamia.utils.JCUtils;
+import com.sun.tools.javac.tree.JCTree;
 
 import java.util.*;
 
@@ -40,8 +41,17 @@ public class FunicleFactory {
     }
 
 
-    public static void createFunicleMethod(String classpath) {
-        Set<String> dependentClassPaths = dependents.get(classpath);
+    public static void createFunicleMethod(JCTree jcTree, String className) {
+        try {
+            doCreateFunicleMethod(jcTree, className);
+        } catch (Exception e) {
+            Logger.log("createFunicleMethod 执行失败 --------------------");
+            Logger.throwableLog(e);
+        }
+    }
+
+    private static void doCreateFunicleMethod(JCTree jcTree, String className) {
+        Set<String> dependentClassPaths = dependents.get(className);
         Map<String, SimpleMethod> classPathAndMethod = new HashMap<>();
 
         //寻找对应的依赖类中有没有脐带方法，如果没有那么就去创建一个
@@ -53,6 +63,8 @@ public class FunicleFactory {
         });
 
         //去调用类中生成方法，完成脐带的调用
+        FunicleMethodCreateVisitor visitor = new FunicleMethodCreateVisitor(classPathAndMethod);
+        jcTree.accept(visitor);
 
     }
 

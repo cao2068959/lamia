@@ -77,7 +77,7 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
     private void handleSignMethod() {
         markedContext.forEach((className, markedMethods) -> {
             JCTree tree = elementUtils.getTree(elementUtils.getTypeElement(className));
-            tree.accept(new MethodUpdateVisitor(markedMethods, jcUtils, tree));
+            tree.accept(new MethodUpdateVisitor(markedMethods, jcUtils, tree, className));
         });
     }
 

@@ -37,12 +37,14 @@ public class MethodUpdateVisitor extends TreeTranslator {
 
     private final MarkedMethods markedMethods;
     private final JCUtils jcUtils;
+    private final String className;
     private JCTree classTree;
 
-    public MethodUpdateVisitor(MarkedMethods markedMethods, JCUtils jcUtils, JCTree tree) {
+    public MethodUpdateVisitor(MarkedMethods markedMethods, JCUtils jcUtils, JCTree tree, String className) {
         this.markedMethods = markedMethods;
         this.jcUtils = jcUtils;
         this.classTree = tree;
+        this.className = className;
     }
 
 
@@ -80,9 +82,7 @@ public class MethodUpdateVisitor extends TreeTranslator {
         }
 
         //最后如果这个类中依赖了其他对象，那么生成对应的脐带方法，解决idea增量编译的问题
-
-
-
+        FunicleFactory.createFunicleMethod(classTree, className);
     }
 
     private void assemble(LooseBlock looseBlock, SunList<Symbol.VarSymbol> paramList, AssembleFactoryHolder assembleFactory) {
@@ -127,7 +127,7 @@ public class MethodUpdateVisitor extends TreeTranslator {
             JCTree.JCReturn aReturn = jcUtils.createReturn(newInstantName);
             newStatement.add(aReturn);
 
-            FunicleFactory.addDependent(classTree.toString(), assembleResult.getDependentClassPath());
+            FunicleFactory.addDependent(className, assembleResult.getDependentClassPath());
         }
 
         JCTree.JCBlock block = jcUtils.createBlock(newStatement);

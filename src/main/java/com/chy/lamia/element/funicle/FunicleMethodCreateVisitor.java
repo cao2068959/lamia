@@ -30,11 +30,7 @@ public class FunicleMethodCreateVisitor extends TreeTranslator {
             return;
         }
         String funicleMethodName = CommonUtils.generateVarName(methodType);
-
-
-        List<JCTree.JCStatement> context = Lists.of(jcUtils.createReturnToStringType(funicleMethodName));
-
-
+        List<JCTree.JCStatement> context = createConnectStatement();
         JCTree.JCMethodDecl method = jcUtils.createMethod(funicleMethodName, null, true,
                 context, null);
         //添加方法
@@ -55,7 +51,6 @@ public class FunicleMethodCreateVisitor extends TreeTranslator {
         simpleMethodMap.forEach((classpath, simpleMethod) -> {
             JCTree.JCExpressionStatement jcExpressionStatement =
                     jcUtils.execMethod(classpath, simpleMethod.getName(), new LinkedList<>());
-
             result.add(jcExpressionStatement);
         });
         return result;
