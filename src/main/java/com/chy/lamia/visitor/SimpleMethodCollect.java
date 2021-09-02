@@ -4,6 +4,7 @@ package com.chy.lamia.visitor;
 import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.entity.SimpleMethod;
 import com.sun.tools.javac.code.Flags;
+import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.TypeTag;
 import com.sun.tools.javac.tree.JCTree;
 
@@ -35,11 +36,12 @@ public class SimpleMethodCollect extends AllMethodVisitor {
         SimpleMethod simpleMethod = new SimpleMethod(that.getName().toString(), returnParameterType);
         simpleMethod.setStatic(isStatic);
         List<ParameterType> parameterTypes = that.getParameters().stream()
-                .map(variableDecl -> new ParameterType(variableDecl.type.toString()))
+                .map(variableDecl -> new ParameterType(variableDecl.vartype.type.toString()))
                 .collect(Collectors.toList());
         simpleMethod.setParams(parameterTypes);
         data.add(simpleMethod);
     }
+
 
     public List<SimpleMethod> getData() {
         return data;

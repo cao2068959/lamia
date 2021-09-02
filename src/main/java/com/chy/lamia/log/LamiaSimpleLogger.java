@@ -1,6 +1,8 @@
 package com.chy.lamia.log;
 
 
+import com.chy.lamia.utils.FileUtils;
+
 import java.io.*;
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -8,29 +10,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.chy.lamia.utils.FileUtils.openFile;
+
 public class LamiaSimpleLogger {
 
     List<String> content = new ArrayList<>();
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-    String logPath = null;
+    private String fileName = "lamialog.log";
 
-    private OutputStream openFile(String path) throws FileNotFoundException {
-        String fileName = "lamialog.log";
-        if (path == null || path.length() == 0) {
-            return null;
-        }
-        if (path.endsWith("/")) {
-            path = path.substring(0, path.length() - 1);
-        }
-        File dir = new File(path);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-        path = path + "/" + fileName;
-
-        File file = new File(path);
-        return new FileOutputStream(file, true);
-    }
 
     private String nowTime() {
         String time = dateTimeFormatter.format(LocalDateTime.now());
@@ -61,7 +48,7 @@ public class LamiaSimpleLogger {
         }
         OutputStream outputStream = null;
         try {
-            outputStream = openFile(getLogPath());
+            outputStream = new FileOutputStream(FileUtils.openClasspathFile(fileName), true);
             if (outputStream == null) {
                 return;
             }
@@ -80,19 +67,6 @@ public class LamiaSimpleLogger {
             } catch (IOException e) {
             }
         }
-    }
-
-    private String getLogPath() {
-        String result = logPath;
-        if (result != null && result.length() > 0) {
-            return result;
-        }
-
-        URL resource = this.getClass().getClassLoader().getResource("");
-        if (resource != null) {
-            return resource.getPath();
-        }
-        return null;
     }
 
 

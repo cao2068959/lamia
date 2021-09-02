@@ -1,6 +1,7 @@
 package com.chy.lamia.processor;
 
 import com.chy.lamia.annotation.Mapping;
+import com.chy.lamia.element.funicle.FunicleFactory;
 import com.chy.lamia.log.Logger;
 import com.chy.lamia.processor.marked.MarkedContext;
 import com.chy.lamia.utils.JCUtils;
@@ -77,10 +78,13 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
     private void handleSignMethod() {
         markedContext.forEach((className, markedMethods) -> {
             JCTree tree = elementUtils.getTree(elementUtils.getTypeElement(className));
+            //去修改原本方法中的逻辑
             tree.accept(new MethodUpdateVisitor(markedMethods, jcUtils, tree, className));
+            //给这个类加上对应的脐带方法
+            FunicleFactory.createFunicleMethod(tree,className);
         });
+        FunicleFactory.persistence();
     }
-
 
     /**
      * 收集项目里所有类的 Element 对象

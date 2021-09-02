@@ -80,9 +80,6 @@ public class MethodUpdateVisitor extends TreeTranslator {
         for (LooseBlock looseBlock : looseBlocks) {
             assemble(looseBlock, paramList, assembleFactory);
         }
-
-        //最后如果这个类中依赖了其他对象，那么生成对应的脐带方法，解决idea增量编译的问题
-        FunicleFactory.createFunicleMethod(classTree, className);
     }
 
     private void assemble(LooseBlock looseBlock, SunList<Symbol.VarSymbol> paramList, AssembleFactoryHolder assembleFactory) {
