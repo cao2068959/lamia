@@ -38,7 +38,7 @@ public class FunicleFactory {
 
         Set<String> oldData = dependents.get(classpath);
         if (oldData == null) {
-            dependents.put(classpath, data);
+            dependents.put(classpath, new HashSet<>(data));
             return;
         }
         oldData.addAll(data);
@@ -78,6 +78,11 @@ public class FunicleFactory {
         }
 
         Set<String> result = new HashSet<>();
+        if (txt == null || "".equals(txt)) {
+            return result;
+        }
+
+
         for (String s : txt.split(",")) {
             if ("".equals(s)) {
                 continue;

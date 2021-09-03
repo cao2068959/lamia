@@ -1,1 +1,2 @@
 com.chy.lamia.processor.MappingAnnotationProcessor
+com.chy.lamia.element.funicle.FunicleAnnotationProcessor

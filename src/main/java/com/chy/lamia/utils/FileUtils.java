@@ -25,6 +25,7 @@ public class FileUtils {
         return new File(path);
     }
 
+
     public static File openClasspathFile(String fileName) {
         return openFile(fileName, getClassPath());
     }
@@ -39,10 +40,9 @@ public class FileUtils {
 
     public static String readSimpleClasspathFile(String fileName) throws IOException {
         File file = openClasspathFile(fileName);
-        if (file == null) {
+        if (file == null || !file.exists()) {
             return null;
         }
-
         FileInputStream fileInputStream = new FileInputStream(file);
         long length = file.length();
         byte[] bytes = new byte[(int) length];

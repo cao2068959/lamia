@@ -25,10 +25,7 @@ import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeTranslator;
 import com.sun.tools.javac.util.Pair;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static com.chy.lamia.constant.PriorityConstant.*;
 
@@ -73,6 +70,10 @@ public class MethodUpdateVisitor extends TreeTranslator {
         ClassDetails returnClassDetails = ClassDetails.getClassElement(returnParameterType);
         //根据不同的策略获取 返回值的生成工厂
         AssembleFactoryHolder assembleFactory = returnClassDetails.getAssembleFactory();
+
+        Set<String> dependent = Set.of(returnParameterType.getTypePatch());
+        FunicleFactory.addDependent(className, dependent);
+
         //获取方法中所有的入参
         SunList<Symbol.VarSymbol> paramList = new SunList<>(methodSymbolDecl.sym.getParameters());
         //解析原来方法中的方法体,计算出 所有的通路
