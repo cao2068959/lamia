@@ -4,37 +4,32 @@ package com.chy.lamia.element;
 import com.chy.lamia.annotation.MapMember;
 import com.chy.lamia.element.annotation.AnnotationProxyFactory;
 import com.chy.lamia.entity.ParameterType;
+import com.chy.lamia.log.Logger;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.utils.SymbolUtils;
 import com.chy.lamia.visitor.AbstractBlockVisitor;
-import com.sun.tools.javac.code.Attribute;
 import com.sun.tools.javac.code.Type;
-import com.sun.tools.javac.code.TypeMetadata;
-import com.sun.tools.javac.comp.Annotate;
-import com.sun.tools.javac.model.AnnotationProxyMaker;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.util.Pair;
-import com.sun.tools.javac.util.StringUtils;
-import sun.reflect.annotation.AnnotationParser;
 
-import java.lang.annotation.Annotation;
 import java.util.*;
 
 
 public class LooseBlockVisitor extends AbstractBlockVisitor {
 
-    private boolean haveReturn = false;
+
     private final List<Pair<ParameterType, MapMember>> vars;
-    private final List<LooseBlock> result;
+    private final Set<NeedUpdateBlock> needUpdateBlocks;
+    private NeedUpdateBlock needUpdateBlock;
 
     public LooseBlockVisitor() {
         vars = new LinkedList<>();
-        result = new LinkedList<>();
+        needUpdateBlocks = new HashSet<>();
     }
 
-    public LooseBlockVisitor(List<Pair<ParameterType, MapMember>> vars, List<LooseBlock> result) {
+    public LooseBlockVisitor(List<Pair<ParameterType, MapMember>> vars, Set<NeedUpdateBlock> needUpdateBlocks) {
         this.vars = new LinkedList<>(vars);
-        this.result = result;
+        this.needUpdateBlocks = needUpdateBlocks;
     }
 
 
@@ -45,41 +40,26 @@ public class LooseBlockVisitor extends AbstractBlockVisitor {
      */
     @Override
     public void blockVisit(JCTree.JCBlock statement) {
-        LooseBlockVisitor looseBlockVisitor = new LooseBlockVisitor(vars, result);
+        LooseBlockVisitor looseBlockVisitor = new LooseBlockVisitor(vars, needUpdateBlocks);
         //继续去扫描代码块里面的代码
         looseBlockVisitor.accept(statement, classTree);
-        analyzeResult(looseBlockVisitor);
-    }
-
-    /**
-     * 去解析 对应的 LooseBlockVisitor 是不是符合要求的数据， 如果是 那么保存下相关的数据
-     *
-     * @param looseBlockVisitor
-     */
-    private void analyzeResult(LooseBlockVisitor looseBlockVisitor) {
-        // 对应的 模块里面没有 return，那么 不是目标对象，就不进行处理了
-        if (!looseBlockVisitor.haveReturn) {
-            return;
-        }
-        LooseBlock looseBlock = new LooseBlock(looseBlockVisitor.getVars(), looseBlockVisitor.block);
-        result.add(looseBlock);
-    }
-
-    public List<LooseBlock> getResult() {
-        analyzeResult(this);
-        return result;
+        //analyzeResult(looseBlockVisitor);
     }
 
 
     @Override
-    public void variableVisit(JCTree.JCVariableDecl statement) {
+    public boolean variableVisit(JCTree.JCVariableDecl statement, List<JCTree.JCStatement> enableUpdateStatements) {
+
+        //去收集写了 Lamia.convert 的语句
+        boolean updateStatements = lamiaConvertStatementCollect(statement.init, enableUpdateStatements, statement);
+
         //查找这一行语句上面有没有@MapMember
         Optional<MapMember> mapMemberOptional = AnnotationProxyFactory
                 .createdAnnotation(classTree, statement.getModifiers().getAnnotations(), MapMember.class);
 
         //没标记注解的就不处理了
         if (mapMemberOptional.isEmpty()) {
-            return;
+            return updateStatements;
         }
 
         Type type = JCUtils.instance.attribType(classTree, statement);
@@ -87,15 +67,55 @@ public class LooseBlockVisitor extends AbstractBlockVisitor {
         MapMember mapMember = mapMemberOptional.get();
         parameterType.setGeneric(SymbolUtils.getGeneric(type));
         vars.add(Pair.of(parameterType, mapMember));
+
+        return updateStatements;
+    }
+
+
+    /**
+     * 去收集写了 Lamia.convert 的语句
+     *
+     * @param jcExpression
+     * @param enableUpdateStatements
+     * @param variableDecl
+     */
+    private boolean lamiaConvertStatementCollect(JCTree.JCExpression jcExpression, List<JCTree.JCStatement> enableUpdateStatements, JCTree.JCVariableDecl variableDecl) {
+        if (jcExpression == null || !(jcExpression instanceof JCTree.JCTypeCast)) {
+            return true;
+        }
+
+        //获取强转
+        JCTree.JCTypeCast typeCast = (JCTree.JCTypeCast) jcExpression;
+
+        Type type = JCUtils.instance.attribType(classTree, typeCast.clazz.toString());
+        if (type == null) {
+            Logger.log("无法解析泛型对象 [" + typeCast.clazz.toString() + "]");
+            return true;
+        }
+
+        PendHighway pendHighway = new PendHighway(vars, new ParameterType(type.toString()), variableDecl);
+        enableUpdateStatements.add(pendHighway);
+
+        //这个代码块已经添加过了，那么就不再去添加了
+        if (needUpdateBlock == null) {
+            NeedUpdateBlock result = new NeedUpdateBlock(this.block, enableUpdateStatements);
+            needUpdateBlocks.add(result);
+        }
+
+        return false;
     }
 
     @Override
-    public void returnVisit(JCTree.JCReturn statement) {
-        haveReturn = true;
+    public boolean returnVisit(JCTree.JCReturn statement, List<JCTree.JCStatement> enableUpdateStatements) {
+        return lamiaConvertStatementCollect(statement.expr, enableUpdateStatements, null);
     }
+
 
     public List<Pair<ParameterType, MapMember>> getVars() {
         return vars;
     }
 
+    public Set<NeedUpdateBlock> getNeedUpdateBlocks() {
+        return needUpdateBlocks;
+    }
 }

@@ -1,9 +1,7 @@
 package com.chy.lamia.element.funicle;
 
 import com.chy.lamia.log.Logger;
-import com.chy.lamia.processor.marked.MarkedContext;
 import com.chy.lamia.utils.JCUtils;
-import com.chy.lamia.visitor.RandomMethodCreateVisitor;
 import com.sun.source.util.Trees;
 import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.comp.Annotate;
@@ -82,6 +80,4 @@ public class FunicleAnnotationProcessor extends AbstractProcessor {
             }
         }
     }
-
-
 }

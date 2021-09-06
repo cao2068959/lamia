@@ -4,6 +4,8 @@ package com.chy.lamia.visitor;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.util.List;
 
+import java.util.ArrayList;
+
 
 public abstract class AbstractBlockVisitor {
 
@@ -20,53 +22,62 @@ public abstract class AbstractBlockVisitor {
         }
         this.block = block;
         this.classTree = classTree;
-        doVisitorAllBlock(statements);
+
+        visitorAllBlock(statements);
     }
 
-    private void doVisitorAllBlock(List<JCTree.JCStatement> statements) {
+    private void visitorAllBlock(List<JCTree.JCStatement> statements) {
+        java.util.List<JCTree.JCStatement> enableUpdateStatements = new ArrayList<>();
+
         for (JCTree.JCStatement statement : statements) {
-            //如果是 if 语句
-            if (statement instanceof JCTree.JCIf) {
-                JCTree.JCIf jcif = (JCTree.JCIf) statement;
-                JCTree.JCBlock elseBlock = (JCTree.JCBlock) jcif.elsepart;
-                JCTree.JCBlock thenBlock = (JCTree.JCBlock) jcif.thenpart;
-                ifVisit(jcif, thenBlock, elseBlock);
-                blockVisit(thenBlock);
-                blockVisit(elseBlock);
-                continue;
-            }
-
-
-            //如果是 while 语句
-            if (statement instanceof JCTree.JCWhileLoop) {
-                JCTree.JCWhileLoop jcWhileLoop = (JCTree.JCWhileLoop) statement;
-                whileLoopVisit(jcWhileLoop, (JCTree.JCBlock) jcWhileLoop.body);
-                blockVisit((JCTree.JCBlock) jcWhileLoop.body);
-                continue;
-            }
-
-            //如果是 return 语句
-            if (statement instanceof JCTree.JCReturn) {
-                JCTree.JCReturn jCReturn = (JCTree.JCReturn) statement;
-                returnVisit(jCReturn);
-                continue;
-            }
-
-            //变量申明语句
-            if (statement instanceof JCTree.JCVariableDecl) {
-                JCTree.JCVariableDecl jcVariableDecl = (JCTree.JCVariableDecl) statement;
-                variableVisit(jcVariableDecl);
-                continue;
-            }
-
-            //如果是 代码块
-            if (statement instanceof JCTree.JCBlock) {
-                JCTree.JCBlock jcBlock = (JCTree.JCBlock) statement;
-                innerBlockVisit(jcBlock);
-                blockVisit(jcBlock);
-                continue;
+            if (doVisitorAllBlock(statement, enableUpdateStatements)) {
+                enableUpdateStatements.add(statement);
             }
         }
+    }
+
+
+    private boolean doVisitorAllBlock(JCTree.JCStatement statement, java.util.List<JCTree.JCStatement> enableUpdateStatements) {
+        //如果是 if 语句
+        if (statement instanceof JCTree.JCIf) {
+            JCTree.JCIf jcif = (JCTree.JCIf) statement;
+            JCTree.JCBlock elseBlock = (JCTree.JCBlock) jcif.elsepart;
+            JCTree.JCBlock thenBlock = (JCTree.JCBlock) jcif.thenpart;
+            ifVisit(jcif, thenBlock, elseBlock);
+            blockVisit(thenBlock);
+            blockVisit(elseBlock);
+            return true;
+        }
+
+
+        //如果是 while 语句
+        if (statement instanceof JCTree.JCWhileLoop) {
+            JCTree.JCWhileLoop jcWhileLoop = (JCTree.JCWhileLoop) statement;
+            whileLoopVisit(jcWhileLoop, (JCTree.JCBlock) jcWhileLoop.body);
+            blockVisit((JCTree.JCBlock) jcWhileLoop.body);
+            return true;
+        }
+
+        //如果是 return 语句
+        if (statement instanceof JCTree.JCReturn) {
+            JCTree.JCReturn jCReturn = (JCTree.JCReturn) statement;
+            return returnVisit(jCReturn, enableUpdateStatements);
+        }
+
+        //变量申明语句
+        if (statement instanceof JCTree.JCVariableDecl) {
+            JCTree.JCVariableDecl jcVariableDecl = (JCTree.JCVariableDecl) statement;
+            return variableVisit(jcVariableDecl, enableUpdateStatements);
+        }
+
+        //如果是 代码块
+        if (statement instanceof JCTree.JCBlock) {
+            JCTree.JCBlock jcBlock = (JCTree.JCBlock) statement;
+            innerBlockVisit(jcBlock);
+            blockVisit(jcBlock);
+            return true;
+        }
+        return true;
     }
 
 
@@ -82,10 +93,12 @@ public abstract class AbstractBlockVisitor {
     public void whileLoopVisit(JCTree.JCWhileLoop statement, JCTree.JCBlock whileBlock) {
     }
 
-    public void returnVisit(JCTree.JCReturn statement) {
+    public boolean returnVisit(JCTree.JCReturn statement, java.util.List<JCTree.JCStatement> enableUpdateStatements) {
+        return true;
     }
 
-    public void variableVisit(JCTree.JCVariableDecl statement) {
+    public boolean variableVisit(JCTree.JCVariableDecl statement, java.util.List<JCTree.JCStatement> enableUpdateStatements) {
+        return true;
     }
 
 }
