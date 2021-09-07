@@ -58,10 +58,6 @@ public class LooseBlockVisitor extends AbstractBlockVisitor {
         Optional<MapMember> mapMemberOptional = AnnotationProxyFactory
                 .createdAnnotation(classTree, statement.getModifiers().getAnnotations(), MapMember.class);
 
-        //没标记注解的就不处理了
-        if (mapMemberOptional.isEmpty()) {
-            return updateStatements;
-        }
 
         Type type = JCUtils.instance.attribType(classTree, statement);
         ParameterTypeMemberAnnotation parameterType = new ParameterTypeMemberAnnotation(statement.getName().toString(),
@@ -108,14 +104,14 @@ public class LooseBlockVisitor extends AbstractBlockVisitor {
         }
 
 
-        Type type = JCUtils.instance.attribType(classTree, typeCast.clazz.toString());
-        if (type == null) {
+        ParameterType parameterType = JCUtils.instance.generateParameterType(classTree, typeCast.clazz);
+
+        if (parameterType == null) {
             Logger.log("无法解析类型 [" + typeCast.clazz.toString() + "]");
             return true;
         }
 
-
-        PendHighway pendHighway = new PendHighway(vars, argsName, new ParameterType(type.toString()), variableDecl);
+        PendHighway pendHighway = new PendHighway(vars, argsName, parameterType, variableDecl);
         enableUpdateStatements.add(pendHighway);
 
         //这个代码块已经添加过了，那么就不再去添加了

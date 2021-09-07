@@ -294,6 +294,39 @@ public class JCUtils {
     }
 
 
+    /**
+     * JCTypeApply 转 ParameterType, 会处理泛型
+     *
+     * @param data
+     * @return
+     */
+
+    public ParameterType generateParameterType(JCTree node, JCTree data) {
+        if (data instanceof JCTree.JCTypeApply) {
+            JCTree.JCTypeApply jcTypeApply = (JCTree.JCTypeApply) data;
+
+            JCTree.JCExpression clazz = jcTypeApply.clazz;
+            Type completeType = attribType(node, clazz);
+            ParameterType result = new ParameterType(completeType.toString());
+            java.util.List<ParameterType> genericRsult = new LinkedList<>();
+            result.setGeneric(genericRsult);
+
+            //查找泛型
+            List<JCTree.JCExpression> generics = jcTypeApply.getTypeArguments();
+
+            for (JCTree.JCExpression generic : generics) {
+                genericRsult.add(generateParameterType(node, generic));
+            }
+            return result;
+        } else if (data instanceof JCTree.JCIdent) {
+            JCTree.JCIdent jcIdent = (JCTree.JCIdent) data;
+            Type completeType = attribType(node, jcIdent);
+            return new ParameterType(completeType.toString());
+        }
+        throw new RuntimeException("无法解析泛型类型 [" + data.toString() + "] class:[" + data.getClass().toString() + "]");
+    }
+
+
     private <T> List<T> toSunList(java.util.List<T> list) {
         if (list == null || list.size() == 0) {
             return List.nil();
