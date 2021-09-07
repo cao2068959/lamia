@@ -8,18 +8,13 @@ import com.chy.lamia.element.assemble.AssembleMaterial;
 import com.chy.lamia.element.assemble.AssembleMaterialSource;
 import com.chy.lamia.element.assemble.AssembleResult;
 import com.chy.lamia.entity.ParameterType;
-import com.chy.lamia.entity.SunList;
+import com.chy.lamia.entity.ParameterTypeMemberAnnotation;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.utils.SymbolUtils;
 import com.sun.source.tree.TreeVisitor;
-import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.tree.JCTree;
-import com.sun.tools.javac.util.Pair;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 
 /**
@@ -27,19 +22,34 @@ import java.util.Optional;
  */
 public class PendHighway extends JCTree.JCStatement {
 
-    //这个 block 能够访问到的所有变量
-    private final List<Pair<ParameterType, MapMember>> vars;
-    //要生成数据的类型
+    /**
+     * 这个 block 能够访问到的所有变量
+     */
+    private final Map<String, ParameterTypeMemberAnnotation> blockVars;
+
+    /**
+     * 方法参数中的 vars
+     */
+    private Map<String, ParameterTypeMemberAnnotation> paramVars;
+
+    /**
+     * 要生成数据的类型
+     */
     private final ClassDetails genClassDetails;
     private final JCUtils jcUtils;
     private final Optional<JCVariableDecl> variableDecl;
+    /**
+     * 手动指定需要使用的变量的名称
+     */
+    private final List<String> enableUseVarNames;
     private AssembleFactoryHolder genTypeFactory;
 
 
-
-
-    public PendHighway(List<Pair<ParameterType, MapMember>> vars, ParameterType genType, JCVariableDecl variableDecl) {
-        this.vars = new ArrayList<>(vars);
+    public PendHighway(Map<String, ParameterTypeMemberAnnotation> blockVars,
+                       List<String> enableUseVarNames,
+                       ParameterType genType, JCVariableDecl variableDecl) {
+        this.blockVars = blockVars;
+        this.enableUseVarNames = enableUseVarNames;
         genClassDetails = new ClassDetails(genType);
         genTypeFactory = genClassDetails.getAssembleFactory();
         this.jcUtils = JCUtils.instance;
@@ -47,62 +57,36 @@ public class PendHighway extends JCTree.JCStatement {
     }
 
 
-    public List<Pair<ParameterType, MapMember>> getVars() {
-        return vars;
+    /**
+     * 把所有需要的变量都放入聚合工厂中，让工厂来决定使用什么
+     */
+    public void addMaterials() {
+        for (String enableUseVarName : enableUseVarNames) {
+            ParameterTypeMemberAnnotation parameterTypeMemberAnnotation = paramVars.get(enableUseVarName);
+            //把方法参数的放入
+            doAddMaterials(parameterTypeMemberAnnotation, AssembleMaterialSource.PARAMETER);
+
+            if (parameterTypeMemberAnnotation == null) {
+                parameterTypeMemberAnnotation = blockVars.get(enableUseVarName);
+                doAddMaterials(parameterTypeMemberAnnotation, AssembleMaterialSource.METHOD_VAR);
+            }
+            if (parameterTypeMemberAnnotation == null) {
+                throw new RuntimeException("不能够找到变量属性：[" + enableUseVarName + "]");
+            }
+        }
     }
 
-    public ClassDetails getGenClassDetails() {
-        return genClassDetails;
-    }
-
-    public AssembleFactoryHolder getGenTypeFactory() {
-        return genTypeFactory;
-    }
-
-    public void addMaterialsFromMethodBodyVar() {
-        if (vars == null || vars.size() == 0) {
+    private void doAddMaterials(ParameterTypeMemberAnnotation parameterTypeMemberAnnotation, AssembleMaterialSource source) {
+        if (parameterTypeMemberAnnotation == null) {
             return;
         }
-        vars.forEach(methodBodyVarPair -> {
-            ParameterType methodBodyVar = methodBodyVarPair.fst;
-            MapMember mapMember = methodBodyVarPair.snd;
-            AssembleMaterial assembleMaterial = new AssembleMaterial(methodBodyVar,
-                    jcUtils.memberAccess(methodBodyVar.getFieldName()), AssembleMaterialSource.METHOD_VAR);
-            assembleMaterial.setMapMember(mapMember);
-            genTypeFactory.addMaterial(assembleMaterial);
-        });
+        AssembleMaterial assembleMaterial = new AssembleMaterial(parameterTypeMemberAnnotation,
+                jcUtils.memberAccess(parameterTypeMemberAnnotation.getFieldName()), source);
+        assembleMaterial.setMapMember(parameterTypeMemberAnnotation.getMapMember());
+        genTypeFactory.addMaterial(assembleMaterial);
     }
 
 
-    public void addMaterialsFromParameters(SunList<Symbol.VarSymbol> params) {
-        if (params == null || params.size() == 0) {
-            return;
-        }
-        params.forEach(varSymbol -> {
-            String paramsTypeClassPath = varSymbol.type.tsym.toString();
-            Optional<MapMember> mapMember = AnnotationProxyFactory
-                    .createdAnnotation(varSymbol.type.getAnnotationMirrors(), MapMember.class);
-            String name = mapMember.map(_mapMember -> {
-                String result = _mapMember.value();
-                if ("".equals(result)) {
-                    return varSymbol.name.toString();
-                }
-                return result;
-            }).orElse(varSymbol.name.toString());
-
-            ParameterType parameterType = new ParameterType(name, paramsTypeClassPath);
-            //把这个字段原本的字段名称塞进去
-            parameterType.setFieldName(varSymbol.name.toString());
-            //这个参数可能会有泛型
-            List<ParameterType> generic = SymbolUtils.getGeneric(varSymbol);
-            parameterType.setGeneric(generic);
-            //先把 这个参数本身给塞入工厂
-            AssembleMaterial assembleMaterial = new AssembleMaterial(parameterType,
-                    jcUtils.memberAccess(parameterType.getFieldName()), AssembleMaterialSource.PARAMETER);
-            assembleMaterial.setMapMember(mapMember);
-            genTypeFactory.addMaterial(assembleMaterial);
-        });
-    }
 
     /**
      * 聚合所有的条件去生成对应的代码
@@ -114,6 +98,10 @@ public class PendHighway extends JCTree.JCStatement {
 
     public Optional<JCVariableDecl> getVariableDecl() {
         return variableDecl;
+    }
+
+    public void setParamVars(Map<String, ParameterTypeMemberAnnotation> paramVars) {
+        this.paramVars = paramVars;
     }
 
     @Override

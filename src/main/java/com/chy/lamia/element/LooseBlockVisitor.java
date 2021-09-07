@@ -4,6 +4,7 @@ package com.chy.lamia.element;
 import com.chy.lamia.annotation.MapMember;
 import com.chy.lamia.element.annotation.AnnotationProxyFactory;
 import com.chy.lamia.entity.ParameterType;
+import com.chy.lamia.entity.ParameterTypeMemberAnnotation;
 import com.chy.lamia.log.Logger;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.utils.SymbolUtils;
@@ -18,17 +19,17 @@ import java.util.*;
 public class LooseBlockVisitor extends AbstractBlockVisitor {
 
 
-    private final List<Pair<ParameterType, MapMember>> vars;
+    private final Map<String, ParameterTypeMemberAnnotation> vars;
     private final Set<NeedUpdateBlock> needUpdateBlocks;
     private NeedUpdateBlock needUpdateBlock;
 
     public LooseBlockVisitor() {
-        vars = new LinkedList<>();
+        vars = new HashMap<>();
         needUpdateBlocks = new HashSet<>();
     }
 
-    public LooseBlockVisitor(List<Pair<ParameterType, MapMember>> vars, Set<NeedUpdateBlock> needUpdateBlocks) {
-        this.vars = new LinkedList<>(vars);
+    public LooseBlockVisitor(Map<String, ParameterTypeMemberAnnotation> vars, Set<NeedUpdateBlock> needUpdateBlocks) {
+        this.vars = new HashMap<>(vars);
         this.needUpdateBlocks = needUpdateBlocks;
     }
 
@@ -63,11 +64,10 @@ public class LooseBlockVisitor extends AbstractBlockVisitor {
         }
 
         Type type = JCUtils.instance.attribType(classTree, statement);
-        ParameterType parameterType = new ParameterType(statement.getName().toString(), type.toString());
-        MapMember mapMember = mapMemberOptional.get();
+        ParameterTypeMemberAnnotation parameterType = new ParameterTypeMemberAnnotation(statement.getName().toString(),
+                type.toString(), mapMemberOptional);
         parameterType.setGeneric(SymbolUtils.getGeneric(type));
-        vars.add(Pair.of(parameterType, mapMember));
-
+        vars.put(parameterType.getFieldName(), parameterType);
         return updateStatements;
     }
 
@@ -87,13 +87,35 @@ public class LooseBlockVisitor extends AbstractBlockVisitor {
         //获取强转
         JCTree.JCTypeCast typeCast = (JCTree.JCTypeCast) jcExpression;
 
-        Type type = JCUtils.instance.attribType(classTree, typeCast.clazz.toString());
-        if (type == null) {
-            Logger.log("无法解析泛型对象 [" + typeCast.clazz.toString() + "]");
+        JCTree.JCExpression expr = typeCast.expr;
+        if (expr == null || !(expr instanceof JCTree.JCMethodInvocation)) {
+            return true;
+        }
+        JCTree.JCMethodInvocation methodInvocation = (JCTree.JCMethodInvocation) expr;
+        String methName = methodInvocation.meth.toString();
+        if (!methName.contains("Lamia.convert")) {
             return true;
         }
 
-        PendHighway pendHighway = new PendHighway(vars, new ParameterType(type.toString()), variableDecl);
+        //去收集Lamia.convert() 方法中传入进来的参数
+        List<String> argsName = new LinkedList<>();
+        for (JCTree.JCExpression arg : methodInvocation.args) {
+            argsName.add(arg.toString());
+        }
+        //没传入参数可能有点不太对
+        if (argsName.size() == 0) {
+            return true;
+        }
+
+
+        Type type = JCUtils.instance.attribType(classTree, typeCast.clazz.toString());
+        if (type == null) {
+            Logger.log("无法解析类型 [" + typeCast.clazz.toString() + "]");
+            return true;
+        }
+
+
+        PendHighway pendHighway = new PendHighway(vars, argsName, new ParameterType(type.toString()), variableDecl);
         enableUpdateStatements.add(pendHighway);
 
         //这个代码块已经添加过了，那么就不再去添加了
@@ -105,14 +127,10 @@ public class LooseBlockVisitor extends AbstractBlockVisitor {
         return false;
     }
 
+
     @Override
     public boolean returnVisit(JCTree.JCReturn statement, List<JCTree.JCStatement> enableUpdateStatements) {
         return lamiaConvertStatementCollect(statement.expr, enableUpdateStatements, null);
-    }
-
-
-    public List<Pair<ParameterType, MapMember>> getVars() {
-        return vars;
     }
 
     public Set<NeedUpdateBlock> getNeedUpdateBlocks() {

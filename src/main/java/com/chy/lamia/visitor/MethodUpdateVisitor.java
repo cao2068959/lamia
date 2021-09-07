@@ -1,21 +1,26 @@
 package com.chy.lamia.visitor;
 
 
+import com.chy.lamia.annotation.MapMember;
 import com.chy.lamia.element.NeedUpdateBlock;
 import com.chy.lamia.element.PendHighway;
 import com.chy.lamia.element.LooseBlockVisitor;
+import com.chy.lamia.element.annotation.AnnotationProxyFactory;
 import com.chy.lamia.element.assemble.AssembleResult;
 import com.chy.lamia.element.funicle.FunicleFactory;
 import com.chy.lamia.entity.ParameterType;
+import com.chy.lamia.entity.ParameterTypeMemberAnnotation;
 import com.chy.lamia.entity.SunList;
 import com.chy.lamia.expose.Lamia;
 import com.chy.lamia.processor.marked.MarkedMethods;
 import com.chy.lamia.utils.JCUtils;
+import com.chy.lamia.utils.SymbolUtils;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.TypeTag;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeTranslator;
+import com.sun.tools.javac.util.Pair;
 
 import java.util.*;
 
@@ -59,29 +64,58 @@ public class MethodUpdateVisitor extends TreeTranslator {
         Set<String> dependent = Set.of(returnParameterType.getTypePatch());
         FunicleFactory.addDependent(className, dependent);
 
-        //获取方法中所有的入参
-        SunList<Symbol.VarSymbol> paramList = new SunList<>(methodSymbolDecl.sym.getParameters());
+        Map<String, ParameterTypeMemberAnnotation> paramMap = new HashMap<>();
+        //处理方法入参，解析泛型，类型转换
+        new SunList<>(methodSymbolDecl.sym.getParameters()).forEach(varSymbol -> {
+            ParameterTypeMemberAnnotation parameterType = toParameterType(varSymbol);
+            paramMap.put(parameterType.getFieldName(), parameterType);
+        });
+
         //解析原来方法中的方法体,计算出所有需要去修改的 方法体
         Set<NeedUpdateBlock> needUpdateBlocks = untieBlock(methodSymbolDecl);
         for (NeedUpdateBlock needUpdateBlock : needUpdateBlocks) {
-            updateBlock(needUpdateBlock, paramList);
+            updateBlock(needUpdateBlock, paramMap);
         }
-
     }
+
+    private ParameterTypeMemberAnnotation toParameterType(Symbol.VarSymbol varSymbol) {
+        String paramsTypeClassPath = varSymbol.type.tsym.toString();
+        Optional<MapMember> mapMember = AnnotationProxyFactory
+                .createdAnnotation(varSymbol.type.getAnnotationMirrors(), MapMember.class);
+        String name = mapMember.map(_mapMember -> {
+            String result = _mapMember.value();
+            if ("".equals(result)) {
+                return varSymbol.name.toString();
+            }
+            return result;
+        }).orElse(varSymbol.name.toString());
+
+        ParameterTypeMemberAnnotation parameterType = new ParameterTypeMemberAnnotation(name, paramsTypeClassPath, mapMember);
+        //把这个字段原本的字段名称塞进去
+        parameterType.setFieldName(varSymbol.name.toString());
+        //这个参数可能会有泛型
+        List<ParameterType> generic = SymbolUtils.getGeneric(varSymbol);
+        parameterType.setGeneric(generic);
+        return parameterType;
+    }
+
 
     /**
      * 去修改方法体中的代码
      *
      * @param needUpdateBlock
-     * @param paramList
+     * @param paramMap
      */
-    private void updateBlock(NeedUpdateBlock needUpdateBlock, SunList<Symbol.VarSymbol> paramList) {
+    private void updateBlock(NeedUpdateBlock needUpdateBlock, Map<String, ParameterTypeMemberAnnotation> paramMap) {
         List<JCTree.JCStatement> enableUpdateStatements = needUpdateBlock.getEnableUpdateStatements();
 
         List<JCTree.JCStatement> newStatement = new LinkedList<>();
         for (JCTree.JCStatement enableUpdateStatement : enableUpdateStatements) {
             if (enableUpdateStatement instanceof PendHighway) {
-                generateNewStatement((PendHighway) enableUpdateStatement, newStatement, paramList);
+                PendHighway pendHighway = (PendHighway) enableUpdateStatement;
+                //把方法的入参放进去
+                pendHighway.setParamVars(paramMap);
+                generateNewStatement(pendHighway, newStatement);
             } else {
                 newStatement.add(enableUpdateStatement);
             }
@@ -90,11 +124,10 @@ public class MethodUpdateVisitor extends TreeTranslator {
         needUpdateBlock.modifyMethodBody(newStatement);
     }
 
-    private void generateNewStatement(PendHighway pendHighway, List<JCTree.JCStatement> newStatement, SunList<Symbol.VarSymbol> paramList) {
-        //先把方法入参当做材料添加进入 工厂中
-        pendHighway.addMaterialsFromParameters(paramList);
-        //把方法体中能访问到的所有参数当做材料添加进入 工厂中
-        pendHighway.addMaterialsFromMethodBodyVar();
+    private void generateNewStatement(PendHighway pendHighway, List<JCTree.JCStatement> newStatement) {
+
+        //把所有的材料添加进工厂
+        pendHighway.addMaterials();
         //生成最终的转换代码
         AssembleResult assembleResult = pendHighway.assemble();
 
