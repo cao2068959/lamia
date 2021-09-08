@@ -75,7 +75,7 @@ public class ListAssembleFactory implements IAssembleFactory {
         if (!typeReflectClass.isPresent()) {
             return false;
         }
-        return typeReflectClass.get().isAssignableFrom(Collection.class);
+        return Collection.class.isAssignableFrom(typeReflectClass.get());
     }
 
     @Override

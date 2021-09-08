@@ -78,11 +78,10 @@ public class ClassType {
 
     private Optional<Class<?>> tryGenReflectClass() {
         try {
-            Optional.of(Class.forName(typePath));
+            return Optional.of(Class.forName(typePath));
         } catch (ClassNotFoundException e) {
             return Optional.empty();
         }
-        return Optional.empty();
     }
 
 
