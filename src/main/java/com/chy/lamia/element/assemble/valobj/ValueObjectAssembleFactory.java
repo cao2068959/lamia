@@ -88,18 +88,7 @@ public class ValueObjectAssembleFactory implements IAssembleFactory {
         AssembleResult result = new AssembleResult(statements, newInstant, dependentClassPath);
         return result;
     }
-   /* private void createFunicle(Map<String, AssembleMaterial> dependentVar, List<JCTree.JCStatement> result) {
-        dependentVar.forEach((varName, assembleMaterial) -> {
-            Optional<String> randomMethodName = jcUtils.genRandomMethod(assembleMaterial.getParameterType().getTypePatch());
-            if (!randomMethodName.isPresent()) {
-                return;
-            }
 
-            //生成新方法的调用语句
-            JCTree.JCStatement jcExpressionStatement = jcUtils.execMethod(varName, randomMethodName.get(), Lists.of());
-            result.add(jcExpressionStatement);
-        });
-    }*/
 
     private void createSetter(Candidate candidate, String instantName,
                               List<JCTree.JCStatement> result, Set<String> dependentVar) {

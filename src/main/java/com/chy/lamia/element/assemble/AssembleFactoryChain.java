@@ -26,7 +26,12 @@ public class AssembleFactoryChain implements IAssembleFactory {
     public void addMaterial(AssembleMaterial assembleMaterial, AssembleFactoryChain chain) {
         Optional<IAssembleFactory> iAssembleFactory = holder.getIAssembleFactory(index);
         index++;
-        iAssembleFactory.ifPresent(assembleFactory -> assembleFactory.addMaterial(assembleMaterial, this));
+        iAssembleFactory.ifPresent(assembleFactory -> {
+            Optional<AssembleMaterial> parent = assembleMaterial.getParent();
+
+
+
+            assembleFactory.addMaterial(assembleMaterial, this);});
     }
 
 

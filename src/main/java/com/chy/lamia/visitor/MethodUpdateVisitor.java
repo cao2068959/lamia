@@ -76,6 +76,8 @@ public class MethodUpdateVisitor extends TreeTranslator {
         for (NeedUpdateBlock needUpdateBlock : needUpdateBlocks) {
             updateBlock(needUpdateBlock, paramMap);
         }
+
+
     }
 
     private ParameterTypeMemberAnnotation toParameterType(Symbol.VarSymbol varSymbol) {
@@ -143,6 +145,9 @@ public class MethodUpdateVisitor extends TreeTranslator {
 
         //放入最后的一条接收语句
         newStatement.add(statement);
+
+        //设置对应的脐带
+        FunicleFactory.addDependent(className, assembleResult.getDependentClassPath());
     }
 
 

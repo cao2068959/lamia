@@ -42,13 +42,12 @@ public class MapAssembleFactory implements IAssembleFactory {
 
         String name = parameterType.getName();
         MaterialCache materialCache = materialCaches.get(name);
-        if (materialCache == null) {
-            materialCache = new MaterialCache(parameterType, expression, priority);
-        }
-        Integer lastPriority = materialCache.getPriority();
-        if (lastPriority > priority) {
+
+        if (materialCache != null && materialCache.getPriority() > priority) {
             return;
         }
+        materialCache = new MaterialCache(parameterType,
+                material.getTopParent().map(AssembleMaterial::getParameterType), expression, priority);
         materialCaches.put(parameterType.getName(), materialCache);
     }
 
@@ -61,7 +60,7 @@ public class MapAssembleFactory implements IAssembleFactory {
         if (!typeReflectClass.isPresent()) {
             return false;
         }
-        return typeReflectClass.get().isAssignableFrom(Map.class);
+        return Map.class.isAssignableFrom(typeReflectClass.get());
     }
 
     @Override
@@ -77,14 +76,29 @@ public class MapAssembleFactory implements IAssembleFactory {
         JCTree.JCVariableDecl newVar = jcUtils.createVar(returnName, returnType.getTypePatch(), jcNewClass);
         List<JCTree.JCStatement> statements = new ArrayList<>();
         statements.add(newVar);
+        Set<String> dependentClassPath = new HashSet<>();
         materialCaches.forEach((k, v) -> {
             JCTree.JCExpression expression = v.getExpression();
             //生成代码 result.put("name",xxxx)
             JCTree.JCExpressionStatement expressionStatement = jcUtils.execMethod(returnName,
                     "put", Lists.of(jcUtils.geStringExpression(k), expression));
+
+            v.getTopParentParameterType().ifPresent(parentParameter -> dependentClassPath.add(parentParameter.getTypePatch()));
             statements.add(expressionStatement);
         });
-        return new AssembleResult(statements, returnName, null);
+        return new AssembleResult(statements, returnName, dependentClassPath);
+    }
+
+
+    /**
+     * 收集依赖到了什么 对象
+     *
+     * @param assembleMaterial
+     */
+    private void gatherDependent(AssembleMaterial assembleMaterial, Set<String> result) {
+        assembleMaterial.getTopParent().ifPresent(am -> {
+            result.add(am.getParameterType().getTypePatch());
+        });
     }
 
 

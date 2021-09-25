@@ -17,9 +17,6 @@ public class AssembleResult {
 
     Set<String> dependentClassPath;
 
-
-
-
     public AssembleResult(List<JCTree.JCStatement> statements, String newInstantName, Set<String> dependentClassPath) {
         this.statements = statements;
         this.newInstantName = newInstantName;

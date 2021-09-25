@@ -55,7 +55,7 @@ public class FunicleFactory {
     }
 
     public static void persistence() {
-        if (dependents.size() == 0) {
+        if (dependents.size() == 0 || persistenceDependents.size() == 0) {
             return;
         }
         try {
