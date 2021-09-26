@@ -3,6 +3,7 @@ package com.chy.lamia.element.type.processor;
 
 import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.utils.JCUtils;
+import com.chy.lamia.utils.Lists;
 import com.sun.tools.javac.tree.JCTree;
 
 import java.util.ArrayList;
@@ -41,7 +42,7 @@ public class OptionalProcessor implements ITypeProcessor {
 
     @Override
     public JCTree.JCExpression autoboxingExpression(JCTree.JCExpression expression) {
-        List<JCTree.JCExpression> params = List.of(expression);
+        List<JCTree.JCExpression> params = Lists.of(expression);
         return jcUtils.execMethod("java.util.Optional", "ofNullable", params).getExpression();
     }
 

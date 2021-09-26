@@ -4,6 +4,7 @@ import com.chy.lamia.element.assemble.*;
 import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.utils.CommonUtils;
 import com.chy.lamia.utils.JCUtils;
+import com.chy.lamia.utils.Lists;
 import com.chy.lamia.utils.ParameterTypeUtils;
 import com.sun.tools.javac.tree.JCTree;
 
@@ -127,7 +128,7 @@ public class ListAssembleFactory implements IAssembleFactory {
             ListMaterial material = listMaterials.get(0);
             //添加 result.add(item) 这一行代码
             JCTree.JCExpressionStatement addExecMethod = jcUtils.execMethod(returnName, "add",
-                    List.of(jcUtils.memberAccess(material.iterableVar)));
+                    Lists.of(jcUtils.memberAccess(material.iterableVar)));
             statements.add(addExecMethod);
             //把代码放入 for循环中
             JCTree.JCEnhancedForLoop foreachLoop = jcUtils.createForeachLoop(material.expression,

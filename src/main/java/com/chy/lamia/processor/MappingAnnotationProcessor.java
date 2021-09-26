@@ -26,7 +26,7 @@ import javax.lang.model.element.*;
 import java.util.*;
 
 @SupportedAnnotationTypes({"com.chy.lamia.annotation.Mapping"})
-@SupportedSourceVersion(SourceVersion.RELEASE_11)
+@SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class MappingAnnotationProcessor extends AbstractProcessor {
 
     JavacElements elementUtils;

@@ -21,7 +21,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @SupportedAnnotationTypes({"*"})
-@SupportedSourceVersion(SourceVersion.RELEASE_11)
+@SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class FunicleAnnotationProcessor extends AbstractProcessor {
 
     JavacElements elementUtils;

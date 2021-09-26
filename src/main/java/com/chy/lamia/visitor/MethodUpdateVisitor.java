@@ -61,7 +61,9 @@ public class MethodUpdateVisitor extends TreeTranslator {
         }
 
         ParameterType returnParameterType = new ParameterType(returnType);
-        Set<String> dependent = Set.of(returnParameterType.getTypePatch());
+        Set<String> dependent = new HashSet();
+        dependent.add(returnParameterType.getTypePatch());
+
         FunicleFactory.addDependent(className, dependent);
 
         Map<String, ParameterTypeMemberAnnotation> paramMap = new HashMap<>();
@@ -149,7 +151,6 @@ public class MethodUpdateVisitor extends TreeTranslator {
         //设置对应的脐带
         FunicleFactory.addDependent(className, assembleResult.getDependentClassPath());
     }
-
 
     /**
      * 去解析 原来的方法体, 每到一个 Lamia.convert()  都算一个 通路, 计算出代码有可能经过的所有通路, 并且把每一个通路中 可以访问到 变量给保存下来
