@@ -37,7 +37,7 @@ public class LooseBlockVisitor extends AbstractBlockVisitor {
     /**
      * 如果 遇到了 代码块 if while for 等 都递归进去 再次扫描一次
      *
-     * @param statement
+     * @param statement statement
      */
     @Override
     public void blockVisit(JCTree.JCBlock statement) {

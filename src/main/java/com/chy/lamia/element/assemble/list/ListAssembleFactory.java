@@ -128,7 +128,7 @@ public class ListAssembleFactory implements IAssembleFactory {
             ListMaterial material = listMaterials.get(0);
             //添加 result.add(item) 这一行代码
             JCTree.JCExpressionStatement addExecMethod = jcUtils.execMethod(returnName, "add",
-                    Lists.of(jcUtils.memberAccess(material.iterableVar)));
+                    Lists.of(jcUtils.memberAccess(assembleResult.getNewInstantName())));
             statements.add(addExecMethod);
             //把代码放入 for循环中
             JCTree.JCEnhancedForLoop foreachLoop = jcUtils.createForeachLoop(material.expression,

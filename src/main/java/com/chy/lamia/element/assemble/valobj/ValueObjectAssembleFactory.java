@@ -1,5 +1,6 @@
 package com.chy.lamia.element.assemble.valobj;
 
+import com.chy.lamia.annotation.MapMember;
 import com.chy.lamia.element.assemble.AssembleFactoryChain;
 import com.chy.lamia.element.assemble.AssembleMaterial;
 import com.chy.lamia.element.assemble.AssembleResult;
@@ -44,11 +45,12 @@ public class ValueObjectAssembleFactory implements IAssembleFactory {
     public void addMaterial(AssembleMaterial assembleMaterial, AssembleFactoryChain chian) {
         ParameterType parameterType = assembleMaterial.getParameterType();
         Integer priority = assembleMaterial.getPriority();
+        String name = assembleMaterial.getMapMember().map(MapMember::value).orElse(parameterType.getName());
         for (Candidate candidate : allCandidate) {
-            MatchReuslt matchReuslt = candidate.match(parameterType, priority);
+            MatchReuslt matchReuslt = candidate.match(name, parameterType, priority);
             //类型和名称都相同了 说明 这个表达式将是构成的一部分，把他存起来
             if (matchReuslt == MatchReuslt.HIT) {
-                updateExpressionMap(parameterType.getName(), assembleMaterial);
+                updateExpressionMap(name, assembleMaterial);
             }
         }
         chian.addMaterial(assembleMaterial, chian);

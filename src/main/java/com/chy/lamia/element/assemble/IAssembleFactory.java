@@ -9,8 +9,8 @@ public interface IAssembleFactory {
     /**
      * 添加原料
      *
-     * @param assembleMaterial
-     * @param chain
+     * @param assembleMaterial assembleMaterial
+     * @param chain chain
      */
     void addMaterial(AssembleMaterial assembleMaterial, AssembleFactoryChain chain);
 

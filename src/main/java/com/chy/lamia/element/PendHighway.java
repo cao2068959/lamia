@@ -87,9 +87,10 @@ public class PendHighway extends JCTree.JCStatement {
     }
 
 
-
     /**
      * 聚合所有的条件去生成对应的代码
+     *
+     * @return AssembleResult
      */
     public AssembleResult assemble() {
         //获取 结果对象的 生成的语句

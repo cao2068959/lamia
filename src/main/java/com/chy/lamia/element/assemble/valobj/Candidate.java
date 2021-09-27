@@ -1,10 +1,12 @@
 package com.chy.lamia.element.assemble.valobj;
 
+import com.chy.lamia.annotation.MapMember;
 import com.chy.lamia.element.UnPackMutliParameterType;
 import com.chy.lamia.element.UnPackTypeMatchResult;
 import com.chy.lamia.element.type.ExpressionFunction;
 import com.chy.lamia.entity.Constructor;
 import com.chy.lamia.entity.ParameterType;
+import com.chy.lamia.entity.ParameterTypeMemberAnnotation;
 import com.chy.lamia.entity.Setter;
 import com.chy.lamia.enums.MatchReuslt;
 import com.sun.tools.javac.tree.JCTree;
@@ -60,12 +62,14 @@ public class Candidate {
      * 传入字段进来，看看能不能和构造器和setter匹配上
      * 如果匹配到那么 将返回true
      *
-     * @return
+     * @param name name
+     * @param target   target
+     * @param priority priority
+     * @return MatchReuslt
      */
-    public MatchReuslt match(ParameterType target, Integer priority) {
-        String fieldName = target.getName();
+    public MatchReuslt match(String name, ParameterType target, Integer priority) {
         //使用字段的名称去匹配有没对应的setter或者构造器
-        UnPackMutliParameterType unPackMutliParameterType = allParamMap.get(fieldName);
+        UnPackMutliParameterType unPackMutliParameterType = allParamMap.get(name);
         //没有匹配上
         if (unPackMutliParameterType == null) {
             return MatchReuslt.MISS;
@@ -78,13 +82,13 @@ public class Candidate {
         }
 
         //记录一下是构造器命中的,还是setter方法命中的
-        if (constructorParamMap.containsKey(fieldName)) {
-            constructorHit.add(fieldName);
+        if (constructorParamMap.containsKey(name)) {
+            constructorHit.add(name);
         } else {
-            setterHit.add(fieldName);
+            setterHit.add(name);
         }
         //把匹配的结构记录一下
-        updateHitUnPackTypeMatchResult(fieldName, unPackTypeMatchResult, priority);
+        updateHitUnPackTypeMatchResult(name, unPackTypeMatchResult, priority);
         return MatchReuslt.HIT;
     }
 

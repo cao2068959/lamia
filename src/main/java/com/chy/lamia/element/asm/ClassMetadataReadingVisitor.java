@@ -165,4 +165,6 @@ public class ClassMetadataReadingVisitor extends ClassVisitor {
     public List<SimpleMethod> getAllMethod() {
         return allMethod;
     }
+
+
 }

@@ -213,10 +213,10 @@ public class JCUtils {
     /**
      * 生成 增强for循环
      *
-     * @param forVarType
-     * @param collectionVar
-     * @param blockFun
-     * @return
+     * @param forVarType forVarType
+     * @param collectionVar collectionVar
+     * @param blockFun blockFun
+     * @return JCEnhancedForLoop
      */
     public JCTree.JCEnhancedForLoop createForeachLoop(ParameterType forVarType, String collectionVar,
                                                       Function<JCTree.JCVariableDecl, java.util.List<JCTree.JCStatement>> blockFun) {
@@ -257,8 +257,9 @@ public class JCUtils {
     /**
      * 生成一个静态的随机方法
      *
-     * @param className
-     * @return
+     * @param className className
+     * @param methodType methodType
+     * @return Optional
      */
     public Optional<String> genStaticRandomMethod(String className, String methodType) {
         JCTree tree = elementUtils.getTree(elementUtils.getTypeElement(className));
