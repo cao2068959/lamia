@@ -1,6 +1,8 @@
 package com.chy.lamia.element.assemble.list;
 
+import com.chy.lamia.annotation.MapMember;
 import com.chy.lamia.element.assemble.*;
+import com.chy.lamia.entity.Expression;
 import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.utils.CommonUtils;
 import com.chy.lamia.utils.JCUtils;
@@ -9,6 +11,8 @@ import com.chy.lamia.utils.ParameterTypeUtils;
 import com.sun.tools.javac.tree.JCTree;
 
 import java.util.*;
+
+import static com.chy.lamia.constant.PriorityConstant.CLASS_FIELD;
 
 /**
  * 生成 list的组装工厂
@@ -37,10 +41,7 @@ public class ListAssembleFactory implements IAssembleFactory {
 
     public void doAddMaterial(AssembleMaterial material, AssembleFactoryChain chain) {
         ParameterType parameterType = material.getParameterType();
-        JCTree.JCExpression expression = material.getExpression();
-        Integer priority = material.getPriority();
-
-
+        JCTree.JCExpression expression = material.getExpression().getExpression();
         if (!isNeedDeal(parameterType)) {
             return;
         }
@@ -52,6 +53,9 @@ public class ListAssembleFactory implements IAssembleFactory {
         ParameterType genericType = generic.get(0);
 
 
+        Integer customPriority = material.getMapMember().map(MapMember::priority).orElse(-1);
+        Integer priority = customPriority < 0 ? CLASS_FIELD : customPriority;
+
         String iterableVar = CommonUtils.generateVarName("iterable");
         //把list中的泛型中的类型的所有属性给塞入其他的组装工厂
         ParameterTypeUtils.parameterGetterSpread(genericType, (methodName, getter) -> {
@@ -59,7 +63,8 @@ public class ListAssembleFactory implements IAssembleFactory {
             JCTree.JCExpressionStatement jcExpressionStatement = jcUtils.execMethod(iterableVar,
                     getter.getSimpleName(), new LinkedList<>());
             AssembleMaterial assembleMaterial = new AssembleMaterial(new ParameterType(methodName, getter.getParameterType()),
-                    jcExpressionStatement.expr, AssembleMaterialSource.OTHER);
+                    new Expression(jcExpressionStatement.expr), AssembleMaterialSource.OTHER);
+            assembleMaterial.setPriority(priority);
             mirrorChain.addMaterial(assembleMaterial, mirrorChain);
         });
         ListMaterial listMaterial = new ListMaterial(parameterType, genericType, expression, iterableVar);

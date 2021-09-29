@@ -53,19 +53,6 @@ public class MethodUpdateVisitor extends TreeTranslator {
             return;
         }
 
-        //解析这个方法的返回值
-        Type returnType = methodSymbol.getReturnType();
-        //返回值不是一个对象就不进行处理了
-        if (returnType.getTag() != TypeTag.CLASS) {
-            return;
-        }
-
-        ParameterType returnParameterType = new ParameterType(returnType);
-        Set<String> dependent = new HashSet();
-        dependent.add(returnParameterType.getTypePatch());
-
-        FunicleFactory.addDependent(className, dependent);
-
         Map<String, ParameterTypeMemberAnnotation> paramMap = new HashMap<>();
         //处理方法入参，解析泛型，类型转换
         new SunList<>(methodSymbolDecl.sym.getParameters()).forEach(varSymbol -> {
@@ -78,7 +65,6 @@ public class MethodUpdateVisitor extends TreeTranslator {
         for (NeedUpdateBlock needUpdateBlock : needUpdateBlocks) {
             updateBlock(needUpdateBlock, paramMap);
         }
-
 
     }
 

@@ -2,6 +2,7 @@ package com.chy.lamia.element.assemble;
 
 
 import com.chy.lamia.annotation.MapMember;
+import com.chy.lamia.entity.Expression;
 import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.utils.ParameterTypeUtils;
@@ -12,7 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.chy.lamia.constant.PriorityConstant.PARAMETERS_IN_VAR;
+import static com.chy.lamia.constant.PriorityConstant.CLASS_FIELD;
 
 public class AssembleFactoryHolder {
 
@@ -29,22 +30,13 @@ public class AssembleFactoryHolder {
     }
 
     public void addMaterial(AssembleMaterial material) {
-        if (isSpread(material)) {
+        String typePatch = material.getParameterType().getTypePatch();
+        //java开头的包不会去进行扩散
+        if (!typePatch.startsWith("java") && material.isSpread()) {
             doSpread(material);
         }
         doAddMaterial(material);
     }
-
-    private boolean isSpread(AssembleMaterial material) {
-        return material.getMapMember().map(MapMember::spread)
-                .orElseGet(() -> {
-                    if (material.getSource() == AssembleMaterialSource.PARAMETER) {
-                        return true;
-                    }
-                    return false;
-                });
-    }
-
 
     public void doAddMaterial(AssembleMaterial material) {
         assembleFactoryChain.resetIndex();
@@ -58,14 +50,17 @@ public class AssembleFactoryHolder {
      */
     private void doSpread(AssembleMaterial assembleMaterial) {
 
+        Integer customPriority = assembleMaterial.getMapMember().map(MapMember::priority).orElse(-1);
+        Integer priority = customPriority < 0 ? CLASS_FIELD : customPriority;
+
         ParameterTypeUtils.parameterGetterSpread(assembleMaterial.getParameterType(), (k, v) -> {
             //生成 a.getXX() 的表达式
             JCTree.JCExpressionStatement getterExpression =
-                    JCUtils.instance.execMethod(assembleMaterial.getExpression(), v.getSimpleName(), new LinkedList<>());
+                    JCUtils.instance.execMethod(assembleMaterial.getExpression().getExpression(), v.getSimpleName(), new LinkedList<>());
             ParameterType parameterType = new ParameterType(k, v.getParameterType());
             //将表达式放入 合成工厂去匹配
-            AssembleMaterial childrenAssembleMaterial = new AssembleMaterial(parameterType, getterExpression.expr);
-            childrenAssembleMaterial.setPriority(PARAMETERS_IN_VAR);
+            AssembleMaterial childrenAssembleMaterial = new AssembleMaterial(parameterType, new Expression(getterExpression.expr));
+            childrenAssembleMaterial.setPriority(priority);
             childrenAssembleMaterial.setParent(assembleMaterial);
             this.addMaterial(childrenAssembleMaterial);
         });

@@ -37,7 +37,7 @@ public class MapAssembleFactory implements IAssembleFactory {
             return;
         }
         ParameterType parameterType = material.getParameterType();
-        JCTree.JCExpression expression = material.getExpression();
+        JCTree.JCExpression expression = material.getExpression().getExpression();
         Integer priority = material.getPriority();
 
         String name = parameterType.getName();

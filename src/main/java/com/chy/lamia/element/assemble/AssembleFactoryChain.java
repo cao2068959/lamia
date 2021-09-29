@@ -28,9 +28,6 @@ public class AssembleFactoryChain implements IAssembleFactory {
         index++;
         iAssembleFactory.ifPresent(assembleFactory -> {
             Optional<AssembleMaterial> parent = assembleMaterial.getParent();
-
-
-
             assembleFactory.addMaterial(assembleMaterial, this);});
     }
 

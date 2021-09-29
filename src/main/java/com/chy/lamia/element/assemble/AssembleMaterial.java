@@ -1,8 +1,9 @@
 package com.chy.lamia.element.assemble;
 
 import com.chy.lamia.annotation.MapMember;
+import com.chy.lamia.entity.Expression;
 import com.chy.lamia.entity.ParameterType;
-import com.sun.tools.javac.tree.JCTree;
+import com.chy.lamia.entity.ParameterTypeMemberAnnotation;
 
 import java.util.Optional;
 
@@ -11,32 +12,57 @@ import static com.chy.lamia.constant.PriorityConstant.*;
 public class AssembleMaterial {
 
     ParameterType parameterType;
-    JCTree.JCExpression expression;
+    Expression expression;
     Integer priority;
     //如果是一个对象中的字段,那么就会存在对应的 parent
     Optional<AssembleMaterial> parent = Optional.empty();
     Optional<MapMember> mapMember = Optional.empty();
     AssembleMaterialSource source;
+    Boolean spread;
 
-    public AssembleMaterial(ParameterType parameterType, JCTree.JCExpression expression, AssembleMaterialSource source) {
+
+    public AssembleMaterial(ParameterType parameterType, Expression expression, AssembleMaterialSource source) {
         this.parameterType = parameterType;
         this.expression = expression;
         this.source = source;
-        if (source == AssembleMaterialSource.PARAMETER) {
-            this.priority = PARAMETERS;
-        } else if (source == AssembleMaterialSource.METHOD_VAR) {
-            this.priority = METHOD_BODY_VAR;
-        } else {
-            this.priority = OTHER;
+        this.priority = COMMON;
+    }
+
+    public AssembleMaterial(ParameterTypeMemberAnnotation parameterType, Expression expression, AssembleMaterialSource source) {
+        this((ParameterType) parameterType, expression, source);
+        Integer priority = parameterType.getMapMember().map(MapMember::priority).orElse(-1);
+        if (priority >= 0) {
+            this.priority = priority;
         }
     }
 
-    public AssembleMaterial(ParameterType parameterType, JCTree.JCExpression expression) {
+
+    public AssembleMaterial(ParameterType parameterType, Expression expression) {
         this.parameterType = parameterType;
         this.expression = expression;
         this.source = AssembleMaterialSource.OTHER;
         this.priority = OTHER;
     }
+
+    public boolean isSpread() {
+        if (spread != null) {
+            return spread;
+        }
+
+        spread = doIsSpread();
+        return spread;
+    }
+
+    private boolean doIsSpread() {
+        return this.getMapMember().map(MapMember::spread)
+                .orElseGet(() -> {
+                    if (this.getSource() == AssembleMaterialSource.PARAMETER) {
+                        return true;
+                    }
+                    return false;
+                });
+    }
+
 
     /**
      * 获取最顶层的 parent
@@ -67,12 +93,8 @@ public class AssembleMaterial {
         this.parameterType = parameterType;
     }
 
-    public JCTree.JCExpression getExpression() {
+    public Expression getExpression() {
         return expression;
-    }
-
-    public void setExpression(JCTree.JCExpression expression) {
-        this.expression = expression;
     }
 
     public Integer getPriority() {

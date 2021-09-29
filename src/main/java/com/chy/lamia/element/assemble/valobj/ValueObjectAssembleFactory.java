@@ -5,6 +5,7 @@ import com.chy.lamia.element.assemble.AssembleFactoryChain;
 import com.chy.lamia.element.assemble.AssembleMaterial;
 import com.chy.lamia.element.assemble.AssembleResult;
 import com.chy.lamia.element.assemble.IAssembleFactory;
+import com.chy.lamia.element.assemble.map.MapAssembleFactory;
 import com.chy.lamia.element.funicle.FunicleFactory;
 import com.chy.lamia.entity.*;
 import com.chy.lamia.enums.MatchReuslt;
@@ -27,6 +28,8 @@ public class ValueObjectAssembleFactory implements IAssembleFactory {
     private boolean complete = false;
     private String originalClassPath;
 
+    private AssembleMaterial omnipotentVar;
+
     public ValueObjectAssembleFactory(JCUtils jcUtils, String originalClassPath,
                                       List<Constructor> constructors,
                                       Map<String, Setter> setterMap) {
@@ -45,6 +48,11 @@ public class ValueObjectAssembleFactory implements IAssembleFactory {
     public void addMaterial(AssembleMaterial assembleMaterial, AssembleFactoryChain chian) {
         ParameterType parameterType = assembleMaterial.getParameterType();
         Integer priority = assembleMaterial.getPriority();
+        //判断一下是不是万能变量
+        if (isOmnipotent(assembleMaterial)) {
+            omnipotentVar = assembleMaterial;
+        }
+
         String name = assembleMaterial.getMapMember().map(MapMember::value).orElse(parameterType.getName());
         for (Candidate candidate : allCandidate) {
             MatchReuslt matchReuslt = candidate.match(name, parameterType, priority);
@@ -55,6 +63,19 @@ public class ValueObjectAssembleFactory implements IAssembleFactory {
         }
         chian.addMaterial(assembleMaterial, chian);
     }
+
+    private boolean isOmnipotent(AssembleMaterial assembleMaterial) {
+        //不扩散那肯定不是
+        if (!assembleMaterial.isSpread()) {
+            return false;
+        }
+        //不是Map 类型的,没有机会了
+        if (!MapAssembleFactory.isNeedDeal(assembleMaterial.getParameterType())) {
+            return false;
+        }
+        return true;
+    }
+
 
     private void updateExpressionMap(String name, AssembleMaterial assembleMaterial) {
         AssembleMaterial existAssembleMaterial = expressionMap.get(name);
@@ -71,9 +92,15 @@ public class ValueObjectAssembleFactory implements IAssembleFactory {
     @Override
     public AssembleResult generate(AssembleFactoryChain chain) {
         //chain.generate(chain);
+        //选择一个合适的Candidate
         Candidate candidate = choose();
-        if (candidate == null) {
+        //没有万能变量,并且不满足构造器,那么就直接报错了
+        if (omnipotentVar == null && candidate == null) {
             throw new RuntimeException("类 ： [" + originalClassPath + "] 构造器参数不够");
+        }
+        if (candidate == null) {
+            //没有找到, 但是发现有万能变量, 去选一个差的最少的
+            candidate = asChooseAs();
         }
         return doGenerateTree(candidate);
     }
@@ -94,10 +121,17 @@ public class ValueObjectAssembleFactory implements IAssembleFactory {
 
     private void createSetter(Candidate candidate, String instantName,
                               List<JCTree.JCStatement> result, Set<String> dependentVar) {
-        candidate.getHitSetter().forEach((k, v) -> {
-            AssembleMaterial assembleMaterial = expressionMap.get(k);
+
+        Map<String, ParameterType> hitSetter = candidate.getHitSetter();
+        if (omnipotentVar != null) {
+            hitSetter = candidate.getSetter();
+        }
+
+        hitSetter.forEach((k, v) -> {
+            AssembleMaterial assembleMaterial = omnipotentVarReplace(expressionMap.get(k), k);
             gatherDependent(assembleMaterial, dependentVar);
-            JCTree.JCExpression wapperExpression = candidate.createdWapperExpression(k, assembleMaterial.getExpression());
+            JCTree.JCExpression wapperExpression = candidate.createdWapperExpression(k,
+                    assembleMaterial.getExpression().getExpressionByHandle(v));
             JCTree.JCExpressionStatement setterExpression = jcUtils.execMethod(instantName, v.getMethodName(), wapperExpression);
             result.add(setterExpression);
         });
@@ -120,10 +154,9 @@ public class ValueObjectAssembleFactory implements IAssembleFactory {
         List<JCTree.JCExpression> paramsExpression = new ArrayList<>();
         constructor.getParams().forEach(param -> {
             String name = param.getName();
-            AssembleMaterial assembleMaterial = expressionMap.get(name);
+            AssembleMaterial assembleMaterial = omnipotentVarReplace(expressionMap.get(name), name);
             gatherDependent(assembleMaterial, dependentVar);
-
-            paramsExpression.add(candidate.createdWapperExpression(name, assembleMaterial.getExpression()));
+            paramsExpression.add(candidate.createdWapperExpression(name, assembleMaterial.getExpression().getExpressionByHandle(param)));
         });
         String varName = CommonUtils.generateVarName("result");
 
@@ -133,6 +166,37 @@ public class ValueObjectAssembleFactory implements IAssembleFactory {
         return varName;
     }
 
+    /**
+     * 判断是否应该由 万能变量去替换
+     *
+     * @param assembleMaterial
+     * @return
+     */
+    private AssembleMaterial omnipotentVarReplace(AssembleMaterial assembleMaterial, String name) {
+        if (omnipotentVar == null) {
+            return assembleMaterial;
+        }
+
+        if (assembleMaterial != null && assembleMaterial.getPriority() > omnipotentVar.getPriority()) {
+            return assembleMaterial;
+        }
+
+
+        //生成 map.get(name) 这个语句
+        JCTree.JCExpressionStatement mapGetStatement = jcUtils.execMethod(omnipotentVar.getExpression().getExpression(), "get",
+                Lists.of(jcUtils.geStringExpression(name)));
+
+        Expression expression = new Expression(mapGetStatement.expr, (oldExpression, parameterType) -> {
+            if (parameterType == null) {
+                return oldExpression;
+            }
+            return jcUtils.typeCast(parameterType.getTypePatch(), oldExpression);
+        });
+        //去生成新的 assembleMaterial;
+        return new AssembleMaterial(omnipotentVar.getParameterType(), expression);
+    }
+
+
     private Candidate choose() {
         int score = -1;
         Candidate result = null;
@@ -140,6 +204,25 @@ public class ValueObjectAssembleFactory implements IAssembleFactory {
             int cScore = candidate.score();
             if (score < cScore) {
                 score = cScore;
+                result = candidate;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 尽可能的去选择一个最接近的
+     *
+     * @return
+     */
+    public Candidate asChooseAs() {
+        Candidate result = null;
+        for (Candidate candidate : allCandidate) {
+            if (result == null) {
+                result = candidate;
+                continue;
+            }
+            if (result.constructorDifference() > candidate.constructorDifference()) {
                 result = candidate;
             }
         }

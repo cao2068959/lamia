@@ -57,6 +57,10 @@ public class SimpleAnnotationInvocationHandler implements InvocationHandler {
                 return false;
             }
         }
+
+        if (type == Integer.class || int.class == type){
+            return Integer.parseInt(strType);
+        }
         return strType;
     }
 

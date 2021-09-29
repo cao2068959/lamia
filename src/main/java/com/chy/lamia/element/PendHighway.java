@@ -7,6 +7,7 @@ import com.chy.lamia.element.assemble.AssembleFactoryHolder;
 import com.chy.lamia.element.assemble.AssembleMaterial;
 import com.chy.lamia.element.assemble.AssembleMaterialSource;
 import com.chy.lamia.element.assemble.AssembleResult;
+import com.chy.lamia.entity.Expression;
 import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.entity.ParameterTypeMemberAnnotation;
 import com.chy.lamia.utils.JCUtils;
@@ -81,7 +82,7 @@ public class PendHighway extends JCTree.JCStatement {
             return;
         }
         AssembleMaterial assembleMaterial = new AssembleMaterial(parameterTypeMemberAnnotation,
-                jcUtils.memberAccess(parameterTypeMemberAnnotation.getFieldName()), source);
+                new Expression(jcUtils.memberAccess(parameterTypeMemberAnnotation.getFieldName())), source);
         assembleMaterial.setMapMember(parameterTypeMemberAnnotation.getMapMember());
         genTypeFactory.addMaterial(assembleMaterial);
     }

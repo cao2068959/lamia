@@ -33,6 +33,8 @@ public class Candidate {
     private Constructor constructor;
     private Set<String> constructorHit = new HashSet<>();
     private Set<String> setterHit = new HashSet<>();
+
+
     private Map<String, Pair<Integer, UnPackTypeMatchResult>> hitUnPackTypeMatchResult = new HashMap<>();
 
 
@@ -62,7 +64,7 @@ public class Candidate {
      * 传入字段进来，看看能不能和构造器和setter匹配上
      * 如果匹配到那么 将返回true
      *
-     * @param name name
+     * @param name     name
      * @param target   target
      * @param priority priority
      * @return MatchReuslt
@@ -76,9 +78,15 @@ public class Candidate {
         }
         //去对比类型是否相同
         UnPackTypeMatchResult unPackTypeMatchResult = unPackMutliParameterType.matchType(target);
+        boolean isObject = false;
         //类型不对, 没有匹配上
         if (!unPackTypeMatchResult.isMatch()) {
-            return MatchReuslt.MISS;
+            //类型不对但是看看是不是 Object 的类型, 如果是的话, 勉强算对, 但是优先级扣分
+            if ("java.lang.Object".equals(target.getTypePatch())) {
+                isObject = true;
+            } else {
+                return MatchReuslt.MISS;
+            }
         }
 
         //记录一下是构造器命中的,还是setter方法命中的
@@ -121,6 +129,12 @@ public class Candidate {
         return setterHit.size();
     }
 
+    public int constructorDifference() {
+        //如果 构造器都没满足则不及格
+        return constructorParamMap.size() - constructorHit.size();
+    }
+
+
     public Map<String, ParameterType> getHitSetter() {
         Map<String, ParameterType> result = new HashMap<>();
         setterHit.forEach(hit -> {
@@ -131,6 +145,10 @@ public class Candidate {
 
     public Constructor getConstructor() {
         return constructor;
+    }
+
+    public Map<String, ParameterType> getSetter() {
+        return setterMap;
     }
 
     public void clear() {

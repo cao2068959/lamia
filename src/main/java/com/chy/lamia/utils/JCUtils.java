@@ -213,9 +213,9 @@ public class JCUtils {
     /**
      * 生成 增强for循环
      *
-     * @param forVarType forVarType
+     * @param forVarType    forVarType
      * @param collectionVar collectionVar
-     * @param blockFun blockFun
+     * @param blockFun      blockFun
      * @return JCEnhancedForLoop
      */
     public JCTree.JCEnhancedForLoop createForeachLoop(ParameterType forVarType, String collectionVar,
@@ -257,7 +257,7 @@ public class JCUtils {
     /**
      * 生成一个静态的随机方法
      *
-     * @param className className
+     * @param className  className
      * @param methodType methodType
      * @return Optional
      */
@@ -325,6 +325,17 @@ public class JCUtils {
             return new ParameterType(completeType.toString());
         }
         throw new RuntimeException("无法解析泛型类型 [" + data.toString() + "] class:[" + data.getClass().toString() + "]");
+    }
+
+
+    /**
+     * 强转类型
+     *
+     * @param castType
+     * @param expression
+     */
+    public JCTree.JCTypeCast typeCast(String castType, JCTree.JCExpression expression) {
+        return treeMaker.TypeCast(memberAccess(castType), expression);
     }
 
 
