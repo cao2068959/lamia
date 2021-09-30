@@ -1,6 +1,7 @@
 package com.chy.lamia.element.assemble.map;
 
 
+import com.chy.lamia.annotation.MapMember;
 import com.chy.lamia.element.assemble.AssembleFactoryChain;
 import com.chy.lamia.element.assemble.AssembleMaterial;
 import com.chy.lamia.element.assemble.AssembleResult;
@@ -37,7 +38,7 @@ public class MapAssembleFactory implements IAssembleFactory {
         JCTree.JCExpression expression = material.getExpression().getExpression();
         Integer priority = material.getPriority();
 
-        String name = parameterType.getName();
+        String name = material.getName();
         MaterialCache materialCache = materialCaches.get(name);
 
         if (materialCache != null && materialCache.getPriority() > priority) {
@@ -45,7 +46,7 @@ public class MapAssembleFactory implements IAssembleFactory {
         }
         materialCache = new MaterialCache(parameterType,
                 material.getTopParent().map(AssembleMaterial::getParameterType), expression, priority);
-        materialCaches.put(parameterType.getName(), materialCache);
+        materialCaches.put(name, materialCache);
     }
 
     public static boolean isNeedDeal(ParameterType parameterType) {

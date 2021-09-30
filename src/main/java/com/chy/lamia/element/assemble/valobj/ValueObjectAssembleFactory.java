@@ -53,7 +53,7 @@ public class ValueObjectAssembleFactory implements IAssembleFactory {
             omnipotentVar = assembleMaterial;
         }
 
-        String name = assembleMaterial.getMapMember().map(MapMember::value).orElse(parameterType.getName());
+        String name = assembleMaterial.getName();
         for (Candidate candidate : allCandidate) {
             MatchReuslt matchReuslt = candidate.match(name, parameterType, priority);
             //类型和名称都相同了 说明 这个表达式将是构成的一部分，把他存起来

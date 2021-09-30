@@ -19,6 +19,7 @@ public class AssembleMaterial {
     Optional<MapMember> mapMember = Optional.empty();
     AssembleMaterialSource source;
     Boolean spread;
+    String name;
 
 
     public AssembleMaterial(ParameterType parameterType, Expression expression, AssembleMaterialSource source) {
@@ -82,6 +83,14 @@ public class AssembleMaterial {
             }
             result = newParent;
         }
+    }
+
+    public String getName() {
+        if (name != null){
+            return name;
+        }
+        name = mapMember.map(MapMember::value).orElse(parameterType.getName());
+        return name;
     }
 
 
