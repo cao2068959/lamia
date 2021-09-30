@@ -33,9 +33,6 @@ public class MapAssembleFactory implements IAssembleFactory {
 
 
     public void doAddMaterial(AssembleMaterial material) {
-        if (!material.hasParent()) {
-            return;
-        }
         ParameterType parameterType = material.getParameterType();
         JCTree.JCExpression expression = material.getExpression().getExpression();
         Integer priority = material.getPriority();

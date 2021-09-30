@@ -127,4 +127,8 @@ public class PendHighway extends JCTree.JCStatement {
     }
 
 
+    public String genTypePath(){
+        return genClassDetails.parameterType.getTypePatch();
+    }
+
 }

@@ -34,6 +34,7 @@ public class AssembleFactoryHolder {
         //java开头的包不会去进行扩散
         if (!typePatch.startsWith("java") && material.isSpread()) {
             doSpread(material);
+            return;
         }
         doAddMaterial(material);
     }

@@ -134,8 +134,10 @@ public class MethodUpdateVisitor extends TreeTranslator {
         //放入最后的一条接收语句
         newStatement.add(statement);
 
+        Set<String> dependentClassPath = assembleResult.getDependentClassPath();
+        dependentClassPath.add(pendHighway.genTypePath());
         //设置对应的脐带
-        FunicleFactory.addDependent(className, assembleResult.getDependentClassPath());
+        FunicleFactory.addDependent(className, dependentClassPath);
     }
 
     /**
