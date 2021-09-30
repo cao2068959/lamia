@@ -35,7 +35,7 @@ __1.引入maven坐标__
 <dependency>
     <groupId>io.github.cao2068959</groupId>
     <artifactId>lamia</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
 </dependency>
 ```
 
