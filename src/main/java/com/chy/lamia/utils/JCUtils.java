@@ -2,17 +2,22 @@ package com.chy.lamia.utils;
 
 import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.visitor.RandomMethodCreateVisitor;
+import com.sun.source.util.Trees;
+import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.TypeTag;
 import com.sun.tools.javac.comp.*;
 import com.sun.tools.javac.model.JavacElements;
+import com.sun.tools.javac.processing.JavacProcessingEnvironment;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeMaker;
+import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.Names;
 
+import javax.annotation.processing.ProcessingEnvironment;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Optional;
@@ -25,22 +30,39 @@ public class JCUtils {
     private final Enter enter;
     private final Annotate annotate;
     private final Names names;
+    final Context context;
     TreeMaker treeMaker;
     JavacElements elementUtils;
     public static JCUtils instance;
+
+
+    public static void refreshJCUtils(ProcessingEnvironment processingEnv) {
+        if (instance == null) {
+            instance = new JCUtils(processingEnv);
+            return;
+        }
+
+        Context context = ((JavacProcessingEnvironment) processingEnv).getContext();
+        if (context != instance.context){
+            instance = new JCUtils(processingEnv);
+        }
+    }
+
+    public JCUtils(ProcessingEnvironment processingEnv) {
+        this.context = ((JavacProcessingEnvironment) processingEnv).getContext();
+        treeMaker = TreeMaker.instance(context);
+        this.elementUtils = (JavacElements) processingEnv.getElementUtils();
+        this.attr = Attr.instance(context);
+        this.enter = Enter.instance(context);
+        this.annotate = Annotate.instance(context);
+        this.names = Names.instance(context);
+    }
 
     public Annotate getAnnotate() {
         return annotate;
     }
 
-    public JCUtils(TreeMaker treeMaker, JavacElements elementUtils, Annotate annotate, Attr attr, Enter enter, Names names) {
-        this.treeMaker = treeMaker;
-        this.elementUtils = elementUtils;
-        this.attr = attr;
-        this.enter = enter;
-        this.annotate = annotate;
-        this.names = names;
-    }
+
 
     /**
      * String等类的简写还原成 全路径
@@ -353,5 +375,9 @@ public class JCUtils {
 
     public JavacElements getElementUtils() {
         return elementUtils;
+    }
+
+    public Context getContext() {
+        return context;
     }
 }

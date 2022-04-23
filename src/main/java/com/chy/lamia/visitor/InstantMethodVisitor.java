@@ -1,11 +1,17 @@
 package com.chy.lamia.visitor;
 
+import com.chy.lamia.element.ClassDetails;
+import com.chy.lamia.entity.ParameterType;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.util.List;
 
 public abstract class InstantMethodVisitor extends JCTree.Visitor {
 
+    /**
+     * 父类的类型
+     */
+    ParameterType parentType;
 
     @Override
     public void visitMethodDef(JCTree.JCMethodDecl that) {
@@ -16,14 +22,15 @@ public abstract class InstantMethodVisitor extends JCTree.Visitor {
         visitInstanttMethod(that);
     }
 
-
     public abstract void visitInstanttMethod(JCTree.JCMethodDecl that);
-
-
-
 
     @Override
     public void visitClassDef(JCTree.JCClassDecl that) {
+        JCTree.JCExpression extendsClause = that.getExtendsClause();
+        //如果有继承的情况下先把父类保存了
+        if (extendsClause != null) {
+            this.parentType = new ParameterType(extendsClause.type.toString());
+        }
         List<JCTree> members = that.getMembers();
         members.forEach(jcTree -> {
             if (jcTree instanceof JCTree.JCMethodDecl) {
@@ -32,5 +39,7 @@ public abstract class InstantMethodVisitor extends JCTree.Visitor {
         });
     }
 
-
+    public ParameterType getParentType() {
+        return parentType;
+    }
 }

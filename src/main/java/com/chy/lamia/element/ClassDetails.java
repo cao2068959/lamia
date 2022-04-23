@@ -4,10 +4,7 @@ import com.chy.lamia.element.assemble.AssembleFactoryHolder;
 import com.chy.lamia.element.assemble.IAssembleFactory;
 import com.chy.lamia.element.assemble.list.ListAssembleFactory;
 import com.chy.lamia.element.assemble.map.MapAssembleFactory;
-import com.chy.lamia.entity.Getter;
-import com.chy.lamia.entity.ParameterType;
-import com.chy.lamia.entity.SimpleMethod;
-import com.chy.lamia.entity.Var;
+import com.chy.lamia.entity.*;
 import com.chy.lamia.utils.JCUtils;
 import com.sun.tools.javac.tree.JCTree;
 
@@ -96,6 +93,9 @@ public class ClassDetails {
         return classDefine.getInstantGetters();
     }
 
+    public Map<String, Setter> getInstantSetters() {
+        return classDefine.getInstantSetters();
+    }
 
     public static ClassDetails getClassElement(ParameterType parameterType) {
         String key = parameterType.toString();

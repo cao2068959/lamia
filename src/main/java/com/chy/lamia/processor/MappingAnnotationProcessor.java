@@ -5,6 +5,7 @@ import com.chy.lamia.element.funicle.FunicleFactory;
 import com.chy.lamia.log.Logger;
 import com.chy.lamia.processor.marked.MarkedContext;
 import com.chy.lamia.utils.JCUtils;
+import com.chy.lamia.utils.ReflectUtils;
 import com.chy.lamia.visitor.MethodUpdateVisitor;
 import com.sun.tools.javac.comp.Annotate;
 import com.sun.tools.javac.comp.Attr;
@@ -29,34 +30,18 @@ import java.util.*;
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class MappingAnnotationProcessor extends AbstractProcessor {
 
-    JavacElements elementUtils;
-
-    TreeMaker treeMaker;
-
-    JavacTrees trees;
-
-    JCUtils jcUtils;
-
     private MarkedContext markedContext = new MarkedContext();
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
-        Context context = ((JavacProcessingEnvironment) processingEnv).getContext();
-        treeMaker = TreeMaker.instance(context);
-        elementUtils = (JavacElements) processingEnv.getElementUtils();
-        trees = (JavacTrees) Trees.instance(processingEnv);
-        Attr attr = Attr.instance(context);
-        Enter enter = Enter.instance(context);
-        Annotate annotate = Annotate.instance(context);
-        Names names = Names.instance(context);
-        jcUtils = new JCUtils(treeMaker, elementUtils, annotate, attr, enter, names);
-        JCUtils.instance = jcUtils;
+
     }
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         try {
-            Logger.log("执行--------->");
+            ProcessingEnvironment processingEnv = ReflectUtils.getFile(roundEnv, "processingEnv", ProcessingEnvironment.class);
+            JCUtils.refreshJCUtils(processingEnv);
 
             if (roundEnv.processingOver()) {
                 handleSignMethod();
@@ -76,10 +61,11 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
      * 处理标注了@Mapping 的方法， 生成对应的实现代码
      */
     private void handleSignMethod() {
+        JavacElements elementUtils = JCUtils.instance.getElementUtils();
         markedContext.forEach((className, markedMethods) -> {
             JCTree tree = elementUtils.getTree(elementUtils.getTypeElement(className));
             //去修改原本方法中的逻辑
-            tree.accept(new MethodUpdateVisitor(markedMethods, jcUtils, tree, className));
+            tree.accept(new MethodUpdateVisitor(markedMethods, JCUtils.instance, tree, className));
             //给这个类加上对应的脐带方法
             FunicleFactory.createFunicleMethod(tree,className);
         });

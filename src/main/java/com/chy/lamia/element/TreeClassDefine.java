@@ -34,8 +34,6 @@ public class TreeClassDefine implements IClassDefine {
     private Map<String, Setter> instantSetters;
 
 
-
-
     /**
      * 实例中所有的构造器
      */
@@ -66,12 +64,8 @@ public class TreeClassDefine implements IClassDefine {
 
     @Override
     public Map<String, Getter> getInstantGetters() {
-
         if (instantGetters == null) {
-            GetSetCollect getterCollect = new GetSetCollect();
-            jcTree.accept(getterCollect);
-            this.instantGetters = getterCollect.getGetterData();
-            this.instantSetters = getterCollect.getSetterData();
+            initGetterAndSetter();
         }
 
         return instantGetters;
@@ -80,12 +74,25 @@ public class TreeClassDefine implements IClassDefine {
     @Override
     public Map<String, Setter> getInstantSetters() {
         if (instantSetters == null) {
-            GetSetCollect getterCollect = new GetSetCollect();
-            jcTree.accept(getterCollect);
-            this.instantGetters = getterCollect.getGetterData();
-            this.instantSetters = getterCollect.getSetterData();
+            initGetterAndSetter();
         }
         return instantSetters;
+    }
+
+    private void initGetterAndSetter() {
+        GetSetCollect getterCollect = new GetSetCollect();
+        jcTree.accept(getterCollect);
+
+        ParameterType parentType = getterCollect.getParentType();
+        this.instantGetters = getterCollect.getGetterData();
+        this.instantSetters = getterCollect.getSetterData();
+
+        //看是否有父类,如果有那么还要对父类解析
+        if (parentType != null) {
+            ClassDetails parentClassElement = ClassDetails.getClassElement(parentType);
+            instantGetters.putAll(parentClassElement.getInstantGetters());
+            instantSetters.putAll(parentClassElement.getInstantSetters());
+        }
     }
 
     @Override
@@ -100,7 +107,7 @@ public class TreeClassDefine implements IClassDefine {
 
     @Override
     public List<SimpleMethod> getAllMethod() {
-        if (allMethod == null){
+        if (allMethod == null) {
             SimpleMethodCollect simpleMethodCollect = new SimpleMethodCollect();
             jcTree.accept(simpleMethodCollect);
             allMethod = simpleMethodCollect.getData();
