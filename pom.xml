@@ -163,8 +163,8 @@
 
         <dependency>
             <groupId>io.github.cao2068959</groupId>
-            <artifactId>sun-tools</artifactId>
-            <version>8</version>
+            <artifactId>sun-tools-javac</artifactId>
+            <version>8.0.0</version>
         </dependency>
 
     </dependencies>
