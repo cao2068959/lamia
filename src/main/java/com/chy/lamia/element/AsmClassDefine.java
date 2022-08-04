@@ -7,7 +7,7 @@ import com.chy.lamia.entity.*;
 import com.chy.lamia.log.Logger;
 import com.chy.lamia.utils.ClassPath;
 import com.chy.lamia.utils.JCUtils;
-import jdk.internal.org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassReader;
 
 import java.io.IOException;
 import java.net.URL;

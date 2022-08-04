@@ -1,8 +1,8 @@
 package com.chy.lamia.element.asm;
 
-import jdk.internal.org.objectweb.asm.signature.SignatureVisitor;
+import org.objectweb.asm.signature.SignatureVisitor;
 
-import static jdk.internal.org.objectweb.asm.Opcodes.ASM5;
+import static org.objectweb.asm.Opcodes.ASM5;
 
 public class MethodSignatureVisitor extends SignatureVisitor {
 

@@ -1,7 +1,7 @@
 package com.chy.lamia.element.asm;
 
 import com.chy.lamia.entity.ParameterType;
-import jdk.internal.org.objectweb.asm.signature.SignatureReader;
+import org.objectweb.asm.signature.SignatureReader;
 
 import java.util.ArrayList;
 import java.util.LinkedList;

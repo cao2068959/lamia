@@ -2,15 +2,12 @@ package com.chy.lamia.element.asm;
 
 
 import com.chy.lamia.entity.*;
-import com.sun.tools.javac.code.Flags;
-import jdk.internal.org.objectweb.asm.ClassVisitor;
-import jdk.internal.org.objectweb.asm.MethodVisitor;
-import jdk.internal.org.objectweb.asm.Opcodes;
-
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 
 import java.util.*;
-
-import jdk.internal.org.objectweb.asm.Type;
 
 public class ClassMetadataReadingVisitor extends ClassVisitor {
 
