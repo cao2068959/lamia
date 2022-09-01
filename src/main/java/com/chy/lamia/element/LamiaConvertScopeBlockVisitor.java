@@ -5,34 +5,29 @@ import com.chy.lamia.annotation.MapMember;
 import com.chy.lamia.element.annotation.AnnotationProxyFactory;
 import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.entity.ParameterTypeMemberAnnotation;
+import com.chy.lamia.entity.VarDefinition;
 import com.chy.lamia.log.Logger;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.utils.SymbolUtils;
 import com.chy.lamia.visitor.AbstractBlockVisitor;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.tree.JCTree;
-import com.sun.tools.javac.util.Pair;
 
 import java.util.*;
 
 
-public class LooseBlockVisitor extends AbstractBlockVisitor {
+public class LamiaConvertScopeBlockVisitor extends AbstractBlockVisitor {
 
+    /**
+     * 这个 block 中能够遇到的所有变量
+     */
+    private final Map<String, VarDefinition> vars = new HashMap<>();
 
-    private final Map<String, ParameterTypeMemberAnnotation> vars;
-    private final Set<NeedUpdateBlock> needUpdateBlocks;
+    /**
+     *  结果
+     */
+    private final Set<LamiaConvertScope> lamiaConvertScopes = new HashSet<>();
     private NeedUpdateBlock needUpdateBlock;
-
-    public LooseBlockVisitor() {
-        vars = new HashMap<>();
-        needUpdateBlocks = new HashSet<>();
-    }
-
-    public LooseBlockVisitor(Map<String, ParameterTypeMemberAnnotation> vars, Set<NeedUpdateBlock> needUpdateBlocks) {
-        this.vars = new HashMap<>(vars);
-        this.needUpdateBlocks = needUpdateBlocks;
-    }
-
 
     /**
      * 如果 遇到了 代码块 if while for 等 都递归进去 再次扫描一次
@@ -41,9 +36,9 @@ public class LooseBlockVisitor extends AbstractBlockVisitor {
      */
     @Override
     public void blockVisit(JCTree.JCBlock statement) {
-        LooseBlockVisitor looseBlockVisitor = new LooseBlockVisitor(vars, needUpdateBlocks);
+        LamiaConvertScopeBlockVisitor lamiaConvertScopeBlockVisitor = new LamiaConvertScopeBlockVisitor(vars, needUpdateBlocks);
         //继续去扫描代码块里面的代码
-        looseBlockVisitor.accept(statement, classTree);
+        lamiaConvertScopeBlockVisitor.accept(statement, classTree);
         //analyzeResult(looseBlockVisitor);
     }
 

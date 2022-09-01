@@ -1,19 +1,21 @@
 package com.chy.lamia.element;
 
 
-import com.chy.lamia.entity.SunList;
-import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.utils.Lists;
 import com.sun.tools.javac.tree.JCTree;
 
 import java.util.List;
 
-public class NeedUpdateBlock {
+/**
+ * 每一个 Lamia.convert 表达式能够使用到的作用域
+ *
+ */
+public class LamiaConvertScope {
 
     JCTree.JCBlock block;
     List<JCTree.JCStatement> enableUpdateStatements;
 
-    public NeedUpdateBlock(JCTree.JCBlock block, List<JCTree.JCStatement> enableUpdateStatements) {
+    public LamiaConvertScope(JCTree.JCBlock block, List<JCTree.JCStatement> enableUpdateStatements) {
         this.block = block;
         this.enableUpdateStatements = enableUpdateStatements;
     }

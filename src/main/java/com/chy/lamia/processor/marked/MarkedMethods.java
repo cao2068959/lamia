@@ -10,6 +10,10 @@ import java.util.Map;
  *
  */
 public class MarkedMethods {
+    /**
+     * key:方法的名称
+     * value:方法的表达式
+     */
     private Map<String, Symbol.MethodSymbol> map = new HashMap<>();
 
     public boolean contains(String methodName) {

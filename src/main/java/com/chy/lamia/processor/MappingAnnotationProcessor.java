@@ -23,14 +23,7 @@ import java.util.Set;
 
 public class MappingAnnotationProcessor extends AbstractProcessor {
 
-    public MappingAnnotationProcessor(MarkedContext markedContext) {
-        this.markedContext = markedContext;
-    }
-
-    public MappingAnnotationProcessor() {
-    }
-
-    private MarkedContext markedContext = new MarkedContext();
+    private final MarkedContext markedContext = new MarkedContext();
 
     static {
         addOpensForLombok();
@@ -51,7 +44,7 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
             if (roundEnv.processingOver()) {
                 handleSignMethod();
             } else {
-                prepare(annotations, roundEnv);
+                prepare(roundEnv);
             }
             return true;
         } catch (Throwable e) {
@@ -66,14 +59,14 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
      * 处理标注了@Mapping 的方法， 生成对应的实现代码
      */
     private void handleSignMethod() {
-        JavacElements elementUtils = JCUtils.instance.getElementUtils();
         markedContext.forEach((className, markedMethods) -> {
-            JCTree tree = elementUtils.getTree(elementUtils.getTypeElement(className));
+            JCTree tree = JCUtils.instance.getJCTree(className);
             //去修改原本方法中的逻辑
-            tree.accept(new MethodUpdateVisitor(markedMethods, JCUtils.instance, tree, className));
+            tree.accept(new MethodUpdateVisitor(markedMethods, tree, className));
             //给这个类加上对应的脐带方法
             FunicleFactory.createFunicleMethod(tree,className);
         });
+
         FunicleFactory.persistence();
     }
 
@@ -84,9 +77,8 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
      * @param annotations
      * @param roundEnv
      */
-    private void prepare(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+    private void prepare(RoundEnvironment roundEnv) {
         for (Element element : roundEnv.getElementsAnnotatedWith(Mapping.class)) {
-            Mapping annotation = element.getAnnotation(Mapping.class);
             Symbol.MethodSymbol methodSymbol = (Symbol.MethodSymbol) element;
             String key = methodSymbol.owner.toString();
             markedContext.put(key, methodSymbol);

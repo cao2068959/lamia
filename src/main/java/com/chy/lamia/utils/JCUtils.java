@@ -2,6 +2,7 @@ package com.chy.lamia.utils;
 
 import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.visitor.RandomMethodCreateVisitor;
+import com.sun.source.tree.Tree;
 import com.sun.source.util.Trees;
 import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.code.Flags;
@@ -43,7 +44,7 @@ public class JCUtils {
         }
 
         Context context = ((JavacProcessingEnvironment) processingEnv).getContext();
-        if (context != instance.context){
+        if (context != instance.context) {
             instance = new JCUtils(processingEnv);
         }
     }
@@ -62,6 +63,10 @@ public class JCUtils {
         return annotate;
     }
 
+
+    public JCTree getJCTree(String className) {
+        return elementUtils.getTree(elementUtils.getTypeElement(className));
+    }
 
 
     /**
