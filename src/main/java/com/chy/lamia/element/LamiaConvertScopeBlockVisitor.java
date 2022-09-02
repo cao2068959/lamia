@@ -16,18 +16,35 @@ import com.sun.tools.javac.tree.JCTree;
 import java.util.*;
 
 
-public class LamiaConvertScopeBlockVisitor extends AbstractBlockVisitor {
+/**
+ * @author bignosecat
+ */
+public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
 
     /**
      * 这个 block 中能够遇到的所有变量
      */
-    private final Map<String, VarDefinition> vars = new HashMap<>();
+    private final Map<String, VarDefinition> vars;
+
 
     /**
-     *  结果
+     * 持有了 所有 lamia.convert 语句 的代码块, 这些代码块也就是后续需要去修改内容的
      */
-    private final Set<LamiaConvertScope> lamiaConvertScopes = new HashSet<>();
-    private NeedUpdateBlock needUpdateBlock;
+    private final List<LamiaConvertHolderBlock> lamiaConvertHolderBlock;
+
+    private LamiaConvertHolderBlock currentBlock;
+
+
+    public LamiaConvertBlockVisitor() {
+        lamiaConvertHolderBlock = new ArrayList<>();
+        vars = new HashMap<>();
+    }
+
+    public LamiaConvertBlockVisitor(Map<String, VarDefinition> vars, List<LamiaConvertHolderBlock> lamiaConvertHolderBlock) {
+        // 镜像拷贝
+        this.vars = new HashMap<>(vars);
+        this.lamiaConvertHolderBlock = lamiaConvertHolderBlock;
+    }
 
     /**
      * 如果 遇到了 代码块 if while for 等 都递归进去 再次扫描一次
@@ -36,30 +53,30 @@ public class LamiaConvertScopeBlockVisitor extends AbstractBlockVisitor {
      */
     @Override
     public void blockVisit(JCTree.JCBlock statement) {
-        LamiaConvertScopeBlockVisitor lamiaConvertScopeBlockVisitor = new LamiaConvertScopeBlockVisitor(vars, needUpdateBlocks);
+        LamiaConvertBlockVisitor lamiaConvertScopeBlockVisitor = new LamiaConvertBlockVisitor(vars, lamiaConvertHolderBlock);
         //继续去扫描代码块里面的代码
         lamiaConvertScopeBlockVisitor.accept(statement, classTree);
-        //analyzeResult(looseBlockVisitor);
     }
 
 
     @Override
-    public boolean variableVisit(JCTree.JCVariableDecl statement, List<JCTree.JCStatement> enableUpdateStatements) {
-
-        //去收集写了 Lamia.convert 的语句
-        boolean updateStatements = lamiaConvertStatementCollect(statement.init, enableUpdateStatements, statement);
+    public boolean variableVisit(JCTree.JCVariableDecl statement) {
 
         //查找这一行语句上面有没有@MapMember
         Optional<MapMember> mapMemberOptional = AnnotationProxyFactory
                 .createdAnnotation(classTree, statement.getModifiers().getAnnotations(), MapMember.class);
-
 
         Type type = JCUtils.instance.attribType(classTree, statement);
         ParameterTypeMemberAnnotation parameterType = new ParameterTypeMemberAnnotation(statement.getName().toString(),
                 type.toString(), mapMemberOptional);
         parameterType.setGeneric(SymbolUtils.getGeneric(type));
         vars.put(parameterType.getFieldName(), parameterType);
-        return updateStatements;
+
+
+        //去收集写了 Lamia.convert 的语句
+        boolean isLamiaConvert = lamiaConvertStatementCollect(statement.init, statement);
+        // 如果该语句是对应的表达式,那么就不记录, 已经替换成新的表达式
+        return !isLamiaConvert;
     }
 
 
@@ -67,25 +84,25 @@ public class LamiaConvertScopeBlockVisitor extends AbstractBlockVisitor {
      * 去收集写了 Lamia.convert 的语句
      *
      * @param jcExpression
-     * @param enableUpdateStatements
      * @param variableDecl
+     * @return 是否收集到了 转换表达式
      */
-    private boolean lamiaConvertStatementCollect(JCTree.JCExpression jcExpression, List<JCTree.JCStatement> enableUpdateStatements, JCTree.JCVariableDecl variableDecl) {
-        if (jcExpression == null || !(jcExpression instanceof JCTree.JCTypeCast)) {
-            return true;
+    private boolean lamiaConvertStatementCollect(JCTree.JCExpression jcExpression, JCTree.JCVariableDecl variableDecl) {
+        if (!(jcExpression instanceof JCTree.JCTypeCast)) {
+            return false;
         }
 
         //获取强转
         JCTree.JCTypeCast typeCast = (JCTree.JCTypeCast) jcExpression;
 
         JCTree.JCExpression expr = typeCast.expr;
-        if (expr == null || !(expr instanceof JCTree.JCMethodInvocation)) {
-            return true;
+        if (!(expr instanceof JCTree.JCMethodInvocation)) {
+            return false;
         }
         JCTree.JCMethodInvocation methodInvocation = (JCTree.JCMethodInvocation) expr;
         String methName = methodInvocation.meth.toString();
         if (!methName.contains("Lamia.convert")) {
-            return true;
+            return false;
         }
 
         //去收集Lamia.convert() 方法中传入进来的参数
@@ -95,19 +112,22 @@ public class LamiaConvertScopeBlockVisitor extends AbstractBlockVisitor {
         }
         //没传入参数可能有点不太对
         if (argsName.size() == 0) {
-            return true;
+            return false;
         }
 
-
+        // 解析强转成为什么类型
         ParameterType parameterType = JCUtils.instance.generateParameterType(classTree, typeCast.clazz);
+
 
         if (parameterType == null) {
             Logger.log("无法解析类型 [" + typeCast.clazz.toString() + "]");
-            return true;
+            return false;
         }
+
 
         PendHighway pendHighway = new PendHighway(vars, argsName, parameterType, variableDecl);
         enableUpdateStatements.add(pendHighway);
+
 
         //这个代码块已经添加过了，那么就不再去添加了
         if (needUpdateBlock == null) {
@@ -115,13 +135,21 @@ public class LamiaConvertScopeBlockVisitor extends AbstractBlockVisitor {
             needUpdateBlocks.add(result);
         }
 
-        return false;
+        return true;
     }
 
 
     @Override
-    public boolean returnVisit(JCTree.JCReturn statement, List<JCTree.JCStatement> enableUpdateStatements) {
-        return lamiaConvertStatementCollect(statement.expr, enableUpdateStatements, null);
+    public boolean returnVisit(JCTree.JCReturn statement) {
+        return lamiaConvertStatementCollect(statement.expr, null);
+    }
+
+    public LamiaConvertHolderBlock getCurrentBlock() {
+        if (currentBlock != null) {
+            return currentBlock;
+        }
+        currentBlock = new LamiaConvertHolderBlock();
+        return currentBlock;
     }
 
     public Set<NeedUpdateBlock> getNeedUpdateBlocks() {

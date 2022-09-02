@@ -2,7 +2,7 @@ package com.chy.lamia.visitor;
 
 
 import com.chy.lamia.annotation.MapMember;
-import com.chy.lamia.element.LamiaConvertScope;
+import com.chy.lamia.element.LamiaConvertInfo;
 import com.chy.lamia.element.NeedUpdateBlock;
 import com.chy.lamia.element.PendHighway;
 import com.chy.lamia.element.LamiaConvertScopeBlockVisitor;
@@ -138,7 +138,7 @@ public class MethodUpdateVisitor extends TreeTranslator {
      * @param methodSymbolDecl
      * @return
      */
-    private Set<LamiaConvertScope> findLamiaConvertScope(JCTree.JCMethodDecl methodSymbolDecl) {
+    private Set<LamiaConvertInfo> findLamiaConvertScope(JCTree.JCMethodDecl methodSymbolDecl) {
         JCTree.JCBlock originalBody = methodSymbolDecl.body;
         LamiaConvertScopeBlockVisitor lamiaConvertScopeBlockVisitor = new LamiaConvertScopeBlockVisitor();
         lamiaConvertScopeBlockVisitor.accept(originalBody, classTree);

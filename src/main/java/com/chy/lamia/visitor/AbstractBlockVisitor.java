@@ -3,14 +3,31 @@ package com.chy.lamia.visitor;
 
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.util.List;
+import lombok.Getter;
 
 import java.util.ArrayList;
 
 
 public abstract class AbstractBlockVisitor {
 
+    /**
+     * 要遍历的 block
+     */
+    @Getter
     public JCTree.JCBlock block;
+
+    /**
+     * 这个 block所属的 class
+     */
+    @Getter
     public JCTree classTree;
+
+    /**
+     * 已经 迭代遍历后的语句
+     */
+    @Getter
+    public java.util.List<JCTree.JCStatement> processedFinishStatement;
+
 
     public void accept(JCTree.JCBlock block, JCTree classTree) {
         if (block == null) {
@@ -22,22 +39,21 @@ public abstract class AbstractBlockVisitor {
         }
         this.block = block;
         this.classTree = classTree;
-
+        this.processedFinishStatement = new ArrayList<>();
         visitorAllBlock(statements);
     }
 
     private void visitorAllBlock(List<JCTree.JCStatement> statements) {
-        java.util.List<JCTree.JCStatement> enableUpdateStatements = new ArrayList<>();
 
         for (JCTree.JCStatement statement : statements) {
-            if (doVisitorAllBlock(statement, enableUpdateStatements)) {
-                enableUpdateStatements.add(statement);
+            if (doVisitorAllBlock(statement)) {
+                processedFinishStatement.add(statement);
             }
         }
     }
 
 
-    private boolean doVisitorAllBlock(JCTree.JCStatement statement, java.util.List<JCTree.JCStatement> enableUpdateStatements) {
+    private boolean doVisitorAllBlock(JCTree.JCStatement statement) {
         //如果是 if 语句
         if (statement instanceof JCTree.JCIf) {
             JCTree.JCIf jcif = (JCTree.JCIf) statement;
@@ -61,13 +77,13 @@ public abstract class AbstractBlockVisitor {
         //如果是 return 语句
         if (statement instanceof JCTree.JCReturn) {
             JCTree.JCReturn jCReturn = (JCTree.JCReturn) statement;
-            return returnVisit(jCReturn, enableUpdateStatements);
+            return returnVisit(jCReturn);
         }
 
         //变量申明语句
         if (statement instanceof JCTree.JCVariableDecl) {
             JCTree.JCVariableDecl jcVariableDecl = (JCTree.JCVariableDecl) statement;
-            return variableVisit(jcVariableDecl, enableUpdateStatements);
+            return variableVisit(jcVariableDecl);
         }
 
         //如果是 代码块
@@ -93,11 +109,11 @@ public abstract class AbstractBlockVisitor {
     public void whileLoopVisit(JCTree.JCWhileLoop statement, JCTree.JCBlock whileBlock) {
     }
 
-    public boolean returnVisit(JCTree.JCReturn statement, java.util.List<JCTree.JCStatement> enableUpdateStatements) {
+    public boolean returnVisit(JCTree.JCReturn statement) {
         return true;
     }
 
-    public boolean variableVisit(JCTree.JCVariableDecl statement, java.util.List<JCTree.JCStatement> enableUpdateStatements) {
+    public boolean variableVisit(JCTree.JCVariableDecl statement) {
         return true;
     }
 
