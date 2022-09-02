@@ -28,5 +28,4 @@ public @interface MapMember {
      * @return
      */
     boolean spread() default false;
-
 }
