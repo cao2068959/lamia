@@ -2,10 +2,10 @@ package com.chy.lamia.visitor;
 
 
 import com.chy.lamia.annotation.MapMember;
+import com.chy.lamia.element.LamiaConvertBlockVisitor;
+import com.chy.lamia.element.LamiaConvertHolderBlock;
 import com.chy.lamia.element.LamiaConvertInfo;
-import com.chy.lamia.element.NeedUpdateBlock;
 import com.chy.lamia.element.PendHighway;
-import com.chy.lamia.element.LamiaConvertScopeBlockVisitor;
 import com.chy.lamia.element.annotation.AnnotationProxyFactory;
 import com.chy.lamia.element.assemble.AssembleResult;
 import com.chy.lamia.element.funicle.FunicleFactory;
@@ -57,9 +57,9 @@ public class MethodUpdateVisitor extends TreeTranslator {
         });
 
         //解析原来方法中的方法体,计算出所有需要去修改的 方法体
-        Set<NeedUpdateBlock> needUpdateBlocks = findLamiaConvertScope(methodSymbolDecl);
-        for (NeedUpdateBlock needUpdateBlock : needUpdateBlocks) {
-            updateBlock(needUpdateBlock, paramMap);
+        List<LamiaConvertHolderBlock> needUpdateBlocks = findLamiaConvertBlock(methodSymbolDecl);
+        for (LamiaConvertHolderBlock lamiaConvertHolderBlock : needUpdateBlocks) {
+            updateBlock(lamiaConvertHolderBlock, paramMap);
         }
 
     }
@@ -84,26 +84,29 @@ public class MethodUpdateVisitor extends TreeTranslator {
     /**
      * 去修改方法体中的代码
      *
-     * @param needUpdateBlock
-     * @param paramMap
+     * @param lamiaConvertHolderBlock 需要修改的代码块
+     * @param paramMap                方法入参
      */
-    private void updateBlock(NeedUpdateBlock needUpdateBlock, Map<String, VarDefinition> paramMap) {
-
-        List<JCTree.JCStatement> enableUpdateStatements = needUpdateBlock.getEnableUpdateStatements();
-
+    private void updateBlock(LamiaConvertHolderBlock lamiaConvertHolderBlock, Map<String, VarDefinition> paramMap) {
+        // 获取这个代码块中 所有的代码
+        List<JCTree.JCStatement> statements = lamiaConvertHolderBlock.getContents();
         List<JCTree.JCStatement> newStatement = new LinkedList<>();
-        for (JCTree.JCStatement enableUpdateStatement : enableUpdateStatements) {
-            if (enableUpdateStatement instanceof PendHighway) {
-                PendHighway pendHighway = (PendHighway) enableUpdateStatement;
-                //把方法的入参放进去
+        for (JCTree.JCStatement statement : statements) {
+            // 如果是 LamiaConvertInfo.Statement 说明这段代码本身就需要修改的
+            if (statement instanceof LamiaConvertInfo.Statement) {
+
+                LamiaConvertInfo lamiaConvertInfo = lamiaConvertHolderBlock.getLamiaConvertInfo((LamiaConvertInfo.Statement) statement);
+
+
+
                 pendHighway.setParamVars(paramMap);
                 generateNewStatement(pendHighway, newStatement);
             } else {
-                newStatement.add(enableUpdateStatement);
+                newStatement.add(statement);
             }
         }
         //替换原来的老代码
-        needUpdateBlock.modifyMethodBody(newStatement);
+        lamiaConvertHolderBlock.modifyMethodBody(newStatement);
     }
 
     private void generateNewStatement(PendHighway pendHighway, List<JCTree.JCStatement> newStatement) {
@@ -133,16 +136,18 @@ public class MethodUpdateVisitor extends TreeTranslator {
     }
 
     /**
-     * 去解析 原来的方法体, 每到一个 Lamia.convert()  都算一个 通路, 计算出代码有可能经过的所有通路, 并且把每一个通路中 可以访问到 变量给保存下来
+     * 去解析 原来的方法体, 每到一个 Lamia.convert() 就保存在 LamiaConvertHolderBlock 对象中,
+     * <p>
+     * 每一个 LamiaConvertHolderBlock 代表着存在 Lamia.convert 表达式的代码块, 如果一个代码块中同时出现了多个  Lamia.convert 表达式 那么将多个表达式存到一个 LamiaConvertHolderBlock 中
      *
      * @param methodSymbolDecl
      * @return
      */
-    private Set<LamiaConvertInfo> findLamiaConvertScope(JCTree.JCMethodDecl methodSymbolDecl) {
+    private List<LamiaConvertHolderBlock> findLamiaConvertBlock(JCTree.JCMethodDecl methodSymbolDecl) {
         JCTree.JCBlock originalBody = methodSymbolDecl.body;
-        LamiaConvertScopeBlockVisitor lamiaConvertScopeBlockVisitor = new LamiaConvertScopeBlockVisitor();
-        lamiaConvertScopeBlockVisitor.accept(originalBody, classTree);
-        return lamiaConvertScopeBlockVisitor.getNeedUpdateBlocks();
+        LamiaConvertBlockVisitor lamiaConvertBlockVisitor = new LamiaConvertBlockVisitor();
+        lamiaConvertBlockVisitor.accept(originalBody, classTree);
+        return lamiaConvertBlockVisitor.getResult();
     }
 
 

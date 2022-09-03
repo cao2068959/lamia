@@ -1,10 +1,9 @@
 package com.chy.lamia.utils;
 
 import com.chy.lamia.entity.ParameterType;
+import com.chy.lamia.entity.TypeDefinition;
+import com.chy.lamia.entity.factory.TypeDefinitionFactory;
 import com.chy.lamia.visitor.RandomMethodCreateVisitor;
-import com.sun.source.tree.Tree;
-import com.sun.source.util.Trees;
-import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
@@ -323,33 +322,24 @@ public class JCUtils {
 
 
     /**
-     * JCTypeApply 转 ParameterType, 会处理泛型
+     * JCTypeApply 转 TypeDefinition, 会处理泛型
      *
-     * @param data
+     * @param node 父节点
+     * @param data 要转换的类型本身
      * @return
      */
 
-    public ParameterType generateParameterType(JCTree node, JCTree data) {
+    public TypeDefinition toTypeDefinition(JCTree node, JCTree data) {
         if (data instanceof JCTree.JCTypeApply) {
             JCTree.JCTypeApply jcTypeApply = (JCTree.JCTypeApply) data;
 
             JCTree.JCExpression clazz = jcTypeApply.clazz;
             Type completeType = attribType(node, clazz);
-            ParameterType result = new ParameterType(completeType.toString());
-            java.util.List<ParameterType> genericRsult = new LinkedList<>();
-            result.setGeneric(genericRsult);
-
-            //查找泛型
-            List<JCTree.JCExpression> generics = jcTypeApply.getTypeArguments();
-
-            for (JCTree.JCExpression generic : generics) {
-                genericRsult.add(generateParameterType(node, generic));
-            }
-            return result;
+            return TypeDefinitionFactory.create(completeType);
         } else if (data instanceof JCTree.JCIdent) {
             JCTree.JCIdent jcIdent = (JCTree.JCIdent) data;
             Type completeType = attribType(node, jcIdent);
-            return new ParameterType(completeType.toString());
+            return TypeDefinitionFactory.create(completeType);
         }
         throw new RuntimeException("无法解析泛型类型 [" + data.toString() + "] class:[" + data.getClass().toString() + "]");
     }

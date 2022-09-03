@@ -1,14 +1,11 @@
 package com.chy.lamia.entity.factory;
 
-import com.chy.lamia.annotation.MapMember;
-import com.chy.lamia.element.annotation.AnnotationProxyFactory;
-import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.entity.TypeDefinition;
 import com.chy.lamia.utils.SymbolUtils;
 import com.sun.tools.javac.code.Symbol;
+import com.sun.tools.javac.code.Type;
 
 import java.util.List;
-import java.util.Optional;
 
 public class TypeDefinitionFactory {
 
@@ -26,6 +23,14 @@ public class TypeDefinitionFactory {
         //这个参数可能会有泛型
         List<TypeDefinition> generic = SymbolUtils.getGeneric(varSymbol);
         // 设置泛型
+        result.setGeneric(generic);
+        return result;
+    }
+
+    public static TypeDefinition create(Type type) {
+        String typeClassPath = type.tsym.toString();
+        TypeDefinition result = new TypeDefinition(typeClassPath);
+        List<TypeDefinition> generic = SymbolUtils.getGeneric(type);
         result.setGeneric(generic);
         return result;
     }

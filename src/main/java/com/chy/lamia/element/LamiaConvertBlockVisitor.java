@@ -3,12 +3,10 @@ package com.chy.lamia.element;
 
 import com.chy.lamia.annotation.MapMember;
 import com.chy.lamia.element.annotation.AnnotationProxyFactory;
-import com.chy.lamia.entity.ParameterType;
-import com.chy.lamia.entity.ParameterTypeMemberAnnotation;
+import com.chy.lamia.entity.TypeDefinition;
 import com.chy.lamia.entity.VarDefinition;
-import com.chy.lamia.log.Logger;
+import com.chy.lamia.entity.factory.TypeDefinitionFactory;
 import com.chy.lamia.utils.JCUtils;
-import com.chy.lamia.utils.SymbolUtils;
 import com.chy.lamia.visitor.AbstractBlockVisitor;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.tree.JCTree;
@@ -46,6 +44,7 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
         this.lamiaConvertHolderBlock = lamiaConvertHolderBlock;
     }
 
+
     /**
      * 如果 遇到了 代码块 if while for 等 都递归进去 再次扫描一次
      *
@@ -63,18 +62,21 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
     public boolean variableVisit(JCTree.JCVariableDecl statement) {
 
         //查找这一行语句上面有没有@MapMember
-        Optional<MapMember> mapMemberOptional = AnnotationProxyFactory
+        Optional<MapMember> mapMember = AnnotationProxyFactory
                 .createdAnnotation(classTree, statement.getModifiers().getAnnotations(), MapMember.class);
 
+        // 解析这个变量把他转成 VarDefinition
         Type type = JCUtils.instance.attribType(classTree, statement);
-        ParameterTypeMemberAnnotation parameterType = new ParameterTypeMemberAnnotation(statement.getName().toString(),
-                type.toString(), mapMemberOptional);
-        parameterType.setGeneric(SymbolUtils.getGeneric(type));
-        vars.put(parameterType.getFieldName(), parameterType);
+        TypeDefinition typeDefinition = TypeDefinitionFactory.create(type);
+        VarDefinition varDefinition = new VarDefinition(statement.getName().toString(), typeDefinition);
+        varDefinition.setMapMember(mapMember);
 
+        // 将这个变量放入 容器
+        vars.put(varDefinition.getVarRealName(), varDefinition);
 
         //去收集写了 Lamia.convert 的语句
         boolean isLamiaConvert = lamiaConvertStatementCollect(statement.init, statement);
+
         // 如果该语句是对应的表达式,那么就不记录, 已经替换成新的表达式
         return !isLamiaConvert;
     }
@@ -115,25 +117,15 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
             return false;
         }
 
-        // 解析强转成为什么类型
-        ParameterType parameterType = JCUtils.instance.generateParameterType(classTree, typeCast.clazz);
+        LamiaConvertInfo lamiaConvertInfo = new LamiaConvertInfo();
+        // 要转换成的目标类型
+        TypeDefinition convertTargetType = JCUtils.instance.toTypeDefinition(classTree, typeCast.clazz);
+        lamiaConvertInfo.setTargetType(convertTargetType);
+        argsName.stream().map(vars::get).filter(Objects::nonNull).forEach(lamiaConvertInfo::addVarArgs);
+        lamiaConvertInfo.setAllArgsNames(argsName);
 
-
-        if (parameterType == null) {
-            Logger.log("无法解析类型 [" + typeCast.clazz.toString() + "]");
-            return false;
-        }
-
-
-        PendHighway pendHighway = new PendHighway(vars, argsName, parameterType, variableDecl);
-        enableUpdateStatements.add(pendHighway);
-
-
-        //这个代码块已经添加过了，那么就不再去添加了
-        if (needUpdateBlock == null) {
-            NeedUpdateBlock result = new NeedUpdateBlock(this.block, enableUpdateStatements);
-            needUpdateBlocks.add(result);
-        }
+        // 替换当前的 statement
+        getCurrentBlock().replaceStatement(lamiaConvertInfo);
 
         return true;
     }
@@ -144,15 +136,24 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
         return lamiaConvertStatementCollect(statement.expr, null);
     }
 
+
+    @Override
+    public void visitorEnd() {
+        if (currentBlock != null) {
+            lamiaConvertHolderBlock.add(currentBlock);
+        }
+    }
+
     public LamiaConvertHolderBlock getCurrentBlock() {
         if (currentBlock != null) {
             return currentBlock;
         }
-        currentBlock = new LamiaConvertHolderBlock();
+        currentBlock = new LamiaConvertHolderBlock(getProcessedFinishStatement());
         return currentBlock;
     }
 
-    public Set<NeedUpdateBlock> getNeedUpdateBlocks() {
-        return needUpdateBlocks;
+    public List<LamiaConvertHolderBlock> getResult() {
+        return lamiaConvertHolderBlock;
     }
+
 }

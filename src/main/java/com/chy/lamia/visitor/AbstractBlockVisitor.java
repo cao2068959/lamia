@@ -41,7 +41,10 @@ public abstract class AbstractBlockVisitor {
         this.classTree = classTree;
         this.processedFinishStatement = new ArrayList<>();
         visitorAllBlock(statements);
+        visitorEnd();
     }
+
+
 
     private void visitorAllBlock(List<JCTree.JCStatement> statements) {
 
@@ -115,6 +118,9 @@ public abstract class AbstractBlockVisitor {
 
     public boolean variableVisit(JCTree.JCVariableDecl statement) {
         return true;
+    }
+
+    public void visitorEnd() {
     }
 
 }
