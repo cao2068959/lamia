@@ -1,5 +1,6 @@
-package com.chy.lamia.element;
+package com.chy.lamia.element.resolver;
 
+import com.chy.lamia.element.IClassDefine;
 import com.chy.lamia.element.assemble.valobj.ValueObjectAssembleFactory;
 import com.chy.lamia.element.tree.ConstructorCollect;
 import com.chy.lamia.element.tree.GetSetCollect;
@@ -83,13 +84,13 @@ public class TreeClassDefine implements IClassDefine {
         GetSetCollect getterCollect = new GetSetCollect();
         jcTree.accept(getterCollect);
 
-        ParameterType parentType = getterCollect.getParentType();
+        TypeDefinition parentType = getterCollect.getParentType();
         this.instantGetters = getterCollect.getGetterData();
         this.instantSetters = getterCollect.getSetterData();
 
         //看是否有父类,如果有那么还要对父类解析
         if (parentType != null) {
-            ClassDetails parentClassElement = ClassDetails.getClassElement(parentType);
+            TypeResolver parentClassElement = TypeResolver.getTypeResolver(parentType);
             instantGetters.putAll(parentClassElement.getInstantGetters());
             instantSetters.putAll(parentClassElement.getInstantSetters());
         }

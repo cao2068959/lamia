@@ -48,4 +48,13 @@ public class VarDefinition {
         }
         this.varName = name;
     }
+
+    /**
+     * 获取 变量的优先级, 取自 @MapMember 中的值,如果没标准注解则 -1
+     *
+     * @return
+     */
+    public int getPriority() {
+       return mapMember.map(MapMember::priority).orElse(-1);
+    }
 }

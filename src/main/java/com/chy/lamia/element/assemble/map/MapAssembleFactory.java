@@ -1,7 +1,6 @@
 package com.chy.lamia.element.assemble.map;
 
 
-import com.chy.lamia.annotation.MapMember;
 import com.chy.lamia.element.assemble.AssembleFactoryChain;
 import com.chy.lamia.element.assemble.AssembleMaterial;
 import com.chy.lamia.element.assemble.AssembleResult;
@@ -55,10 +54,7 @@ public class MapAssembleFactory implements IAssembleFactory {
         }
         //尝试反射获取一下
         Optional<Class<?>> typeReflectClass = parameterType.getTypeReflectClass();
-        if (!typeReflectClass.isPresent()) {
-            return false;
-        }
-        return Map.class.isAssignableFrom(typeReflectClass.get());
+        return typeReflectClass.filter(Map.class::isAssignableFrom).isPresent();
     }
 
     @Override

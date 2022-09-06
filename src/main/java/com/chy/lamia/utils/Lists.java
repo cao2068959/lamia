@@ -24,4 +24,10 @@ public class Lists {
         return com.sun.tools.javac.util.List.from(list);
     }
 
+    public static String toString(List<String> data) {
+        if (data == null){
+            return "null";
+        }
+        return String.join(",", data);
+    }
 }

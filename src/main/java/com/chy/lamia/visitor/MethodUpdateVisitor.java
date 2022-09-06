@@ -2,6 +2,7 @@ package com.chy.lamia.visitor;
 
 
 import com.chy.lamia.annotation.MapMember;
+import com.chy.lamia.convert.ConvertFactory;
 import com.chy.lamia.element.LamiaConvertBlockVisitor;
 import com.chy.lamia.element.LamiaConvertHolderBlock;
 import com.chy.lamia.element.LamiaConvertInfo;
@@ -96,17 +97,19 @@ public class MethodUpdateVisitor extends TreeTranslator {
             if (statement instanceof LamiaConvertInfo.Statement) {
 
                 LamiaConvertInfo lamiaConvertInfo = lamiaConvertHolderBlock.getLamiaConvertInfo((LamiaConvertInfo.Statement) statement);
+                // 合并所有参数 之前只添加了 方法体中参与转换的参数, 现在把入参中的也添加进去
+                lamiaConvertInfo.getAllArgsNames().stream().map(paramMap::get).filter(Objects::nonNull).forEach(lamiaConvertInfo::addVarArgs);
+                lamiaConvertInfo.checkArgs();
+                ConvertFactory.INSTANCE.make(lamiaConvertInfo);
 
-
-
-                pendHighway.setParamVars(paramMap);
-                generateNewStatement(pendHighway, newStatement);
+                //pendHighway.setParamVars(paramMap);
+                //generateNewStatement(pendHighway, newStatement);
             } else {
                 newStatement.add(statement);
             }
         }
         //替换原来的老代码
-        lamiaConvertHolderBlock.modifyMethodBody(newStatement);
+        //lamiaConvertHolderBlock.modifyMethodBody(newStatement);
     }
 
     private void generateNewStatement(PendHighway pendHighway, List<JCTree.JCStatement> newStatement) {

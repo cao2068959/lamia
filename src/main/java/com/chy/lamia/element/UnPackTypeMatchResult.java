@@ -1,6 +1,6 @@
 package com.chy.lamia.element;
 
-import com.chy.lamia.element.type.ExpressionFunction;
+import com.chy.lamia.element.boxing.ExpressionFunction;
 
 import java.util.List;
 

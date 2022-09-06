@@ -8,26 +8,19 @@ import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.utils.ReflectUtils;
 import com.chy.lamia.visitor.MethodUpdateVisitor;
 import com.sun.tools.javac.code.Symbol;
-import com.sun.tools.javac.model.JavacElements;
 import com.sun.tools.javac.tree.JCTree;
-import sun.misc.Unsafe;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Set;
 
 public class MappingAnnotationProcessor extends AbstractProcessor {
 
     private final MarkedContext markedContext = new MarkedContext();
 
-    static {
-        addOpensForLombok();
-    }
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
@@ -74,7 +67,6 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
      * 收集项目里所有类的 Element 对象
      * 同时把标注了 @Mapping 的方法 给存储下来
      *
-     * @param annotations
      * @param roundEnv
      */
     private void prepare(RoundEnvironment roundEnv) {
@@ -82,85 +74,6 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
             Symbol.MethodSymbol methodSymbol = (Symbol.MethodSymbol) element;
             String key = methodSymbol.owner.toString();
             markedContext.put(key, methodSymbol);
-        }
-    }
-
-    private static Object getOwnModule() {
-        try {
-            Method m = ReflectUtils.getMethod(Class.class, "getModule");
-            return m.invoke(MappingAnnotationProcessor.class);
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private static Object getJdkCompilerModule() {
-        try {
-            Class<?> cModuleLayer = Class.forName("java.lang.ModuleLayer");
-            Method mBoot = cModuleLayer.getDeclaredMethod("boot");
-            Object bootLayer = mBoot.invoke(null);
-            Class<?> cOptional = Class.forName("java.util.Optional");
-            Method mFindModule = cModuleLayer.getDeclaredMethod("findModule", String.class);
-            Object oCompilerO = mFindModule.invoke(bootLayer, "jdk.compiler");
-            return cOptional.getDeclaredMethod("get").invoke(oCompilerO);
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private static void addOpensForLombok() {
-        Class<?> cModule;
-        try {
-            cModule = Class.forName("java.lang.Module");
-        } catch (ClassNotFoundException e) {
-            return; //jdk8-; this is not needed.
-        }
-
-        Unsafe unsafe = getUnsafe();
-        Object jdkCompilerModule = getJdkCompilerModule();
-        Object ownModule = getOwnModule();
-        String[] allPkgs = {
-                "com.sun.tools.javac.code",
-                "com.sun.tools.javac.comp",
-                "com.sun.tools.javac.file",
-                "com.sun.tools.javac.main",
-                "com.sun.tools.javac.model",
-                "com.sun.tools.javac.parser",
-                "com.sun.tools.javac.processing",
-                "com.sun.tools.javac.tree",
-                "com.sun.tools.javac.util",
-                "com.sun.tools.javac.jvm",
-        };
-
-        try {
-            Method m = cModule.getDeclaredMethod("implAddOpens", String.class, cModule);
-            long firstFieldOffset = getFirstFieldOffset(unsafe);
-            unsafe.putBooleanVolatile(m, firstFieldOffset, true);
-            for (String p : allPkgs) {
-                m.invoke(jdkCompilerModule, p, ownModule);
-            }
-        } catch (Exception ignore) {}
-    }
-
-    private static long getFirstFieldOffset(Unsafe unsafe) {
-        try {
-            return unsafe.objectFieldOffset(Parent.class.getDeclaredField("first"));
-        } catch (NoSuchFieldException e) {
-            // can't happen.
-            throw new RuntimeException(e);
-        } catch (SecurityException e) {
-            // can't happen
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static Unsafe getUnsafe() {
-        try {
-            Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
-            theUnsafe.setAccessible(true);
-            return (Unsafe) theUnsafe.get(null);
-        } catch (Exception e) {
-            return null;
         }
     }
 

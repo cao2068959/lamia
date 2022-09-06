@@ -34,4 +34,8 @@ public class TypeDefinitionFactory {
         result.setGeneric(generic);
         return result;
     }
+
+    public static TypeDefinition unPackage(TypeDefinition targetType) {
+        return null;
+    }
 }

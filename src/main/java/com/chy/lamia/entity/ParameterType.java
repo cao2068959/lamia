@@ -1,6 +1,5 @@
 package com.chy.lamia.entity;
 
-import com.chy.lamia.utils.SymbolUtils;
 import com.sun.tools.javac.code.Type;
 
 import java.util.ArrayList;
@@ -44,7 +43,6 @@ public class ParameterType {
 
     public ParameterType(Type type) {
         this("", type.tsym.toString());
-        generic = SymbolUtils.getGeneric(type);
     }
 
 

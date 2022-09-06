@@ -1,12 +1,11 @@
 package com.chy.lamia.element;
 
 
-import com.chy.lamia.element.type.ExpressionFunction;
-import com.chy.lamia.element.type.TypeProcessorFactory;
+import com.chy.lamia.element.boxing.ExpressionFunction;
+import com.chy.lamia.element.boxing.TypeBoxingHandle;
 import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.entity.TypeProcessorResult;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -26,7 +25,7 @@ public class UnPackMutliParameterType {
     }
 
     private void parseType(ParameterType parameterType) {
-        TypeProcessorResult typeProcessorResult = TypeProcessorFactory.instance.unpack(parameterType);
+        TypeProcessorResult typeProcessorResult = TypeBoxingHandle.instance.unpack(parameterType);
         if (typeProcessorResult == null) {
             return;
         }
@@ -61,7 +60,7 @@ public class UnPackMutliParameterType {
         }
 
         //检查一下 目标对象是否是包装类型, 把他解析后再比较一次
-        TypeProcessorResult targetUnpack = TypeProcessorFactory.instance.unpack(targetType);
+        TypeProcessorResult targetUnpack = TypeBoxingHandle.instance.unpack(targetType);
         if (targetUnpack != null) {
             unpackFunChain.add(targetUnpack.getUnboxingFun());
             return doMatchType(targetUnpack.getNextParameterType(), unpackFunChain);

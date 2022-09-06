@@ -1,17 +1,15 @@
 package com.chy.lamia.element;
 
 
-import com.chy.lamia.annotation.MapMember;
-import com.chy.lamia.element.annotation.AnnotationProxyFactory;
 import com.chy.lamia.element.assemble.AssembleFactoryHolder;
 import com.chy.lamia.element.assemble.AssembleMaterial;
 import com.chy.lamia.element.assemble.AssembleMaterialSource;
 import com.chy.lamia.element.assemble.AssembleResult;
+import com.chy.lamia.element.resolver.TypeResolver;
 import com.chy.lamia.entity.Expression;
 import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.entity.ParameterTypeMemberAnnotation;
 import com.chy.lamia.utils.JCUtils;
-import com.chy.lamia.utils.SymbolUtils;
 import com.sun.source.tree.TreeVisitor;
 import com.sun.tools.javac.tree.JCTree;
 
@@ -36,7 +34,7 @@ public class PendHighway extends JCTree.JCStatement {
     /**
      * 要生成数据的类型
      */
-    private final ClassDetails genClassDetails;
+    private final TypeResolver genTypeResolver;
     private final JCUtils jcUtils;
     private final Optional<JCVariableDecl> variableDecl;
     /**
@@ -51,8 +49,8 @@ public class PendHighway extends JCTree.JCStatement {
                        ParameterType genType, JCVariableDecl variableDecl) {
         this.blockVars = blockVars;
         this.enableUseVarNames = enableUseVarNames;
-        genClassDetails = new ClassDetails(genType);
-        genTypeFactory = genClassDetails.getAssembleFactory();
+        genTypeResolver = new TypeResolver(genType);
+        genTypeFactory = genTypeResolver.getAssembleFactory();
         this.jcUtils = JCUtils.instance;
         this.variableDecl = Optional.ofNullable(variableDecl);
     }
@@ -128,7 +126,7 @@ public class PendHighway extends JCTree.JCStatement {
 
 
     public String genTypePath(){
-        return genClassDetails.parameterType.getTypePatch();
+        return genTypeResolver.parameterType.getTypePatch();
     }
 
 }

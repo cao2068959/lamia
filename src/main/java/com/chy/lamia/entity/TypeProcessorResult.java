@@ -1,8 +1,7 @@
 package com.chy.lamia.entity;
 
 
-import com.chy.lamia.element.type.ExpressionFunction;
-import com.sun.tools.javac.tree.JCTree;
+import com.chy.lamia.element.boxing.ExpressionFunction;
 
 public class TypeProcessorResult {
 

@@ -25,7 +25,28 @@ public class TypeDefinition {
         this.classPath = classPath;
     }
 
+    public TypeDefinition(TypeDefinition typeDefinition) {
+        classPath = typeDefinition.getClassPath();
+        generic = new ArrayList<>(typeDefinition.getGeneric());
+    }
+
+
     public void addGeneric(List<TypeDefinition> generic) {
         this.generic.addAll(generic);
+    }
+
+    @Override
+    public String toString() {
+        String typePatch = classPath;
+        typePatch = typePatch == null ? "null" : typePatch;
+        StringBuilder result = new StringBuilder(typePatch);
+        if (generic != null && generic.size() != 0) {
+            result.append("<");
+            for (TypeDefinition typeDefinition : generic) {
+                result.append(typeDefinition.toString());
+            }
+            result.append(">");
+        }
+        return result.toString();
     }
 }

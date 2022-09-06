@@ -7,7 +7,6 @@ import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.utils.CommonUtils;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.utils.Lists;
-import com.chy.lamia.utils.ParameterTypeUtils;
 import com.sun.tools.javac.tree.JCTree;
 
 import java.util.*;
