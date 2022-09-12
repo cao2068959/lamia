@@ -60,6 +60,20 @@ public class ValueObjAssembleHandler implements AssembleHandler {
         // 选择一个合适的构造器
         Constructor constructor = chooseConstructor();
 
+        // 生成一个新的实例,返回对应的实例名称
+        String newInstant = createNewInstantExpression(constructor);
+
+        // 生成对应的 set 赋值语句
+        createSetterExpression(newInstant);
+
+
+    }
+
+    /**
+     * 生成 set赋值语句 如 : instantName.setName(xxxx)
+     * @param instantName
+     */
+    private void createSetterExpression(String instantName) {
 
     }
 
@@ -104,7 +118,13 @@ public class ValueObjAssembleHandler implements AssembleHandler {
         return result;
     }
 
-    private String createNewInstant(Constructor constructor) {
+    /**
+     * 创建一个新实例表达式,并返回对应的新实例名称
+     *
+     * @param constructor
+     * @return
+     */
+    private String createNewInstantExpression(Constructor constructor) {
         String classPath = targetTypeResolver.getTypeDefinition().getClassPath();
         // 构造器所需要的所有入参
         List<Material> constructorParam = constructor.getParams().stream().map(param -> materialMap.get(param.getVarName())).collect(Collectors.toList());
