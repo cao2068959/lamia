@@ -1,5 +1,7 @@
 package com.chy.lamia.entity.factory;
 
+import com.chy.lamia.element.boxing.TypeBoxingHandle;
+import com.chy.lamia.element.boxing.processor.TypeBoxingDefinition;
 import com.chy.lamia.entity.TypeDefinition;
 import com.chy.lamia.utils.SymbolUtils;
 import com.sun.tools.javac.code.Symbol;
@@ -35,7 +37,20 @@ public class TypeDefinitionFactory {
         return result;
     }
 
+
+    /**
+     * 解包, 解到 最基础的 value object 或者 map
+     *
+     * @param targetType 要解包的包装类型
+     * @return 解包后的类如  Optional<A> ----> 返回的是 A
+     */
     public static TypeDefinition unPackage(TypeDefinition targetType) {
-        return null;
+        TypeBoxingDefinition unboxing = TypeBoxingHandle.instance.unboxing(targetType);
+        // 不是包装类型,直接返回
+        if (unboxing == null){
+            return targetType;
+        }
+
+        return unboxing;
     }
 }

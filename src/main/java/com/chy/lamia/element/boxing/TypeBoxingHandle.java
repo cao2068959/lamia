@@ -5,7 +5,6 @@ import com.chy.lamia.element.boxing.processor.ITypeBoxingProcessor;
 import com.chy.lamia.element.boxing.processor.OptionalBoxingProcessor;
 import com.chy.lamia.element.boxing.processor.TypeBoxingDefinition;
 import com.chy.lamia.entity.TypeDefinition;
-import com.chy.lamia.entity.TypeProcessorResult;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,17 +30,23 @@ public class TypeBoxingHandle {
 
     /**
      * 对应的类型拆包，这里并不是基本数据类型那种拆包，比如 Optioanl<String> -> String
-     * 并且返回修改后的拆包表达式，比如 Optioanl<String> myop ; 传入的表达式 应该是 myop， 那么解包后的表达式 应该是 myop.get()
+     * 拆到不能拆位置,并且返回最终的元素
      *
      * @param typeDefinition
      */
-    public TypeProcessorResult unboxing(TypeDefinition typeDefinition) {
-
-
-
-        ExpressionFunction autoboxingExpression = typeProcessor::autoboxingExpression;
-        ExpressionFunction unboxingExpression = typeProcessor::unboxingExpression;
-        return new TypeProcessorResult(parameterType, newParameterType, unboxingExpression, autoboxingExpression);
+    public TypeBoxingDefinition unboxing(TypeDefinition typeDefinition) {
+        TypeBoxingDefinition boxingDefinition = new TypeBoxingDefinition(typeDefinition);
+        TypeBoxingDefinition result = null;
+        while (true) {
+            // 解包,直至解到最后一层
+            TypeBoxingDefinition typeBoxingDefinition = doUnboxing(boxingDefinition);
+            if (typeBoxingDefinition == null) {
+                break;
+            }
+            boxingDefinition = typeBoxingDefinition;
+            result = typeBoxingDefinition;
+        }
+        return result;
     }
 
     private TypeBoxingDefinition doUnboxing(TypeDefinition typeDefinition) {
@@ -50,15 +55,16 @@ public class TypeBoxingHandle {
         if (typeProcessor == null) {
             return null;
         }
-        TypeBoxingDefinition parent = new TypeBoxingDefinition(typeDefinition);
-
-        TypeDefinition children = typeProcessor.unboxingType(typeDefinition);
-
-
-
-
-
+        // 给父类解包,如果存在的话
+        return typeProcessor.unboxing(typeDefinition);
     }
 
+
+    public TypeBoxingDefinition toTypeBoxingDefinition(TypeDefinition typeDefinition) {
+        if (typeDefinition instanceof TypeBoxingDefinition) {
+            return (TypeBoxingDefinition) typeDefinition;
+        }
+        return new TypeBoxingDefinition(typeDefinition);
+    }
 
 }

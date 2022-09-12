@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 public class TypeResolver {
 
     IClassDefine classDefine;
+
+    @lombok.Getter
     TypeDefinition typeDefinition;
     boolean canUpdate = true;
     List<TypeResolver> generic = new LinkedList<>();
@@ -99,6 +101,11 @@ public class TypeResolver {
      */
     public Map<String, Setter> getInstantSetters() {
         return classDefine.getInstantSetters();
+    }
+
+
+    public List<Constructor> getConstructors(){
+        return classDefine.getConstructors();
     }
 
 
