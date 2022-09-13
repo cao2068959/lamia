@@ -4,27 +4,29 @@ import com.chy.lamia.entity.Expression;
 import com.chy.lamia.entity.TypeDefinition;
 import com.chy.lamia.entity.VarDefinition;
 import lombok.Getter;
+import lombok.Setter;
 
 
 /**
  * @author bignosecat
  */
 @Getter
+@Setter
 public class Material {
 
 
     /**
-     * 要转换对应目标的名称
+     * 该材料提供的 名称是什么，用于和真正要转换字段的名称匹配
      */
-    String targetName;
+    String supplyName;
 
     /**
-     * 要转换成的类型是什么
+     * 提供的类型是什么
      */
-    TypeDefinition targetType;
+    TypeDefinition supplyType;
 
     /**
-     * 参与转换的变量
+     *  该材料的变量本身， 如果该材料提供的是 a.getName(), 那这里 varDefinition 指的是 A a; 这个变量
      */
     VarDefinition varDefinition;
 

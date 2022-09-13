@@ -7,14 +7,12 @@ import com.chy.lamia.entity.Setter;
 import com.chy.lamia.entity.TypeDefinition;
 import com.chy.lamia.entity.VarDefinition;
 import com.chy.lamia.utils.CommonUtils;
+import com.chy.lamia.utils.DefaultHashMap;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.utils.Lists;
 import com.sun.tools.javac.tree.JCTree;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -27,7 +25,16 @@ public class ValueObjAssembleHandler implements AssembleHandler {
     private final TypeResolver targetTypeResolver;
     private final Map<String, Setter> targetSetters;
 
-    private Map<String, Material> materialMap = new HashMap<>();
+    private final DefaultHashMap<String, Material> materialMap = new DefaultHashMap<>();
+    /**
+     * 已经使用过的 material，用于防止重复使用
+     */
+    private final Set<String> useMaterial = new HashSet<>();
+
+    /**
+     * 生成新实例的名称
+     */
+    private String newInstant;
 
     /**
      * 生成的表达式器列表, 最终将使用这些 builder来生成对应的转换语句
@@ -49,32 +56,53 @@ public class ValueObjAssembleHandler implements AssembleHandler {
     @Override
     public void addMaterial(List<Material> materials) {
         materials.forEach(material -> {
-            materialMap.put(material.getTargetName(), material);
+            if (material instanceof OmnipotentMaterial) {
+                materialMap.setDefaultValue(material);
+                return;
+            }
+            materialMap.put(material.getSupplyName(), material);
         });
     }
 
     /**
      * 生成对应的转换语句
+     *
+     * @return
      */
-    public void run() {
+    @Override
+    public List<ExpressionBuilder> run() {
         // 选择一个合适的构造器
         Constructor constructor = chooseConstructor();
 
         // 生成一个新的实例,返回对应的实例名称
-        String newInstant = createNewInstantExpression(constructor);
+        this.newInstant = createNewInstantExpression(constructor);
 
         // 生成对应的 set 赋值语句
-        createSetterExpression(newInstant);
+        createSetterExpression();
 
-
+        return expressionBuilders;
     }
 
     /**
      * 生成 set赋值语句 如 : instantName.setName(xxxx)
-     * @param instantName
      */
-    private void createSetterExpression(String instantName) {
-
+    private void createSetterExpression() {
+        // 遍历所有的 set方法， 如果能找到
+        targetSetters.forEach((varName, setter) -> {
+            Material material = useMaterial(setter.getType(), varName);
+            // 没找到 就不处理了
+            if (material == null) {
+                return;
+            }
+            ExpressionBuilder expressionBuilder = new ExpressionBuilder();
+            String id = expressionBuilder.addMaterial(material);
+            // 生成对应的 set的方法
+            expressionBuilder.setFunction(builder -> {
+                JCTree.JCExpression expression = builder.getExpression(id);
+                return Lists.of(JCUtils.instance.execMethod(newInstant, setter.getMethodName(), expression));
+            });
+            expressionBuilders.add(expressionBuilder);
+        });
     }
 
     /**
@@ -97,7 +125,7 @@ public class ValueObjAssembleHandler implements AssembleHandler {
             // 去寻找构造器中每一个参数是不是可以找到
             for (VarDefinition param : params) {
                 //如果有字段无法匹配上就直接跳过了
-                if (!materialMap.containsKey(param.getVarName())) {
+                if (!materialMap.contains(param.getVarName())) {
                     continue constructorLoop;
                 }
             }
@@ -127,7 +155,8 @@ public class ValueObjAssembleHandler implements AssembleHandler {
     private String createNewInstantExpression(Constructor constructor) {
         String classPath = targetTypeResolver.getTypeDefinition().getClassPath();
         // 构造器所需要的所有入参
-        List<Material> constructorParam = constructor.getParams().stream().map(param -> materialMap.get(param.getVarName())).collect(Collectors.toList());
+        List<Material> constructorParam = constructor.getParams().stream().map(this::useMaterial)
+                .collect(Collectors.toList());
         // 新实例的名称生成
         String varName = CommonUtils.generateVarName("result");
 
@@ -147,5 +176,25 @@ public class ValueObjAssembleHandler implements AssembleHandler {
         expressionBuilders.add(expressionBuilder);
         return varName;
     }
+
+    private Material useMaterial(VarDefinition varDefinition) {
+        return useMaterial(varDefinition.getType(), varDefinition.getVarName());
+    }
+
+
+    private Material useMaterial(TypeDefinition typeDefinition, String varName) {
+        if (useMaterial.contains(varName)) {
+            return null;
+        }
+        useMaterial.add(varName);
+        Material material = materialMap.get(varName);
+        // 万能材料，适配一下
+        if (material instanceof OmnipotentMaterial) {
+            return ((OmnipotentMaterial) material).adapter(typeDefinition, varName);
+        }
+
+        return material;
+    }
+
 
 }

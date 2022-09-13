@@ -19,6 +19,7 @@ import com.sun.tools.javac.code.Symbol;
 
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeTranslator;
+import lombok.Data;
 
 import java.util.*;
 
@@ -62,7 +63,6 @@ public class MethodUpdateVisitor extends TreeTranslator {
         for (LamiaConvertHolderBlock lamiaConvertHolderBlock : needUpdateBlocks) {
             updateBlock(lamiaConvertHolderBlock, paramMap);
         }
-
     }
 
     private VarDefinition toVarDefinition(Symbol.VarSymbol varSymbol) {
@@ -82,12 +82,6 @@ public class MethodUpdateVisitor extends TreeTranslator {
     }
 
 
-    /**
-     * 去修改方法体中的代码
-     *
-     * @param lamiaConvertHolderBlock 需要修改的代码块
-     * @param paramMap                方法入参
-     */
     private void updateBlock(LamiaConvertHolderBlock lamiaConvertHolderBlock, Map<String, VarDefinition> paramMap) {
         // 获取这个代码块中 所有的代码
         List<JCTree.JCStatement> statements = lamiaConvertHolderBlock.getContents();
@@ -95,13 +89,12 @@ public class MethodUpdateVisitor extends TreeTranslator {
         for (JCTree.JCStatement statement : statements) {
             // 如果是 LamiaConvertInfo.Statement 说明这段代码本身就需要修改的
             if (statement instanceof LamiaConvertInfo.Statement) {
-
                 LamiaConvertInfo lamiaConvertInfo = lamiaConvertHolderBlock.getLamiaConvertInfo((LamiaConvertInfo.Statement) statement);
                 // 合并所有参数 之前只添加了 方法体中参与转换的参数, 现在把入参中的也添加进去
                 lamiaConvertInfo.getAllArgsNames().stream().map(paramMap::get).filter(Objects::nonNull).forEach(lamiaConvertInfo::addVarArgs);
                 lamiaConvertInfo.checkArgs();
+                // 生成对应的转换语句
                 ConvertFactory.INSTANCE.make(lamiaConvertInfo);
-
                 //pendHighway.setParamVars(paramMap);
                 //generateNewStatement(pendHighway, newStatement);
             } else {
@@ -118,7 +111,6 @@ public class MethodUpdateVisitor extends TreeTranslator {
         pendHighway.addMaterials();
         //生成最终的转换代码
         AssembleResult assembleResult = pendHighway.assemble();
-
         //将生成的代码都放入结果集中
         newStatement.addAll(assembleResult.getStatements());
 
@@ -153,5 +145,7 @@ public class MethodUpdateVisitor extends TreeTranslator {
         return lamiaConvertBlockVisitor.getResult();
     }
 
-
 }
+
+
+

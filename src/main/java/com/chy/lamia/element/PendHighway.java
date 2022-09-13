@@ -49,8 +49,8 @@ public class PendHighway extends JCTree.JCStatement {
                        ParameterType genType, JCVariableDecl variableDecl) {
         this.blockVars = blockVars;
         this.enableUseVarNames = enableUseVarNames;
-        genTypeResolver = new TypeResolver(genType);
-        genTypeFactory = genTypeResolver.getAssembleFactory();
+        this.genTypeResolver = new TypeResolver(genType);
+        this.genTypeFactory = genTypeResolver.getAssembleFactory();
         this.jcUtils = JCUtils.instance;
         this.variableDecl = Optional.ofNullable(variableDecl);
     }

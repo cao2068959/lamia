@@ -2,12 +2,14 @@ package com.chy.lamia.convert;
 
 import com.chy.lamia.convert.assemble.AssembleHandler;
 import com.chy.lamia.convert.assemble.MapAssembleHandler;
+import com.chy.lamia.convert.assemble.Material;
 import com.chy.lamia.convert.assemble.ValueObjAssembleHandler;
 import com.chy.lamia.element.LamiaConvertInfo;
 import com.chy.lamia.element.resolver.TypeResolver;
 import com.chy.lamia.entity.TypeDefinition;
 import com.chy.lamia.entity.factory.TypeDefinitionFactory;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,6 +31,11 @@ public class ConvertFactory {
 
         // 可能存在包装类型,把包装类型解包 如: Optional<A> ---> A
         TypeDefinition targetType = TypeDefinitionFactory.unPackage(lamiaConvertInfo.getTargetType());
+        // 寻找适合的组成器
+        AssembleHandler assembleHandler = getAssembleHandler(targetType);
+
+
+
 
 
 
@@ -36,6 +43,15 @@ public class ConvertFactory {
 
         // Optional / list / map / obj
 
+
+    }
+
+    /**
+     * 整合所有的入参
+     * @param lamiaConvertInfo
+     * @return
+     */
+    private List<Material> createdMaterials(LamiaConvertInfo lamiaConvertInfo){
 
     }
 

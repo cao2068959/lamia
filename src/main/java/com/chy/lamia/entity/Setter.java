@@ -1,28 +1,22 @@
 package com.chy.lamia.entity;
 
+import lombok.Data;
+
+@Data
 public class Setter {
 
-    private String simpleName;
-    //setter 方法的类型, 也就是入参的类型是什么
-    private ParameterType parameterType;
+    /**
+     * set方法 设置的字段的名称
+     */
+    private String varName;
+    /**
+     * 方法的名称
+     */
+    private String methodName;
 
-    public String getSimpleName() {
-        return simpleName;
-    }
+    /**
+     * set方法 设置的字段的类型
+     */
+    private TypeDefinition type;
 
-    public void setSimpleName(String simpleName) {
-        this.simpleName = simpleName;
-    }
-
-    public ParameterType getParameterType() {
-        return parameterType;
-    }
-
-    public void setParameterType(ParameterType parameterType) {
-        this.parameterType = parameterType;
-    }
-
-    public void setTypePath(String parameterTypeName) {
-        parameterType = new ParameterType(parameterTypeName);
-    }
 }

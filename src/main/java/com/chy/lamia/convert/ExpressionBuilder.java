@@ -31,12 +31,15 @@ public class ExpressionBuilder {
     Map<String, Material> materialMap = new HashMap<>();
 
     public List<String> addMaterial(List<Material> constructorParam) {
-        return constructorParam.stream().map(material -> {
-            String id = CommonUtils.getRandomString(12);
-            materialMap.put(id, material);
-            return id;
-        }).collect(Collectors.toList());
+        return constructorParam.stream().map(this::addMaterial).collect(Collectors.toList());
     }
+
+    public String addMaterial(Material material) {
+        String id = CommonUtils.getRandomString(12);
+        materialMap.put(id, material);
+        return id;
+    }
+
 
     /**
      * 一个 Material 可能经历过多次解包之后,他表达式的变量发生了变化, 这里其实就是获取这个 material的最终形态
