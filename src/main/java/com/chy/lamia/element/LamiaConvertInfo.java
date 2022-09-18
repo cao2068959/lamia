@@ -67,8 +67,12 @@ public class LamiaConvertInfo {
      * @return 对应的 var列表
      */
     public List<VarDefinition> getArgsByPriority() {
-        Collections.unmodifiableSortedMap()
+        List<VarDefinition> result = new ArrayList<>();
+        allArgsNames.forEach(name -> result.add(args.get(name)));
+        // 排序
+        result.sort(Comparator.comparingInt(VarDefinition::getPriority));
 
+        return result;
 
     }
 

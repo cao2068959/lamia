@@ -1,23 +1,23 @@
 package com.chy.lamia.entity;
 
+import lombok.Data;
+
+@Data
 public class Getter {
 
-    private String simpleName;
-    private ParameterType parameterType;
 
-    public ParameterType getParameterType() {
-        return parameterType;
-    }
+    /**
+     * set方法 设置的字段的名称
+     */
+    private String varName;
+    /**
+     * 方法的名称
+     */
+    private String methodName;
 
-    public void setParameterType(ParameterType parameterType) {
-        this.parameterType = parameterType;
-    }
+    /**
+     * set方法 设置的字段的类型
+     */
+    private TypeDefinition type;
 
-    public String getSimpleName() {
-        return simpleName;
-    }
-
-    public void setSimpleName(String simpleName) {
-        this.simpleName = simpleName;
-    }
 }

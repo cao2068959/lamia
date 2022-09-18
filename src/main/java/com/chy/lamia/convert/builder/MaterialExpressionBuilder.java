@@ -1,4 +1,4 @@
-package com.chy.lamia.convert;
+package com.chy.lamia.convert.builder;
 
 import com.chy.lamia.convert.assemble.Material;
 import com.chy.lamia.utils.CommonUtils;
@@ -12,11 +12,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * 表达式生成器
+ * Material 的表达式生成器
  *
  * @author bignosecat
  */
-public class ExpressionBuilder {
+public class MaterialExpressionBuilder {
 
     /**
      * 构建函数
@@ -58,7 +58,7 @@ public class ExpressionBuilder {
     }
 
 
-    public static interface BuilderFunction {
+    public interface BuilderFunction {
 
         /**
          * 构建函数, 用于实现真正的表达式
@@ -66,7 +66,7 @@ public class ExpressionBuilder {
          * @param builder
          * @return
          */
-        public List<JCTree.JCStatement> builder(ExpressionBuilder builder);
+        List<JCTree.JCStatement> builder(MaterialExpressionBuilder builder);
 
     }
 

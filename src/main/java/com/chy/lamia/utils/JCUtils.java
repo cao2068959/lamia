@@ -171,7 +171,6 @@ public class JCUtils {
         return execMethod(methodInstanceName, methodName, params);
     }
 
-
     public JCTree getTree(String treePath) {
         Symbol.ClassSymbol typeElement = elementUtils.getTypeElement(treePath);
         if (typeElement == null) {

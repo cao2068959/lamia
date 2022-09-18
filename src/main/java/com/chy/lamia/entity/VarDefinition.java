@@ -55,6 +55,10 @@ public class VarDefinition {
      * @return
      */
     public int getPriority() {
-       return mapMember.map(MapMember::priority).orElse(-1);
+        return mapMember.map(MapMember::priority).orElse(-1);
+    }
+
+    public boolean isSpread() {
+        return mapMember.map(MapMember::spread).orElse(false);
     }
 }

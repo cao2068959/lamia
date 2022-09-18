@@ -1,6 +1,6 @@
 package com.chy.lamia.convert.assemble;
 
-import com.chy.lamia.convert.ExpressionBuilder;
+import com.chy.lamia.convert.builder.MaterialExpressionBuilder;
 import com.chy.lamia.element.resolver.TypeResolver;
 import com.chy.lamia.entity.Constructor;
 import com.chy.lamia.entity.Setter;
@@ -39,7 +39,7 @@ public class ValueObjAssembleHandler implements AssembleHandler {
     /**
      * 生成的表达式器列表, 最终将使用这些 builder来生成对应的转换语句
      */
-    List<ExpressionBuilder> expressionBuilders = new ArrayList<>();
+    List<MaterialExpressionBuilder> materialExpressionBuilders = new ArrayList<>();
 
 
     public ValueObjAssembleHandler(TypeDefinition targetType) {
@@ -70,7 +70,7 @@ public class ValueObjAssembleHandler implements AssembleHandler {
      * @return
      */
     @Override
-    public List<ExpressionBuilder> run() {
+    public List<MaterialExpressionBuilder> run() {
         // 选择一个合适的构造器
         Constructor constructor = chooseConstructor();
 
@@ -79,8 +79,7 @@ public class ValueObjAssembleHandler implements AssembleHandler {
 
         // 生成对应的 set 赋值语句
         createSetterExpression();
-
-        return expressionBuilders;
+        return materialExpressionBuilders;
     }
 
     /**
@@ -94,14 +93,14 @@ public class ValueObjAssembleHandler implements AssembleHandler {
             if (material == null) {
                 return;
             }
-            ExpressionBuilder expressionBuilder = new ExpressionBuilder();
-            String id = expressionBuilder.addMaterial(material);
+            MaterialExpressionBuilder materialExpressionBuilder = new MaterialExpressionBuilder();
+            String id = materialExpressionBuilder.addMaterial(material);
             // 生成对应的 set的方法
-            expressionBuilder.setFunction(builder -> {
+            materialExpressionBuilder.setFunction(builder -> {
                 JCTree.JCExpression expression = builder.getExpression(id);
                 return Lists.of(JCUtils.instance.execMethod(newInstant, setter.getMethodName(), expression));
             });
-            expressionBuilders.add(expressionBuilder);
+            materialExpressionBuilders.add(materialExpressionBuilder);
         });
     }
 
@@ -161,11 +160,11 @@ public class ValueObjAssembleHandler implements AssembleHandler {
         String varName = CommonUtils.generateVarName("result");
 
         // 表达式生成器
-        ExpressionBuilder expressionBuilder = new ExpressionBuilder();
+        MaterialExpressionBuilder materialExpressionBuilder = new MaterialExpressionBuilder();
         // 把所有的参数都放入构造器中, 返回对应顺序的id
-        List<String> materialIds = expressionBuilder.addMaterial(constructorParam);
+        List<String> materialIds = materialExpressionBuilder.addMaterial(constructorParam);
 
-        expressionBuilder.setFunction((builder -> {
+        materialExpressionBuilder.setFunction((builder -> {
             // 用 materialId 去换取 真正的表达式
             List<JCTree.JCExpression> paramsExpression = builder.getExpression(materialIds);
             JCTree.JCNewClass jcNewClass = JCUtils.instance.newClass(classPath, paramsExpression);
@@ -173,7 +172,7 @@ public class ValueObjAssembleHandler implements AssembleHandler {
             return Lists.of(newVar);
         }));
 
-        expressionBuilders.add(expressionBuilder);
+        materialExpressionBuilders.add(materialExpressionBuilder);
         return varName;
     }
 
