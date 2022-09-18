@@ -65,6 +65,8 @@ public class AssembleFactoryHolder {
             this.addMaterial(childrenAssembleMaterial);
         });
 
+
+
     }
 
 
@@ -79,7 +81,7 @@ public class AssembleFactoryHolder {
         assembleFactoryChain.clear(assembleFactoryChain);
     }
 
-    public void addAssembleFactorie(IAssembleFactory iAssembleFactory) {
+    public void addAssembleFactories(IAssembleFactory iAssembleFactory) {
         assembleFactories.add(iAssembleFactory);
     }
 

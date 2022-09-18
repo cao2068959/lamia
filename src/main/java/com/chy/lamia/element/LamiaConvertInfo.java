@@ -11,9 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 每一个 Lamia.convert 表达式能够使用到的作用域
@@ -57,8 +55,26 @@ public class LamiaConvertInfo {
         }
     }
 
-    public void checkArgs(){
-        if (allArgsNames.size() != args.size()){
+    /**
+     * 根据优先级 来获取 对应的 参数
+     * 优先级 数字越大 则越优先
+     * 低优先级的放队头，高优先级放队尾
+     * <p>
+     * <p>
+     * 1.根据 varDefinition.getPriority() 来获取优先级，不设置 则是 -1
+     * 2.如果获取的优先级是一样的，那么 根据所在 allArgsNames 中的位置判定
+     *
+     * @return 对应的 var列表
+     */
+    public List<VarDefinition> getArgsByPriority() {
+        Collections.unmodifiableSortedMap()
+
+
+    }
+
+
+    public void checkArgs() {
+        if (allArgsNames.size() != args.size()) {
             throw new RuntimeException("[LamiaConvertInfo] 中参数缺失, 需要参数" + Lists.toString(allArgsNames));
         }
 
