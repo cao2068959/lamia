@@ -56,6 +56,20 @@ public class TypeDefinition {
         return reflectClass.filter(type::isAssignableFrom).isPresent();
     }
 
+    /**
+     * 类型匹配
+     *
+     * @param type           要对比的类型
+     * @param isMatchGeneric 是否匹配泛型, true: 泛型也需要完全相同才能算相同
+     * @return 是否比较通过
+     */
+    public boolean matchType(TypeDefinition type, boolean isMatchGeneric) {
+        if (isMatchGeneric) {
+            return toString().equals(type.toString());
+        }
+        return classPath.equals(type.getClassPath());
+    }
+
 
     public Optional<Class<?>> getReflectClass() {
         if (reflectClass == null) {

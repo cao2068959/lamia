@@ -1,6 +1,6 @@
 package com.chy.lamia.convert.assemble;
 
-import com.chy.lamia.convert.builder.MaterialExpressionBuilder;
+import com.chy.lamia.convert.builder.MaterialStatementBuilder;
 
 import java.util.List;
 
@@ -24,5 +24,5 @@ public interface AssembleHandler {
      *
      * @return
      */
-    List<MaterialExpressionBuilder> run();
+    List<MaterialStatementBuilder> run();
 }

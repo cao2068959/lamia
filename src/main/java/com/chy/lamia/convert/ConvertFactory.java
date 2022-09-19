@@ -1,7 +1,7 @@
 package com.chy.lamia.convert;
 
 import com.chy.lamia.convert.assemble.*;
-import com.chy.lamia.convert.builder.MaterialExpressionBuilder;
+import com.chy.lamia.convert.builder.MaterialStatementBuilder;
 import com.chy.lamia.element.LamiaConvertInfo;
 import com.chy.lamia.element.resolver.TypeResolver;
 import com.chy.lamia.entity.Getter;
@@ -41,8 +41,30 @@ public class ConvertFactory {
         List<Material> materials = createdMaterials(lamiaConvertInfo);
         // 在组装器中添加所有的材料
         assembleHandler.addMaterial(materials);
-        // 生成所有组装对象 语句的构建器, 每一个builder 将会生成一行 语句, 如 result.setXXX(var.getVVV());
-        List<MaterialExpressionBuilder> materialExpressionBuilders = assembleHandler.run();
+        // 生成所有组装对象 语句的构建器, 每一个builder 将会生成一行 语句, 如 result.setXXX(var.getVVV())
+        List<MaterialStatementBuilder> materialStatementBuilders = assembleHandler.run();
+        // 生成真正的 java语句
+        List<JCTree.JCStatement> statements = createdStatement(materialStatementBuilders, lamiaConvertInfo);
+
+
+    }
+
+    /**
+     * 使用 MaterialExpressionBuilder 去生成真正的 statement
+     *
+     * @param expressionBuilders
+     * @param lamiaConvertInfo
+     * @return
+     */
+    private List<JCTree.JCStatement> createdStatement(List<MaterialStatementBuilder> expressionBuilders, LamiaConvertInfo lamiaConvertInfo) {
+        List<JCTree.JCStatement> result = new ArrayList<>();
+        expressionBuilders.forEach(expressionBuilder -> {
+            List<JCTree.JCStatement> jcStatements = expressionBuilder.build();
+            result.addAll(jcStatements);
+        });
+
+
+        return null;
     }
 
     /**
@@ -94,10 +116,10 @@ public class ConvertFactory {
         instantGetters.forEach((fieldName, getter) -> {
             Material material = new Material();
             material.setVarDefinition(varDefinition);
-            material.setSupplyType(typeDefinition);
+            material.setExecType(typeDefinition);
             material.setSupplyName(fieldName);
             // 生成对应的 var.getXX()
-            material.setExpression((varName -> {
+            material.setVarExpressionFunction((varName -> {
                 JCTree.JCExpressionStatement statement = JCUtils.instance.execMethod(varName, getter.getMethodName(), Lists.of());
                 return statement.getExpression();
             }));

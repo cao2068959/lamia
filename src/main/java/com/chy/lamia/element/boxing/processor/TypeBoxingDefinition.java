@@ -2,6 +2,7 @@ package com.chy.lamia.element.boxing.processor;
 
 import com.chy.lamia.element.boxing.ExpressionFunction;
 import com.chy.lamia.entity.TypeDefinition;
+import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ public class TypeBoxingDefinition extends TypeDefinition {
     /**
      * 包装链路 如: List<Optional<A>> 那么链路就是 List --> Optional --> A
      */
+    @Getter
     List<TypeBoxingDefinition> boxChain = new ArrayList<>();
 
     /**

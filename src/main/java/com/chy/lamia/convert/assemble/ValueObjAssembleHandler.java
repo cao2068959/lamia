@@ -1,6 +1,7 @@
 package com.chy.lamia.convert.assemble;
 
-import com.chy.lamia.convert.builder.MaterialExpressionBuilder;
+import com.chy.lamia.convert.builder.MaterialStatementBuilder;
+import com.chy.lamia.convert.builder.MaterialTypeConvertBuilder;
 import com.chy.lamia.element.resolver.TypeResolver;
 import com.chy.lamia.entity.Constructor;
 import com.chy.lamia.entity.Setter;
@@ -39,7 +40,7 @@ public class ValueObjAssembleHandler implements AssembleHandler {
     /**
      * 生成的表达式器列表, 最终将使用这些 builder来生成对应的转换语句
      */
-    List<MaterialExpressionBuilder> materialExpressionBuilders = new ArrayList<>();
+    List<MaterialStatementBuilder> materialStatementBuilders = new ArrayList<>();
 
 
     public ValueObjAssembleHandler(TypeDefinition targetType) {
@@ -70,7 +71,7 @@ public class ValueObjAssembleHandler implements AssembleHandler {
      * @return
      */
     @Override
-    public List<MaterialExpressionBuilder> run() {
+    public List<MaterialStatementBuilder> run() {
         // 选择一个合适的构造器
         Constructor constructor = chooseConstructor();
 
@@ -79,7 +80,7 @@ public class ValueObjAssembleHandler implements AssembleHandler {
 
         // 生成对应的 set 赋值语句
         createSetterExpression();
-        return materialExpressionBuilders;
+        return materialStatementBuilders;
     }
 
     /**
@@ -93,14 +94,14 @@ public class ValueObjAssembleHandler implements AssembleHandler {
             if (material == null) {
                 return;
             }
-            MaterialExpressionBuilder materialExpressionBuilder = new MaterialExpressionBuilder();
-            String id = materialExpressionBuilder.addMaterial(material);
+            MaterialStatementBuilder materialStatementBuilder = new MaterialStatementBuilder();
+            String id = materialStatementBuilder.addMaterial(material);
             // 生成对应的 set的方法
-            materialExpressionBuilder.setFunction(builder -> {
+            materialStatementBuilder.setFunction(builder -> {
                 JCTree.JCExpression expression = builder.getExpression(id);
                 return Lists.of(JCUtils.instance.execMethod(newInstant, setter.getMethodName(), expression));
             });
-            materialExpressionBuilders.add(materialExpressionBuilder);
+            materialStatementBuilders.add(materialStatementBuilder);
         });
     }
 
@@ -154,17 +155,18 @@ public class ValueObjAssembleHandler implements AssembleHandler {
     private String createNewInstantExpression(Constructor constructor) {
         String classPath = targetTypeResolver.getTypeDefinition().getClassPath();
         // 构造器所需要的所有入参
-        List<Material> constructorParam = constructor.getParams().stream().map(this::useMaterial)
+        List<MaterialTypeConvertBuilder> constructorParam = constructor.getParams().stream().map(this::useMaterial)
                 .collect(Collectors.toList());
+
         // 新实例的名称生成
         String varName = CommonUtils.generateVarName("result");
 
         // 表达式生成器
-        MaterialExpressionBuilder materialExpressionBuilder = new MaterialExpressionBuilder();
+        MaterialStatementBuilder materialStatementBuilder = new MaterialStatementBuilder();
         // 把所有的参数都放入构造器中, 返回对应顺序的id
-        List<String> materialIds = materialExpressionBuilder.addMaterial(constructorParam);
+        List<String> materialIds = materialStatementBuilder.addMaterial(constructorParam);
 
-        materialExpressionBuilder.setFunction((builder -> {
+        materialStatementBuilder.setFunction((builder -> {
             // 用 materialId 去换取 真正的表达式
             List<JCTree.JCExpression> paramsExpression = builder.getExpression(materialIds);
             JCTree.JCNewClass jcNewClass = JCUtils.instance.newClass(classPath, paramsExpression);
@@ -172,16 +174,16 @@ public class ValueObjAssembleHandler implements AssembleHandler {
             return Lists.of(newVar);
         }));
 
-        materialExpressionBuilders.add(materialExpressionBuilder);
+        materialStatementBuilders.add(materialStatementBuilder);
         return varName;
     }
 
-    private Material useMaterial(VarDefinition varDefinition) {
+    private MaterialTypeConvertBuilder useMaterial(VarDefinition varDefinition) {
         return useMaterial(varDefinition.getType(), varDefinition.getVarName());
     }
 
 
-    private Material useMaterial(TypeDefinition typeDefinition, String varName) {
+    private MaterialTypeConvertBuilder useMaterial(TypeDefinition typeDefinition, String varName) {
         if (useMaterial.contains(varName)) {
             return null;
         }
@@ -189,10 +191,9 @@ public class ValueObjAssembleHandler implements AssembleHandler {
         Material material = materialMap.get(varName);
         // 万能材料，适配一下
         if (material instanceof OmnipotentMaterial) {
-            return ((OmnipotentMaterial) material).adapter(typeDefinition, varName);
+            material = ((OmnipotentMaterial) material).adapter(typeDefinition, varName);
         }
-
-        return material;
+        return new MaterialTypeConvertBuilder(material, typeDefinition);
     }
 
 

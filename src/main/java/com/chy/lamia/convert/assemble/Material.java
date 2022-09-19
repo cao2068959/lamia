@@ -4,7 +4,6 @@ import com.chy.lamia.convert.builder.VarExpressionFunction;
 import com.chy.lamia.entity.TypeDefinition;
 import com.chy.lamia.entity.VarDefinition;
 import com.chy.lamia.utils.JCUtils;
-import com.sun.tools.javac.tree.JCTree;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,30 +22,30 @@ public class Material {
     String supplyName;
 
     /**
-     * 提供的类型是什么
-     */
-    TypeDefinition supplyType;
-
-    /**
      * 该材料的变量本身， 如果该材料提供的是 a.getName(), 那这里 varDefinition 指的是 A a; 这个变量
      */
     VarDefinition varDefinition;
 
     /**
+     *  真正去执行的类型是什么, 如果 var 是 Optional<A> 类型, 但是真正参与表达式的是 a.getXX() 那么这里execType 是 A类型
+     */
+    TypeDefinition execType;
+
+    /**
      * 表达式生成函数, 传入真实的变量名,生成执行的表达式, 如果普通对象就是变量名称,如果是map/扩散 则是 map.get("") , 或者 vobj.getVar();
      */
-    VarExpressionFunction expression;
+    VarExpressionFunction varExpressionFunction;
 
 
     public static Material simpleMaterial(VarDefinition varDefinition) {
         Material result = new Material();
-        result.setSupplyType(varDefinition.getType());
         result.setSupplyName(varDefinition.getVarName());
         result.setVarDefinition(varDefinition);
         // 包装成一个表达式
-        JCTree.JCExpression jcExpression = JCUtils.instance.memberAccess(varDefinition.getVarRealName());
-        result.setExpression(jcExpression);
+        result.setVarExpressionFunction(name -> JCUtils.instance.memberAccess(name));
         return result;
     }
+
+
 
 }

@@ -61,4 +61,9 @@ public class VarDefinition {
     public boolean isSpread() {
         return mapMember.map(MapMember::spread).orElse(false);
     }
+
+    @Override
+    public String toString() {
+        return type.toString() + " " + varRealName;
+    }
 }
