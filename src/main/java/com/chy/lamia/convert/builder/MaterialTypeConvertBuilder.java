@@ -36,13 +36,23 @@ public class MaterialTypeConvertBuilder {
 
         // 变量真正提供的类型
         TypeDefinition realType = varDefinition.getType();
-        // 合成材料 能够提供的类型  get方法提供的类型
+        // 执行的时候 get方法所在对象的类型
         TypeDefinition execType = material.getExecType();
+
+        // 提供的
+        if (realType.matchType(execType, true)){
+
+        }
+
+
         // set表达式需要的类型
         TypeDefinition targetType = this.targetType;
+        // get表达式 返回的类型
+        TypeDefinition supplyType = material.getSupplyType();
+
 
         // 需要的类型和转换材料提供的材料是否相同, 如果不相同则需要 转相同
-        if (!targetType.matchType(execType, true)) {
+        if (!targetType.matchType(supplyType, true)) {
             // 解包匹配到合适的 类型
             Pair<TypeDefinition, TypeDefinition> unPackagePair = TypeDefinitionFactory.unPackageMatch(execType, targetType);
             if (unPackagePair == null) {

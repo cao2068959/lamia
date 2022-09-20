@@ -32,6 +32,11 @@ public class Material {
     TypeDefinition execType;
 
     /**
+     * 这个材料提供的类型是什么, 可以理解成 getXX() 返回的参数类型
+     */
+    TypeDefinition supplyType;
+
+    /**
      * 表达式生成函数, 传入真实的变量名,生成执行的表达式, 如果普通对象就是变量名称,如果是map/扩散 则是 map.get("") , 或者 vobj.getVar();
      */
     VarExpressionFunction varExpressionFunction;
