@@ -30,12 +30,14 @@ public class TypeBoxingDefinition extends TypeDefinition {
      * 装箱函数, 执行后可以获得 boxChain[index-1] 位置类型的变量
      */
     @Setter
+    @Getter
     ExpressionFunction boxingExpression;
 
     /**
      * 拆箱函数, 执行后可以获得 boxChain[index+1] 位置类型的变量
      */
     @Setter
+    @Getter
     ExpressionFunction unboxingExpression;
 
 
@@ -68,6 +70,24 @@ public class TypeBoxingDefinition extends TypeDefinition {
         }
     }
 
+    public TypeBoxingDefinition next() {
+        int oIndex = index + 1;
+        if (boxChain.size() <= oIndex) {
+            return null;
+        }
+        return boxChain.get(oIndex);
+    }
+
+    public TypeBoxingDefinition last() {
+        if (boxChain.size() == 0) {
+            return null;
+        }
+        int oIndex = index - 1;
+        if (oIndex < 0) {
+            return null;
+        }
+        return boxChain.get(oIndex);
+    }
 
     private void addChain(TypeBoxingDefinition typeBoxingDefinition) {
         boxChain.add(typeBoxingDefinition);

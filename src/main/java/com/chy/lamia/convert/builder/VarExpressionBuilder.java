@@ -1,6 +1,7 @@
 package com.chy.lamia.convert.builder;
 
 
+import com.chy.lamia.element.boxing.ExpressionFunction;
 import com.chy.lamia.element.boxing.processor.TypeBoxingDefinition;
 import com.chy.lamia.entity.TypeDefinition;
 import com.chy.lamia.utils.JCUtils;
@@ -57,14 +58,14 @@ public class VarExpressionBuilder {
 
     private BuilderResult createdVar() {
         // 不是 TypeBoxingDefinition 没有解包/装包 操作直接返回了
-        if (!(typeDefinition instanceof TypeBoxingDefinition)){
+        if (!(typeDefinition instanceof TypeBoxingDefinition)) {
             return new BuilderResult(JCUtils.instance.memberAccess(varName));
         }
         TypeBoxingDefinition typeBoxingDefinition = (TypeBoxingDefinition) typeDefinition;
-        if (isBoxing){
-            return createdUnboxingExpression(typeBoxingDefinition);
-        }else {
+        if (isBoxing) {
             return createdBoxingExpression(typeBoxingDefinition);
+        } else {
+            return createdUnboxingExpression(typeBoxingDefinition);
         }
 
     }
@@ -73,6 +74,7 @@ public class VarExpressionBuilder {
      * 变量装包,并生成对应的装包语句  以及最终这个变量的表达式
      */
     private BuilderResult createdBoxingExpression(TypeBoxingDefinition typeBoxingDefinition) {
+        ExpressionFunction boxingExpression = typeBoxingDefinition.getBoxingExpression();
 
 
 
@@ -84,6 +86,11 @@ public class VarExpressionBuilder {
      */
     private BuilderResult createdUnboxingExpression(TypeBoxingDefinition typeBoxingDefinition) {
         return null;
+    }
+
+    private String doCreatedVarExpression(ExpressionFunction function, ){
+
+
     }
 
 
