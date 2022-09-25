@@ -1,10 +1,11 @@
 package com.chy.lamia.element.boxing;
 
 
+import com.chy.lamia.entity.ExpressionWrapper;
 import com.sun.tools.javac.tree.JCTree;
 
 public interface ExpressionFunction {
 
-    JCTree.JCExpression getExpression(JCTree.JCExpression expression);
+    ExpressionWrapper getExpression(JCTree.JCExpression expression);
 
 }

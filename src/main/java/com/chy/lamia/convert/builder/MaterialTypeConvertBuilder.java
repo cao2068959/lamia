@@ -39,9 +39,10 @@ public class MaterialTypeConvertBuilder {
         // 执行的时候 get方法所在对象的类型
         TypeDefinition execType = material.getExecType();
 
-        // 提供的
+        // 提供的类型和执行的类型相同, 不需要转换
         if (realType.matchType(execType, true)){
-
+            // 将变量转换成对应的类型, 只有存在 泛型关系的类型才能转换
+            varDefinition.convert(execType);
         }
 
 

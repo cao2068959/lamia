@@ -70,6 +70,11 @@ public class TypeBoxingDefinition extends TypeDefinition {
         }
     }
 
+    public TypeBoxingDefinition top() {
+        return boxChain.get(0);
+    }
+
+
     public TypeBoxingDefinition next() {
         int oIndex = index + 1;
         if (boxChain.size() <= oIndex) {

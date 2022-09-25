@@ -1,8 +1,11 @@
 package com.chy.lamia.entity;
 
 import com.chy.lamia.annotation.MapMember;
+import com.chy.lamia.convert.builder.BoxingExpressionBuilder;
 import lombok.Data;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -31,6 +34,8 @@ public class VarDefinition {
      * 这个边上是否标注了注解 @MapMember
      */
     private Optional<MapMember> mapMember = Optional.empty();
+
+    private Map<String, BoxingExpressionBuilder> boxingExpressionBuilderCache = new HashMap<>();
 
 
     public VarDefinition(String name, TypeDefinition type) {
@@ -62,8 +67,24 @@ public class VarDefinition {
         return mapMember.map(MapMember::spread).orElse(false);
     }
 
+
+    /**
+     * 将这个变量转成其他类型, 生成对应的表达式, 如果已经转换过,那么存在对应的缓存, 就不会返回对应的转换过程表达式, 只会返回转后的变量名称
+     * <p>
+     * 只有存在泛型父子关系的才能转换
+     *
+     * @param targetType
+     * @return
+     */
+    public ExpressionWrapper convert(TypeDefinition targetType) {
+        String key = targetType.toString();
+        BoxingExpressionBuilder builder = boxingExpressionBuilderCache.computeIfAbsent(key, k -> new BoxingExpressionBuilder(type, varRealName, targetType));
+        return builder.getVarExpression();
+    }
+
     @Override
     public String toString() {
         return type.toString() + " " + varRealName;
     }
+
 }

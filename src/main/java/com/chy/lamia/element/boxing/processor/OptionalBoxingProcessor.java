@@ -1,6 +1,7 @@
 package com.chy.lamia.element.boxing.processor;
 
 
+import com.chy.lamia.entity.ExpressionWrapper;
 import com.chy.lamia.entity.TypeDefinition;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.utils.Lists;
@@ -42,8 +43,9 @@ public class OptionalBoxingProcessor implements ITypeBoxingProcessor {
         TypeBoxingDefinition children = toTypeBoxingDefinition(unBoxingType);
         parent.addChildrenBoxType(children);
 
-        parent.unboxingExpression = this::unboxingExpression;
-        children.boxingExpression = this::autoboxingExpression;
+
+        parent.unboxingExpression = expression -> unboxingExpression(expression, JCUtils.instance.memberAccess(children.toString()));
+        children.boxingExpression = expression -> autoboxingExpression(expression, JCUtils.instance.memberAccess(parent.toString()));
 
         return children;
     }
@@ -59,20 +61,29 @@ public class OptionalBoxingProcessor implements ITypeBoxingProcessor {
     /**
      * 拆箱的表达式 这里使用 optional.orElse(null) 进行拆箱
      *
-     * @param expression 哪一个变量进行拆箱
+     * @param expression     哪一个变量进行拆箱
+     * @param typeDefinition 转换后的类型
      * @return
      */
-    private JCTree.JCExpression unboxingExpression(JCTree.JCExpression expression) {
+    private ExpressionWrapper unboxingExpression(JCTree.JCExpression expression, TypeDefinition typeDefinition) {
         List<JCTree.JCExpression> list = new ArrayList();
         list.add(jcUtils.getNullExpression());
-        //生成 语句 optional.orElse(null);
-        return jcUtils.execMethod(expression, "orElse", list).getExpression();
+        //生成 语句 optional.orElse(null)
+        return new ExpressionWrapper(jcUtils.execMethod(expression, "orElse", list).getExpression(), typeDefinition);
     }
 
 
-    private JCTree.JCExpression autoboxingExpression(JCTree.JCExpression expression) {
+    /**
+     * 表达式装箱
+     *
+     * @param expression     要操作装箱的表达式
+     * @param typeDefinition 操作完后的类型是什么
+     * @return
+     */
+    private ExpressionWrapper autoboxingExpression(JCTree.JCExpression expression, TypeDefinition typeDefinition) {
         List<JCTree.JCExpression> params = Lists.of(expression);
-        return jcUtils.execMethod("java.util.Optional", "ofNullable", params).getExpression();
+        JCTree.JCExpression result = jcUtils.execMethod("java.util.Optional", "ofNullable", params).getExpression();
+        return new ExpressionWrapper(result, typeDefinition);
     }
 
     /**

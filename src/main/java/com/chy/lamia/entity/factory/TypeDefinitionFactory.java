@@ -9,6 +9,7 @@ import com.chy.lamia.utils.struct.Pair;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TypeDefinitionFactory {
@@ -47,6 +48,10 @@ public class TypeDefinitionFactory {
      * @return 解包后的类如  Optional<A> ----> 返回的是 A
      */
     public static TypeDefinition unPackage(TypeDefinition targetType) {
+        if (targetType instanceof TypeBoxingDefinition) {
+            return targetType;
+        }
+
         TypeBoxingDefinition unboxing = TypeBoxingHandle.instance.unboxing(targetType);
         // 不是包装类型,直接返回
         if (unboxing == null) {
@@ -55,6 +60,26 @@ public class TypeDefinitionFactory {
 
         return unboxing;
     }
+
+    /**
+     * 把type类型解包, 同时找到 targetType 所在 解包链路的位置, 返回出去
+     *
+     * @param type       包装父类型
+     * @param targetType 要查找链路的类型
+     * @return
+     */
+    public static TypeBoxingDefinition unPackage(TypeDefinition type, TypeDefinition targetType) {
+        // 获取当前的 解包链
+        List<? extends TypeDefinition> typeBoxChain = getBoxChain(unPackage(type), false);
+        for (TypeDefinition typeDefinition : typeBoxChain) {
+            if (typeDefinition.matchType(targetType, false)) {
+                return (TypeBoxingDefinition) typeDefinition;
+            }
+
+        }
+        return null;
+    }
+
 
     /**
      * 把2个type的类型 匹配到一致, 会不断解包,直到匹配到一致为止
@@ -71,8 +96,8 @@ public class TypeDefinitionFactory {
         if (type.matchType(targetType, true)) {
             return Pair.of(type, targetType);
         }
-        List<? extends TypeDefinition> typeBoxChain = getBoxChain(unPackage(type));
-        List<? extends TypeDefinition> targetBoxChain = getBoxChain(unPackage(targetType));
+        List<? extends TypeDefinition> typeBoxChain = getBoxChain(unPackage(type), true);
+        List<? extends TypeDefinition> targetBoxChain = getBoxChain(unPackage(targetType), true);
 
         for (TypeDefinition typeDefinition : typeBoxChain) {
             for (TypeDefinition target : targetBoxChain) {
@@ -89,11 +114,14 @@ public class TypeDefinitionFactory {
     /**
      * 获取 包装链路,只有 TypeBoxingDefinition 存在包装链路,如果非 TypeBoxingDefinition 类型返回  Lists.of(type)
      */
-    private static List<? extends TypeDefinition> getBoxChain(TypeDefinition type) {
+    private static List<? extends TypeDefinition> getBoxChain(TypeDefinition type, boolean self) {
         if (type instanceof TypeBoxingDefinition) {
             return ((TypeBoxingDefinition) type).getBoxChain();
         }
-        return Lists.of(type);
+        if (self) {
+            return Lists.of(type);
+        }
+        return new ArrayList<>();
     }
 
 

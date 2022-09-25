@@ -100,4 +100,20 @@ public class TypeDefinition {
         }
         return result.toString();
     }
+
+    public String simpleClassName() {
+        String[] split = classPath.split("\\.");
+        return split[split.length - 1];
+    }
+
+    /**
+     * 目标类型是否是 当前类型的 子泛型
+     *
+     * @param targetType
+     * @return
+     */
+    public boolean isChildrenGeneric(TypeDefinition targetType) {
+        String current = toString();
+        return current.contains(targetType.toString());
+    }
 }
