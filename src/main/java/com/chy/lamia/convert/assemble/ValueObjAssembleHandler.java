@@ -89,11 +89,12 @@ public class ValueObjAssembleHandler implements AssembleHandler {
     private void createSetterExpression() {
         // 遍历所有的 set方法， 如果能找到
         targetSetters.forEach((varName, setter) -> {
-            Material material = useMaterial(setter.getType(), varName);
+            MaterialTypeConvertBuilder material = useMaterial(setter.getType(), varName);
             // 没找到 就不处理了
             if (material == null) {
                 return;
             }
+
             MaterialStatementBuilder materialStatementBuilder = new MaterialStatementBuilder();
             String id = materialStatementBuilder.addMaterial(material);
             // 生成对应的 set的方法
@@ -184,6 +185,7 @@ public class ValueObjAssembleHandler implements AssembleHandler {
 
 
     private MaterialTypeConvertBuilder useMaterial(TypeDefinition typeDefinition, String varName) {
+        // 这个材料已经被使用过，不在返回了
         if (useMaterial.contains(varName)) {
             return null;
         }

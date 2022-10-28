@@ -51,6 +51,11 @@ public class ConvertFactory {
 
     /**
      * 使用 MaterialExpressionBuilder 去生成真正的 statement
+     * <p>
+     * 每一个 MaterialStatementBuilder 理论上是对应了一行 java语句，但是这一行java语句可能依赖的入参需要有一些前置转换，所以
+     * 一个 MaterialStatementBuilder 能够生成出多行 java语句
+     *
+     *
      *
      * @param expressionBuilders
      * @param lamiaConvertInfo

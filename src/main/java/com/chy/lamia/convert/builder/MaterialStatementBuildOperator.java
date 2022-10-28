@@ -37,6 +37,7 @@ public class MaterialStatementBuildOperator {
      * @return
      */
     public JCTree.JCExpression getExpression(String id) {
+
         MaterialTypeConvertBuilder convertBuilder = materialStatementBuilder.getMaterialTypeConvertBuilder(id);
         if (convertBuilder == null) {
             throw new RuntimeException("无效的 MaterialTypeConvertBuilder id : " + id);
@@ -44,13 +45,10 @@ public class MaterialStatementBuildOperator {
         // 转换成外接可以接受的类型, 返回这个变量的表达式 ,可能会带有这个表达式的转换语句
         MaterialTypeConvertBuilder.ConvertResult convertResult = convertBuilder.convert();
 
-
         return null;
     }
 
     public List<JCTree.JCExpression> getExpression(List<String> ids) {
         return ids.stream().map(this::getExpression).collect(Collectors.toList());
     }
-
-
 }

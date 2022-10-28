@@ -83,6 +83,7 @@ public class MethodUpdateVisitor extends TreeTranslator {
 
 
     private void updateBlock(LamiaConvertHolderBlock lamiaConvertHolderBlock, Map<String, VarDefinition> paramMap) {
+
         // 获取这个代码块中 所有的代码
         List<JCTree.JCStatement> statements = lamiaConvertHolderBlock.getContents();
         List<JCTree.JCStatement> newStatement = new LinkedList<>();

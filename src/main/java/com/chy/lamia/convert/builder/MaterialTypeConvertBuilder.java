@@ -2,9 +2,11 @@ package com.chy.lamia.convert.builder;
 
 
 import com.chy.lamia.convert.assemble.Material;
+import com.chy.lamia.entity.ExpressionWrapper;
 import com.chy.lamia.entity.TypeDefinition;
 import com.chy.lamia.entity.VarDefinition;
 import com.chy.lamia.entity.factory.TypeDefinitionFactory;
+import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.utils.struct.Pair;
 import com.sun.tools.javac.tree.JCTree;
 import lombok.Data;
@@ -32,17 +34,24 @@ public class MaterialTypeConvertBuilder {
      * 将这个类型 转换成 指定的类型
      */
     public ConvertResult convert() {
-        VarDefinition varDefinition = material.getVarDefinition();
+        ConvertResult result = new ConvertResult();
+        VarDefinition materialVarDefinition = material.getVarDefinition();
 
         // 变量真正提供的类型
-        TypeDefinition realType = varDefinition.getType();
+        TypeDefinition realType = materialVarDefinition.getType();
         // 执行的时候 get方法所在对象的类型
         TypeDefinition execType = material.getExecType();
 
-        // 提供的类型和执行的类型相同, 不需要转换
-        if (realType.matchType(execType, true)){
+
+        JCTree.JCExpression materialExpression;
+        // 如果提供的类型和实际参与转换的类型不同，则转换类型
+        if (!realType.matchType(execType, true)) {
             // 将变量转换成对应的类型, 只有存在 泛型关系的类型才能转换
-            varDefinition.convert(execType);
+            ExpressionWrapper expressionWrapper = materialVarDefinition.convert(execType);
+            result.addConvertStatement(expressionWrapper.getBefore());
+            materialExpression = expressionWrapper.getExpression();
+        } else {
+            materialExpression = JCUtils.instance.memberAccess(materialVarDefinition.getVarRealName());
         }
 
 
@@ -62,10 +71,6 @@ public class MaterialTypeConvertBuilder {
             execType = unPackagePair.getLeft();
             targetType = unPackagePair.getRight();
         }
-
-
-
-
     }
 
     @Data
@@ -73,8 +78,8 @@ public class MaterialTypeConvertBuilder {
         List<JCTree.JCStatement> convertStatement = new ArrayList<>();
         JCTree.JCExpression varExpression;
 
-        public ConvertResult(JCTree.JCExpression varExpression) {
-            this.varExpression = varExpression;
+        public void addConvertStatement(List<JCTree.JCStatement> statements) {
+            convertStatement.addAll(statements);
         }
     }
 

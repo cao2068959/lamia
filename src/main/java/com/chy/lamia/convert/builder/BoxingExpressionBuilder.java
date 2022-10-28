@@ -93,7 +93,6 @@ public class BoxingExpressionBuilder {
             return new ExpressionWrapper(JCUtils.instance.memberAccess(varName), currentType);
         }
 
-
         TypeBoxingDefinition typeBoxingDefinition = (TypeBoxingDefinition) currentType;
         if (isBoxing) {
             return createdBoxingExpression(typeBoxingDefinition);
