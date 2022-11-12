@@ -41,6 +41,10 @@ public class TypeDefinition {
         this.generic.addAll(generic);
     }
 
+    public void addGeneric(TypeDefinition generic) {
+        this.generic.add(generic);
+    }
+
     /**
      * 判断是否是指定的 类型
      *

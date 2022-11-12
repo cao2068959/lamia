@@ -44,8 +44,8 @@ public class OptionalBoxingProcessor implements ITypeBoxingProcessor {
         parent.addChildrenBoxType(children);
 
 
-        parent.unboxingExpression = expression -> unboxingExpression(expression, JCUtils.instance.memberAccess(children.toString()));
-        children.boxingExpression = expression -> autoboxingExpression(expression, JCUtils.instance.memberAccess(parent.toString()));
+        parent.unboxingExpression = expression -> unboxingExpression(expression, children);
+        children.boxingExpression = expression -> autoboxingExpression(expression, parent);
 
         return children;
     }

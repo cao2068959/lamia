@@ -2,6 +2,7 @@ package com.chy.lamia.entity;
 
 import com.chy.lamia.annotation.MapMember;
 import com.chy.lamia.convert.builder.BoxingExpressionBuilder;
+import com.chy.lamia.utils.JCUtils;
 import lombok.Data;
 
 import java.util.HashMap;
@@ -78,8 +79,14 @@ public class VarDefinition {
      */
     public ExpressionWrapper convert(TypeDefinition targetType) {
         String key = targetType.toString();
-        BoxingExpressionBuilder builder = boxingExpressionBuilderCache.computeIfAbsent(key, k -> new BoxingExpressionBuilder(type, varRealName, targetType));
-        return builder.getVarExpression();
+        BoxingExpressionBuilder builder = boxingExpressionBuilderCache
+                .computeIfAbsent(key, k -> new BoxingExpressionBuilder(type, JCUtils.instance.memberAccess(varRealName), targetType));
+        ExpressionWrapper result = builder.getVarExpression();
+        // 两个类型不能相互转换
+        if (result == null) {
+            throw new RuntimeException("类型 [" + type + "] 和 类型 [" + targetType + "] 无法相互转换");
+        }
+        return result;
     }
 
 

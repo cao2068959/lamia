@@ -1,7 +1,6 @@
 package com.chy.lamia.element.resolver;
 
 import com.chy.lamia.element.IClassDefine;
-import com.chy.lamia.element.assemble.valobj.ValueObjectAssembleFactory;
 import com.chy.lamia.element.tree.ConstructorCollect;
 import com.chy.lamia.element.tree.GetSetCollect;
 import com.chy.lamia.element.tree.VarCollect;
@@ -45,12 +44,6 @@ public class TreeClassDefine implements IClassDefine {
     public TreeClassDefine(JCUtils jcUtils, JCTree jcTree) {
         this.jcUtils = jcUtils;
         this.jcTree = jcTree;
-    }
-
-    @Override
-    public ValueObjectAssembleFactory getAssembleFactory() {
-        String classPath = ((JCTree.JCClassDecl) jcTree).sym.toString();
-        return new ValueObjectAssembleFactory(jcUtils, classPath, getConstructors(), getInstantSetters());
     }
 
     @Override

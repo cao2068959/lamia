@@ -1,8 +1,8 @@
 package com.chy.lamia.element.funicle;
 
 import com.chy.lamia.element.resolver.TypeResolver;
-import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.entity.SimpleMethod;
+import com.chy.lamia.entity.TypeDefinition;
 import com.chy.lamia.log.Logger;
 import com.chy.lamia.utils.CommonUtils;
 import com.chy.lamia.utils.FileUtils;
@@ -132,7 +132,7 @@ public class FunicleFactory {
 
     private static SimpleMethod findOrCreateFunicleMethod(String classpath) {
 
-        TypeResolver classElement = TypeResolver.getClassElement(new ParameterType(classpath));
+        TypeResolver classElement = TypeResolver.getTypeResolver(new TypeDefinition(classpath));
         List<SimpleMethod> allMethod = classElement.getAllMethod();
         //先去这个类中的所有方法看看，有没有对应的脐带方法
         return findFunicleMethodByClass(allMethod).orElseGet(() -> {
@@ -155,7 +155,7 @@ public class FunicleFactory {
         for (int i = allMethod.size() - 1; i >= 0; i--) {
             SimpleMethod simpleMethod = allMethod.get(i);
 
-            if (!simpleMethod.isStatic() || !simpleMethod.getParam().isEmpty()) {
+            if (!simpleMethod.isStatic() || !simpleMethod.getParams().isEmpty()) {
                 continue;
             }
             if (simpleMethod.getName().contains(funicleFlag)) {

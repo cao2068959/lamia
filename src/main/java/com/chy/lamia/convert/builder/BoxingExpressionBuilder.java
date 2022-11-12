@@ -23,23 +23,29 @@ import java.util.function.Function;
 public class BoxingExpressionBuilder {
 
     private final boolean isBoxing;
+
+    private final JCTree.JCExpression paramExpression;
     private TypeDefinition targetType;
-    String varName;
     TypeDefinition currentType;
 
     ExpressionWrapper resultCache;
 
     /**
+     * 两个类型是否可以转换
+     */
+    private boolean enableConvert = true;
+
+
+    /**
      * 如果 isBoxing 为 true 则是 自动装包生成变量,  为 false 则是以解包的方式生成变量
      *
-     * @param currentType 当前要操作的类型
-     * @param varName     当前最初始的变量名
-     * @param targetType  要转换的目标类型
+     * @param currentType     当前要操作的类型
+     * @param paramExpression 变量表达式
+     * @param targetType      要转换的目标类型
      */
-    public BoxingExpressionBuilder(TypeDefinition currentType, String varName, TypeDefinition targetType) {
-        this.varName = varName;
+    public BoxingExpressionBuilder(TypeDefinition currentType, JCTree.JCExpression paramExpression, TypeDefinition targetType) {
+        this.paramExpression = paramExpression;
         this.isBoxing = decideBoxing(currentType, targetType);
-
     }
 
     /**
@@ -68,7 +74,8 @@ public class BoxingExpressionBuilder {
             this.currentType = typeBoxingDefinition;
             return false;
         }
-        throw new RuntimeException("类型 [" + currentType + "] 和 类型 [" + targetType + "] 无法相互转换");
+        enableConvert = false;
+        return false;
     }
 
 
@@ -77,6 +84,11 @@ public class BoxingExpressionBuilder {
      * 如果是第一次获取,还将获取到, 在生成这个变量之前还需要的表达式
      */
     public ExpressionWrapper getVarExpression() {
+
+        if (!enableConvert) {
+            return null;
+        }
+
         // 不是第一次生成了, 直接返回结果
         if (resultCache != null) {
             return new ExpressionWrapper(resultCache.getExpression(), resultCache.getReturnType());
@@ -90,7 +102,7 @@ public class BoxingExpressionBuilder {
     private ExpressionWrapper createdVar() {
         // 不是 TypeBoxingDefinition 没有解包/装包 操作直接返回了
         if (!(currentType instanceof TypeBoxingDefinition)) {
-            return new ExpressionWrapper(JCUtils.instance.memberAccess(varName), currentType);
+            return new ExpressionWrapper(paramExpression, currentType);
         }
 
         TypeBoxingDefinition typeBoxingDefinition = (TypeBoxingDefinition) currentType;
@@ -130,22 +142,21 @@ public class BoxingExpressionBuilder {
                                                      Function<TypeBoxingDefinition, ExpressionFunction> fetchExpressionFunction,
                                                      Function<TypeBoxingDefinition, TypeBoxingDefinition> fetchNext) {
         // 参与装换的 表达式,最开始应该是 参数的变量名
-        JCTree.JCExpression paramExpression = JCUtils.instance.memberAccess(varName);
         ExpressionWrapper result = new ExpressionWrapper();
         TypeBoxingDefinition current = typeBoxingDefinition;
-
+        JCTree.JCExpression expression = paramExpression;
         while (true) {
             ExpressionFunction function = fetchExpressionFunction.apply(current);
-            ExpressionWrapper wrapper = function.getExpression(paramExpression);
+            ExpressionWrapper wrapper = function.getExpression(expression);
             // 当前计算出来的表达式,应该是下一个函数的入参
-            paramExpression = wrapper.getExpression();
+            expression = wrapper.getExpression();
             result.addBeforeStatement(wrapper.getBefore());
             // 获取下一个
             current = fetchNext.apply(current);
 
             // 已经是最后一个 直接返回了
             if (current == null) {
-                result.setExpression(paramExpression);
+                result.setExpression(expression);
                 result.setReturnType(wrapper.getReturnType());
                 return result;
             }
@@ -159,7 +170,7 @@ public class BoxingExpressionBuilder {
             String newName = CommonUtils.generateVarName(returnType.get().simpleClassName());
             JCTree.JCVariableDecl variableDecl = JCUtils.instance.createVar(newName, returnType.get().toString(), paramExpression);
             result.addBeforeStatement(variableDecl);
-            paramExpression = JCUtils.instance.memberAccess(newName);
+            expression = JCUtils.instance.memberAccess(newName);
         }
     }
 

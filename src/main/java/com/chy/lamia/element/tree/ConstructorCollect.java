@@ -1,8 +1,9 @@
 package com.chy.lamia.element.tree;
 
 import com.chy.lamia.entity.Constructor;
-import com.chy.lamia.entity.ParameterType;
-import com.chy.lamia.utils.SymbolUtils;
+import com.chy.lamia.entity.TypeDefinition;
+import com.chy.lamia.entity.VarDefinition;
+import com.chy.lamia.entity.factory.TypeDefinitionFactory;
 import com.chy.lamia.visitor.InstantMethodVisitor;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.tree.JCTree;
@@ -25,11 +26,9 @@ public class ConstructorCollect extends InstantMethodVisitor {
         for (JCTree.JCVariableDecl param : params) {
             String name = param.name.toString();
             Type paramType = param.vartype.type;
-            ParameterType parameterType = new ParameterType(name, paramType.toString());
-            //去解析一下这个类型里面有没泛型
-            java.util.List<ParameterType> generic = SymbolUtils.getGeneric(paramType);
-            parameterType.setGeneric(generic);
-            constructor.add(parameterType);
+            TypeDefinition typeDefinition = TypeDefinitionFactory.create(paramType);
+            VarDefinition varDefinition = new VarDefinition(name, typeDefinition);
+            constructor.add(varDefinition);
         }
 
         data.add(constructor);

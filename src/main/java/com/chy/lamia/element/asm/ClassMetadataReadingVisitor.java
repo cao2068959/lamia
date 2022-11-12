@@ -9,28 +9,35 @@ import org.objectweb.asm.Type;
 
 import java.util.*;
 
+
 public class ClassMetadataReadingVisitor extends ClassVisitor {
 
     /**
      * 实例中的所有属性
      */
+    @lombok.Getter
     private Map<String, Var> instantVars = new HashMap<>();
 
     /**
      * 实例中所有的 getter
      * key getter方法对应的 字段的名称
      */
+    @lombok.Getter
     private Map<String, Getter> instantGetters = new HashMap<>();
+
+    @lombok.Getter
     private Map<String, Setter> instantSetters = new HashMap<>();
 
     /**
      * 所有的方法，不包括构造器
      */
+    @lombok.Getter
     private List<SimpleMethod> allMethod = new LinkedList<>();
 
     /**
      * 实例中所有的构造器
      */
+    @lombok.Getter
     private List<Constructor> constructors = new ArrayList<>();
 
     public ClassMetadataReadingVisitor() {
@@ -53,7 +60,7 @@ public class ClassMetadataReadingVisitor extends ClassVisitor {
         //是否是 static
         boolean isStatic = (access & 1 << 3) != 0;
 
-        SimpleMethod simpleMethod = new SimpleMethod(name, new ParameterType(returnType.getClassName()));
+        SimpleMethod simpleMethod = new SimpleMethod(name, new TypeDefinition(returnType.getClassName()));
         simpleMethod.setParams(signatureHandleWarpper.getParameters());
         simpleMethod.setStatic(isStatic);
         allMethod.add(simpleMethod);
@@ -85,14 +92,14 @@ public class ClassMetadataReadingVisitor extends ClassVisitor {
         Type argumentType = argumentTypes[0];
 
         Setter setter = new Setter();
-        String parameterTypeName = argumentTypes[0].getClassName();
-        setter.setSimpleName(name);
+        setter.setMethodName(name);
 
-
-        ParameterType parameterType = signatureHandleWarpper.getParameter(0)
-                .orElseGet(() -> new ParameterType(parameterTypeName));
-        setter.setParameterType(parameterType);
+        String parameterTypeName = argumentType.getClassName();
+        TypeDefinition typeDefinition = signatureHandleWarpper.getParameter(0)
+                .orElseGet(() -> new TypeDefinition(parameterTypeName));
+        setter.setType(typeDefinition);
         String varName = varNameHandle(name.substring(3));
+        setter.setVarName(varName);
         instantSetters.put(varName, setter);
     }
 
@@ -110,11 +117,12 @@ public class ClassMetadataReadingVisitor extends ClassVisitor {
             return;
         }
 
-        ParameterType parameterType = signatureHandleWarpper.getReturnType()
-                .orElse(new ParameterType(returnTypeName));
+        TypeDefinition parameterType = signatureHandleWarpper.getReturnType()
+                .orElse(new TypeDefinition(returnTypeName));
         Getter getter = new Getter();
-        getter.setSimpleName(name);
-        getter.setParameterType(parameterType);
+        getter.setVarName(name);
+        getter.setType(parameterType);
+        getter.setMethodName(name);
         instantGetters.put(varName, getter);
 
     }
@@ -141,26 +149,6 @@ public class ClassMetadataReadingVisitor extends ClassVisitor {
             c += 32;
         }
         return c;
-    }
-
-    public Map<String, Var> getInstantVars() {
-        return instantVars;
-    }
-
-    public Map<String, Getter> getInstantGetters() {
-        return instantGetters;
-    }
-
-    public Map<String, Setter> getInstantSetters() {
-        return instantSetters;
-    }
-
-    public List<Constructor> getConstructors() {
-        return constructors;
-    }
-
-    public List<SimpleMethod> getAllMethod() {
-        return allMethod;
     }
 
 

@@ -3,7 +3,6 @@ package com.chy.lamia.element.resolver;
 
 import com.chy.lamia.element.IClassDefine;
 import com.chy.lamia.element.asm.ClassMetadataReadingVisitor;
-import com.chy.lamia.element.assemble.valobj.ValueObjectAssembleFactory;
 import com.chy.lamia.entity.*;
 import com.chy.lamia.log.Logger;
 import com.chy.lamia.utils.ClassPath;
@@ -51,11 +50,6 @@ public class AsmClassDefine implements IClassDefine {
         return classMetadataReadingVisitor.getAllMethod();
     }
 
-
-    @Override
-    public ValueObjectAssembleFactory getAssembleFactory() {
-        return new ValueObjectAssembleFactory(jcUtils, classPath, getConstructors(), getInstantSetters());
-    }
 
     @Override
     public Map<String, Var> getInstantVars() {

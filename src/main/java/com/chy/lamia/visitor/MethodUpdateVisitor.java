@@ -6,20 +6,14 @@ import com.chy.lamia.convert.ConvertFactory;
 import com.chy.lamia.element.LamiaConvertBlockVisitor;
 import com.chy.lamia.element.LamiaConvertHolderBlock;
 import com.chy.lamia.element.LamiaConvertInfo;
-import com.chy.lamia.element.PendHighway;
 import com.chy.lamia.element.annotation.AnnotationProxyFactory;
-import com.chy.lamia.element.assemble.AssembleResult;
-import com.chy.lamia.element.funicle.FunicleFactory;
 import com.chy.lamia.entity.TypeDefinition;
 import com.chy.lamia.entity.VarDefinition;
 import com.chy.lamia.entity.factory.TypeDefinitionFactory;
 import com.chy.lamia.processor.marked.MarkedMethods;
-import com.chy.lamia.utils.JCUtils;
 import com.sun.tools.javac.code.Symbol;
-
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeTranslator;
-import lombok.Data;
 
 import java.util.*;
 
@@ -95,41 +89,17 @@ public class MethodUpdateVisitor extends TreeTranslator {
                 lamiaConvertInfo.getAllArgsNames().stream().map(paramMap::get).filter(Objects::nonNull).forEach(lamiaConvertInfo::addVarArgs);
                 lamiaConvertInfo.checkArgs();
                 // 生成对应的转换语句
-                ConvertFactory.INSTANCE.make(lamiaConvertInfo);
-                //pendHighway.setParamVars(paramMap);
-                //generateNewStatement(pendHighway, newStatement);
+                List<JCTree.JCStatement> makeResult = ConvertFactory.INSTANCE.make(lamiaConvertInfo);
+                newStatement.addAll(makeResult);
             } else {
                 newStatement.add(statement);
             }
         }
         //替换原来的老代码
-        //lamiaConvertHolderBlock.modifyMethodBody(newStatement);
+       // lamiaConvertHolderBlock.modifyMethodBody(newStatement);
     }
 
-    private void generateNewStatement(PendHighway pendHighway, List<JCTree.JCStatement> newStatement) {
 
-        //把所有的材料添加进工厂
-        pendHighway.addMaterials();
-        //生成最终的转换代码
-        AssembleResult assembleResult = pendHighway.assemble();
-        //将生成的代码都放入结果集中
-        newStatement.addAll(assembleResult.getStatements());
-
-        //存在variableDecl 说明是一个 A a = Lamia.convert() 的形式，那么去替换 Lamia.convert()为新生成的对象
-        //如果不存在，说明是 return Lamia.convert() 的形式，也生成对应的语句
-        JCTree.JCStatement statement = pendHighway.getVariableDecl().map((variableDecl) -> {
-            variableDecl.init = JCUtils.instance.memberAccess(assembleResult.getNewInstantName());
-            return (JCTree.JCStatement) variableDecl;
-        }).orElseGet(() -> JCUtils.instance.createReturn(assembleResult.getNewInstantName()));
-
-        //放入最后的一条接收语句
-        newStatement.add(statement);
-
-        Set<String> dependentClassPath = assembleResult.getDependentClassPath();
-        dependentClassPath.add(pendHighway.genTypePath());
-        //设置对应的脐带
-        FunicleFactory.addDependent(className, dependentClassPath);
-    }
 
     /**
      * 去解析 原来的方法体, 每到一个 Lamia.convert() 就保存在 LamiaConvertHolderBlock 对象中,

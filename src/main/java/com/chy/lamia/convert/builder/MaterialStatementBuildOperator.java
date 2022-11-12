@@ -44,8 +44,8 @@ public class MaterialStatementBuildOperator {
         }
         // 转换成外接可以接受的类型, 返回这个变量的表达式 ,可能会带有这个表达式的转换语句
         MaterialTypeConvertBuilder.ConvertResult convertResult = convertBuilder.convert();
-
-        return null;
+        exStatement.addAll(convertResult.getConvertStatement());
+        return convertResult.getVarExpression();
     }
 
     public List<JCTree.JCExpression> getExpression(List<String> ids) {

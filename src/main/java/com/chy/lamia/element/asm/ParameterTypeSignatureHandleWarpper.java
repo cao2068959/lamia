@@ -1,6 +1,6 @@
 package com.chy.lamia.element.asm;
 
-import com.chy.lamia.entity.ParameterType;
+import com.chy.lamia.entity.TypeDefinition;
 import org.objectweb.asm.signature.SignatureReader;
 
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ public class ParameterTypeSignatureHandleWarpper {
         return handle;
     }
 
-    public Optional<ParameterType> getParameter(int index) {
+    public Optional<TypeDefinition> getParameter(int index) {
         ParameterTypeSignatureHandle handle = getHandle();
         if (handle == null) {
             return Optional.empty();
@@ -47,7 +47,7 @@ public class ParameterTypeSignatureHandleWarpper {
     }
 
 
-    public List<ParameterType> getParameters() {
+    public List<TypeDefinition> getParameters() {
         ParameterTypeSignatureHandle handle = getHandle();
         if (handle == null) {
             return new LinkedList<>();
@@ -57,7 +57,7 @@ public class ParameterTypeSignatureHandleWarpper {
     }
 
 
-    public Optional<ParameterType> getSuperClass() {
+    public Optional<TypeDefinition> getSuperClass() {
         ParameterTypeSignatureHandle handle = getHandle();
         if (handle == null) {
             return Optional.empty();
@@ -70,7 +70,7 @@ public class ParameterTypeSignatureHandleWarpper {
         return Optional.ofNullable(superClass.getParameterType());
     }
 
-    public Optional<ParameterType> getReturnType() {
+    public Optional<TypeDefinition> getReturnType() {
         ParameterTypeSignatureHandle handle = getHandle();
         if (handle == null) {
             return Optional.empty();

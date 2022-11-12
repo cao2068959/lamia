@@ -30,8 +30,9 @@ public class ConvertFactory {
      * 开始生成对应的转换代码
      *
      * @param lamiaConvertInfo 表达式信息
+     * @return
      */
-    public void make(LamiaConvertInfo lamiaConvertInfo) {
+    public List<JCTree.JCStatement> make(LamiaConvertInfo lamiaConvertInfo) {
 
         // 可能存在包装类型,把包装类型解包 如: Optional<A> ---> A
         TypeDefinition targetType = TypeDefinitionFactory.unPackage(lamiaConvertInfo.getTargetType());
@@ -44,8 +45,7 @@ public class ConvertFactory {
         // 生成所有组装对象 语句的构建器, 每一个builder 将会生成一行 语句, 如 result.setXXX(var.getVVV())
         List<MaterialStatementBuilder> materialStatementBuilders = assembleHandler.run();
         // 生成真正的 java语句
-        List<JCTree.JCStatement> statements = createdStatement(materialStatementBuilders, lamiaConvertInfo);
-
+        return createdStatement(materialStatementBuilders, lamiaConvertInfo);
 
     }
 
@@ -67,9 +67,7 @@ public class ConvertFactory {
             List<JCTree.JCStatement> jcStatements = expressionBuilder.build();
             result.addAll(jcStatements);
         });
-
-
-        return null;
+        return result;
     }
 
     /**
@@ -124,8 +122,8 @@ public class ConvertFactory {
             material.setExecType(typeDefinition);
             material.setSupplyName(fieldName);
             // 生成对应的 var.getXX()
-            material.setVarExpressionFunction((varName -> {
-                JCTree.JCExpressionStatement statement = JCUtils.instance.execMethod(varName, getter.getMethodName(), Lists.of());
+            material.setVarExpressionFunction((varExpression -> {
+                JCTree.JCExpressionStatement statement = JCUtils.instance.execMethod(varExpression, getter.getMethodName(), Lists.of());
                 return statement.getExpression();
             }));
             result.add(material);

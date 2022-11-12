@@ -1,7 +1,7 @@
 package com.chy.lamia.element.asm;
 
 
-import com.chy.lamia.entity.ParameterType;
+import com.chy.lamia.entity.TypeDefinition;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.signature.SignatureVisitor;
@@ -54,13 +54,13 @@ class ParameterTypeSignatureHandle extends SignatureVisitor {
     private ArrayList<ParameterTypeSignatureHandle> mParameters = new ArrayList<ParameterTypeSignatureHandle>();
 
     /**
-     * 把整个泛型以 ParameterType 类型的形式去存储
+     * 把整个泛型以 typeDefinition 类型的形式去存储
      */
-    ParameterType parameterType;
+    TypeDefinition typeDefinition;
     /**
      * 栈顶元素就是当前正常处理的 泛型对象
      */
-    Stack<ParameterType> currentOperateGeneric = new Stack<>();
+    Stack<TypeDefinition> currentOperateGeneric = new Stack<>();
 
     public ParameterTypeSignatureHandle() {
         super(Opcodes.ASM5);
@@ -104,8 +104,8 @@ class ParameterTypeSignatureHandle extends SignatureVisitor {
         return mSuperClass;
     }
 
-    public ParameterType getParameterType() {
-        return parameterType;
+    public TypeDefinition getParameterType() {
+        return typeDefinition;
     }
 
     // ------------------------------------------------------------------------
@@ -193,9 +193,9 @@ class ParameterTypeSignatureHandle extends SignatureVisitor {
     public void visitClassType(final String name) {
         String classPath = name.replace('/', '.');
         getBuf().append(classPath);
-        ParameterType newParameterType = new ParameterType(classPath);
-        if (this.parameterType == null) {
-            this.parameterType = newParameterType;
+        TypeDefinition newParameterType = new TypeDefinition(classPath);
+        if (this.typeDefinition == null) {
+            this.typeDefinition = newParameterType;
         }
         getTopParameterType(false).ifPresent(vt -> vt.addGeneric(newParameterType));
 
@@ -203,7 +203,7 @@ class ParameterTypeSignatureHandle extends SignatureVisitor {
         mArgumentStack *= 2;
     }
 
-    private Optional<ParameterType> getTopParameterType(boolean isRemove) {
+    private Optional<TypeDefinition> getTopParameterType(boolean isRemove) {
         if (currentOperateGeneric.empty()) {
             return Optional.empty();
         }

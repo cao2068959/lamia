@@ -3,7 +3,6 @@ package com.chy.lamia.convert.assemble;
 import com.chy.lamia.convert.builder.VarExpressionFunction;
 import com.chy.lamia.entity.TypeDefinition;
 import com.chy.lamia.entity.VarDefinition;
-import com.chy.lamia.utils.JCUtils;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,7 +26,7 @@ public class Material {
     VarDefinition varDefinition;
 
     /**
-     *  真正去执行的类型是什么, 如果 var 是 Optional<A> 类型, 但是真正参与表达式的是 a.getXX() 那么这里execType 是 A类型
+     * 真正去执行的类型是什么, 如果 var 是 Optional<A> 类型, 但是真正参与表达式的是 a.getXX() 那么这里execType 是 A类型
      */
     TypeDefinition execType;
 
@@ -47,10 +46,9 @@ public class Material {
         result.setSupplyName(varDefinition.getVarName());
         result.setVarDefinition(varDefinition);
         // 包装成一个表达式
-        result.setVarExpressionFunction(name -> JCUtils.instance.memberAccess(name));
+        result.setVarExpressionFunction(expression -> expression);
         return result;
     }
-
 
 
 }

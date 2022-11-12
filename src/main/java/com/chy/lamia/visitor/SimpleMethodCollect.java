@@ -1,10 +1,10 @@
 package com.chy.lamia.visitor;
 
 
-import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.entity.SimpleMethod;
+import com.chy.lamia.entity.TypeDefinition;
+import com.chy.lamia.entity.factory.TypeDefinitionFactory;
 import com.sun.tools.javac.code.Flags;
-import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.TypeTag;
 import com.sun.tools.javac.tree.JCTree;
 
@@ -28,16 +28,17 @@ public class SimpleMethodCollect extends AllMethodVisitor {
 
 
         JCTree returnType = that.getReturnType();
-        ParameterType returnParameterType = null;
+        TypeDefinition returnParameterType = null;
         if (returnType != null && returnType.type != null && returnType.type.getTag() != TypeTag.VOID) {
-            returnParameterType = new ParameterType(returnType.type.toString());
+            returnParameterType = TypeDefinitionFactory.create(returnType.type);
         }
 
         SimpleMethod simpleMethod = new SimpleMethod(that.getName().toString(), returnParameterType);
         simpleMethod.setStatic(isStatic);
-        List<ParameterType> parameterTypes = that.getParameters().stream()
-                .map(variableDecl -> new ParameterType(variableDecl.vartype.type.toString()))
+        List<TypeDefinition> parameterTypes = that.getParameters().stream()
+                .map(variableDecl -> TypeDefinitionFactory.create(variableDecl.type))
                 .collect(Collectors.toList());
+
         simpleMethod.setParams(parameterTypes);
         data.add(simpleMethod);
     }

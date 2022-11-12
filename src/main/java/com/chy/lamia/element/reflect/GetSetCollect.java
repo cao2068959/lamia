@@ -3,6 +3,7 @@ package com.chy.lamia.element.reflect;
 
 import com.chy.lamia.entity.Getter;
 import com.chy.lamia.entity.Setter;
+import com.chy.lamia.entity.TypeDefinition;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -11,7 +12,6 @@ import java.util.Map;
 
 /**
  * 使用反射去收集getter以及setter方法
- *
  */
 public class GetSetCollect {
 
@@ -46,8 +46,8 @@ public class GetSetCollect {
         String parameterTypeName = parameters[0].getType().getName();
         String varName = varNameHandle(name.substring(3));
         Setter setter = new Setter();
-        setter.setTypePath(parameterTypeName);
-        setter.setSimpleName(name);
+        setter.setType(new TypeDefinition(parameterTypeName));
+        setter.setVarName(name);
         instantSetters.put(varName, setter);
     }
 
@@ -65,7 +65,7 @@ public class GetSetCollect {
             return;
         }
         Getter getter = new Getter();
-        getter.setSimpleName(name);
+        getter.setVarName(name);
         //getter.setTypePath(returnTypeName);
         instantGetters.put(varName, getter);
     }

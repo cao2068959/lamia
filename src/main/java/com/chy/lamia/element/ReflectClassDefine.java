@@ -1,7 +1,6 @@
 package com.chy.lamia.element;
 
 
-import com.chy.lamia.element.assemble.valobj.ValueObjectAssembleFactory;
 import com.chy.lamia.element.reflect.GetSetCollect;
 import com.chy.lamia.entity.*;
 import com.chy.lamia.utils.JCUtils;
@@ -70,11 +69,6 @@ public class ReflectClassDefine implements IClassDefine {
         }
         instantGetters = getSetCollect.getInstantGetters();
         instantSetters = getSetCollect.getInstantSetters();
-    }
-
-    @Override
-    public ValueObjectAssembleFactory getAssembleFactory() {
-        return null;
     }
 
     @Override

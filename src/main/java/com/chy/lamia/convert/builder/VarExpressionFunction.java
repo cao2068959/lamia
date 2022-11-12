@@ -10,10 +10,11 @@ import com.sun.tools.javac.tree.JCTree;
 public interface VarExpressionFunction {
 
     /**
-     * 根据变量名称生成对应的表达式
-     * @param varName 变量名称
+     * 生成对应的转换表达式
+     *
+     * @param  expression 变量原本的表达式
      * @return 表达式
      */
-    JCTree.JCExpression run(String varName);
+    JCTree.JCExpression run(JCTree.JCExpression expression);
 
 }

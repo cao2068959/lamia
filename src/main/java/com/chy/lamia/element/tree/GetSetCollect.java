@@ -2,16 +2,14 @@ package com.chy.lamia.element.tree;
 
 
 import com.chy.lamia.entity.Getter;
-import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.entity.Setter;
-import com.chy.lamia.entity.Var;
-import com.chy.lamia.utils.SymbolUtils;
+import com.chy.lamia.entity.TypeDefinition;
+import com.chy.lamia.entity.factory.TypeDefinitionFactory;
 import com.chy.lamia.visitor.InstantMethodVisitor;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.TypeTag;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.util.List;
-import com.sun.tools.javac.util.Name;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -55,16 +53,15 @@ public class GetSetCollect extends InstantMethodVisitor {
         if (varName == null) {
             return;
         }
-
+        // 获取方法的第一个参数
         JCTree.JCVariableDecl fparam = parameters.get(0);
         Type paramType = fparam.vartype.type;
-        ParameterType parameterType = new ParameterType(paramType.toString());
-        //去解析一下这个类型里面有没泛型
-        java.util.List<ParameterType> generic = SymbolUtils.getGeneric(paramType);
-        parameterType.setGeneric(generic);
+        TypeDefinition typeDefinition = TypeDefinitionFactory.create(paramType);
+
         Setter setter = new Setter();
-        setter.setSimpleName(name);
-        setter.setParameterType(parameterType);
+        setter.setType(typeDefinition);
+        setter.setVarName(varName);
+        setter.setMethodName(name);
         setterData.put(varName, setter);
     }
 
@@ -89,14 +86,12 @@ public class GetSetCollect extends InstantMethodVisitor {
         }
 
         Type type = returnType.type;
-        java.util.List<ParameterType> generic = SymbolUtils.getGeneric(type);
-        ParameterType parameterType = new ParameterType(type.toString());
-        parameterType.setGeneric(generic);
-
+        TypeDefinition typeDefinition = TypeDefinitionFactory.create(type);
 
         Getter getter = new Getter();
-        getter.setSimpleName(name);
-        getter.setParameterType(parameterType);
+        getter.setType(typeDefinition);
+        getter.setVarName(varName);
+        getter.setMethodName(name);
         getterData.put(varName, getter);
     }
 
