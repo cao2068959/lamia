@@ -154,7 +154,6 @@ public class FunicleFactory {
         //脐带方法放到末尾的可能性更大，这里倒叙扫描
         for (int i = allMethod.size() - 1; i >= 0; i--) {
             SimpleMethod simpleMethod = allMethod.get(i);
-
             if (!simpleMethod.isStatic() || !simpleMethod.getParams().isEmpty()) {
                 continue;
             }
