@@ -3,6 +3,7 @@ package com.chy.lamia.element;
 import com.sun.tools.javac.tree.JCTree;
 import lombok.Getter;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +21,7 @@ public class LamiaConvertHolderBlock {
      * key : lamia.convert 语句 在代码块中的id, 用于标识这个转换语句在代码块中的位置
      * value: 对应的 LamiaConvertScope 对象
      */
-    private Map<String, LamiaConvertInfo> lamiaConvertScopes;
+    private Map<String, LamiaConvertInfo> lamiaConvertScopes = new HashMap<>();
 
     private List<JCTree.JCStatement> contents;
 

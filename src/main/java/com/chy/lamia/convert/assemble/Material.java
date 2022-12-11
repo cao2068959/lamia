@@ -28,7 +28,7 @@ public class Material {
     /**
      * 真正去执行的类型是什么, 如果 var 是 Optional<A> 类型, 但是真正参与表达式的是 a.getXX() 那么这里execType 是 A类型
      */
-    TypeDefinition execType;
+    //TypeDefinition execType;
 
     /**
      * 这个材料提供的类型是什么, 可以理解成 getXX() 返回的参数类型

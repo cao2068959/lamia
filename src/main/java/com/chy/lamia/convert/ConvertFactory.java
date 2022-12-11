@@ -119,7 +119,7 @@ public class ConvertFactory {
         instantGetters.forEach((fieldName, getter) -> {
             Material material = new Material();
             material.setVarDefinition(varDefinition);
-            material.setExecType(typeDefinition);
+            material.setSupplyType(typeDefinition);
             material.setSupplyName(fieldName);
             // 生成对应的 var.getXX()
             material.setVarExpressionFunction((varExpression -> {

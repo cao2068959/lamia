@@ -191,6 +191,10 @@ public class ValueObjAssembleHandler implements AssembleHandler {
         }
         useMaterial.add(varName);
         Material material = materialMap.get(varName);
+        if (material == null) {
+            return null;
+        }
+
         // 万能材料，适配一下
         if (material instanceof OmnipotentMaterial) {
             material = ((OmnipotentMaterial) material).adapter(typeDefinition, varName);

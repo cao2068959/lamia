@@ -3,6 +3,7 @@ package com.chy.lamia.convert.builder;
 import com.sun.tools.javac.tree.JCTree;
 import lombok.Getter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,7 +21,7 @@ public class MaterialStatementBuildOperator {
      * 额外的 表达式, 如 要使用 Optional<A> a 需要先执行 A a1 = a.get(), 需要预先执行的这行语句就存在 exStatement 中
      */
     @Getter
-    List<JCTree.JCStatement> exStatement;
+    List<JCTree.JCStatement> exStatement = new ArrayList<>();
 
     public MaterialStatementBuildOperator(MaterialStatementBuilder materialStatementBuilder) {
         this.materialStatementBuilder = materialStatementBuilder;

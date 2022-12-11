@@ -39,7 +39,7 @@ public class MaterialTypeConvertBuilder {
         // 变量真正提供的类型
         TypeDefinition realType = materialVarDefinition.getType();
         // 执行的时候 get方法所在对象的类型
-        TypeDefinition execType = material.getExecType();
+        TypeDefinition execType = material.getSupplyType();
 
 
         JCTree.JCExpression materialExpression;
