@@ -63,11 +63,8 @@ public class TypeBoxingDefinition extends TypeDefinition {
         List<TypeBoxingDefinition> childrenBoxChain = definition.boxChain;
         // 把要挂载的子类型给挂载上去,同时刷新他的 boxChain 以及 index
         addChain(definition);
-        // 如果 子类型 中已经存有值,那么把他原本 boxChain 中的值都刷一遍
-        for (int i = 0; i < definition.boxChain.size(); i++) {
-            TypeBoxingDefinition typeBoxingDefinition = childrenBoxChain.get(i);
-            addChain(typeBoxingDefinition);
-        }
+
+
     }
 
     public TypeBoxingDefinition top() {
@@ -96,6 +93,7 @@ public class TypeBoxingDefinition extends TypeDefinition {
 
     private void addChain(TypeBoxingDefinition typeBoxingDefinition) {
         boxChain.add(typeBoxingDefinition);
+        typeBoxingDefinition.boxChain = boxChain;
         typeBoxingDefinition.index = boxChain.size() - 1;
     }
 
