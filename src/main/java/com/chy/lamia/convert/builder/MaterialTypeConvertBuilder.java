@@ -41,7 +41,6 @@ public class MaterialTypeConvertBuilder {
         // 执行的时候 get方法所在对象的类型
         TypeDefinition execType = material.getSupplyType();
 
-
         JCTree.JCExpression materialExpression;
         // 如果提供的类型和实际参与转换的类型不同，则转换类型
         if (!realType.matchType(execType, true)) {

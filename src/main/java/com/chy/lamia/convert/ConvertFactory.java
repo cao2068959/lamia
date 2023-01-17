@@ -33,11 +33,8 @@ public class ConvertFactory {
      * @return
      */
     public List<JCTree.JCStatement> make(LamiaConvertInfo lamiaConvertInfo) {
-
-        // 可能存在包装类型,把包装类型解包 如: Optional<A> ---> A
-        TypeDefinition targetType = TypeDefinitionFactory.unPackage(lamiaConvertInfo.getTargetType());
         // 寻找适合的组成器
-        AssembleHandler assembleHandler = getAssembleHandler(targetType);
+        AssembleHandler assembleHandler = getAssembleHandler(lamiaConvertInfo.getTargetType());
         // 获取所有可能参与组合结果对象的材料
         List<Material> materials = createdMaterials(lamiaConvertInfo);
         // 在组装器中添加所有的材料
@@ -54,8 +51,6 @@ public class ConvertFactory {
      * <p>
      * 每一个 MaterialStatementBuilder 理论上是对应了一行 java语句，但是这一行java语句可能依赖的入参需要有一些前置转换，所以
      * 一个 MaterialStatementBuilder 能够生成出多行 java语句
-     *
-     *
      *
      * @param expressionBuilders
      * @param lamiaConvertInfo
