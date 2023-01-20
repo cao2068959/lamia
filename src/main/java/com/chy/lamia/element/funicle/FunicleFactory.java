@@ -1,6 +1,6 @@
 package com.chy.lamia.element.funicle;
 
-import com.chy.lamia.element.resolver.TypeResolver;
+import com.chy.lamia.element.resolver.type.TypeResolver;
 import com.chy.lamia.entity.SimpleMethod;
 import com.chy.lamia.entity.TypeDefinition;
 import com.chy.lamia.log.Logger;

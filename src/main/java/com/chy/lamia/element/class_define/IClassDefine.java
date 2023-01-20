@@ -1,4 +1,4 @@
-package com.chy.lamia.element;
+package com.chy.lamia.element.class_define;
 
 import com.chy.lamia.entity.*;
 

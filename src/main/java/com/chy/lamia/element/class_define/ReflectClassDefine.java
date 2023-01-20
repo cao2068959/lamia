@@ -1,6 +1,7 @@
-package com.chy.lamia.element;
+package com.chy.lamia.element.class_define;
 
 
+import com.chy.lamia.element.class_define.IClassDefine;
 import com.chy.lamia.element.reflect.GetSetCollect;
 import com.chy.lamia.entity.*;
 import com.chy.lamia.utils.JCUtils;

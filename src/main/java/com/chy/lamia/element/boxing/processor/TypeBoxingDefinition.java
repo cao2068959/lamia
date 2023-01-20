@@ -64,7 +64,6 @@ public class TypeBoxingDefinition extends TypeDefinition {
         // 把要挂载的子类型给挂载上去,同时刷新他的 boxChain 以及 index
         addChain(definition);
 
-
     }
 
     public TypeBoxingDefinition top() {

@@ -1,6 +1,6 @@
-package com.chy.lamia.element.resolver;
+package com.chy.lamia.element.class_define;
 
-import com.chy.lamia.element.IClassDefine;
+import com.chy.lamia.element.resolver.type.TypeResolver;
 import com.chy.lamia.element.tree.ConstructorCollect;
 import com.chy.lamia.element.tree.GetSetCollect;
 import com.chy.lamia.element.tree.VarCollect;

@@ -1,6 +1,8 @@
-package com.chy.lamia.element.resolver;
+package com.chy.lamia.element.resolver.type;
 
-import com.chy.lamia.element.IClassDefine;
+import com.chy.lamia.element.class_define.IClassDefine;
+import com.chy.lamia.element.class_define.AsmClassDefine;
+import com.chy.lamia.element.class_define.TreeClassDefine;
 import com.chy.lamia.entity.*;
 import com.chy.lamia.utils.JCUtils;
 import com.sun.tools.javac.tree.JCTree;

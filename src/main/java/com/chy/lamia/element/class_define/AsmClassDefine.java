@@ -1,7 +1,6 @@
-package com.chy.lamia.element.resolver;
+package com.chy.lamia.element.class_define;
 
 
-import com.chy.lamia.element.IClassDefine;
 import com.chy.lamia.element.asm.ClassMetadataReadingVisitor;
 import com.chy.lamia.entity.*;
 import com.chy.lamia.log.Logger;

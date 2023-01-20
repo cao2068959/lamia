@@ -2,7 +2,7 @@ package com.chy.lamia.convert.assemble;
 
 import com.chy.lamia.convert.builder.MaterialStatementBuilder;
 import com.chy.lamia.convert.builder.MaterialTypeConvertBuilder;
-import com.chy.lamia.element.resolver.TypeResolver;
+import com.chy.lamia.element.resolver.type.TypeResolver;
 import com.chy.lamia.entity.Constructor;
 import com.chy.lamia.entity.Setter;
 import com.chy.lamia.entity.TypeDefinition;
