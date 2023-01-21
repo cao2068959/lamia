@@ -1,10 +1,10 @@
 package com.chy.lamia.element;
 
 
+import com.chy.lamia.element.resolver.expression.LamiaExpression;
 import com.chy.lamia.entity.TypeDefinition;
 import com.chy.lamia.entity.VarDefinition;
 import com.chy.lamia.utils.CommonUtils;
-import com.chy.lamia.utils.Lists;
 import com.sun.source.tree.TreeVisitor;
 import com.sun.tools.javac.tree.JCTree;
 import lombok.AllArgsConstructor;
@@ -38,9 +38,11 @@ public class LamiaConvertInfo {
     @Getter
     Map<String, VarDefinition> args = new HashMap<>();
 
-    @Getter
-    @Setter
-    List<String> allArgsNames;
+    LamiaExpression lamiaExpression;
+
+    public LamiaConvertInfo(LamiaExpression lamiaExpression) {
+        this.lamiaExpression = lamiaExpression;
+    }
 
     public void addVarArgs(VarDefinition varDefinition) {
         String varName = varDefinition.getVarName();
@@ -68,24 +70,31 @@ public class LamiaConvertInfo {
      */
     public List<VarDefinition> getArgsByPriority() {
         List<VarDefinition> result = new ArrayList<>();
-        allArgsNames.forEach(name -> result.add(args.get(name)));
+        getAllArgsName().forEach(name -> result.add(args.get(name)));
         // 排序
         result.sort(Comparator.comparingInt(VarDefinition::getPriority));
 
         return result;
-
     }
 
-
-    public void checkArgs() {
-        if (allArgsNames.size() != args.size()) {
-            throw new RuntimeException("[LamiaConvertInfo] 中参数缺失, 需要参数" + Lists.toString(allArgsNames));
-        }
-
-    }
 
     public JCTree.JCStatement getStatement() {
         return new Statement(id);
+    }
+
+    public Set<String> getAllArgsName() {
+        return lamiaExpression.getAllArgsNames();
+    }
+
+    public boolean isSpread(VarDefinition varDefinition) {
+        boolean spread = varDefinition.isSpread();
+        if (spread) {
+            return true;
+        }
+        if (lamiaExpression.getSpreadArgs().contains(varDefinition.getVarRealName())) {
+            return true;
+        }
+        return lamiaExpression.isDefaultSpread();
     }
 
     @AllArgsConstructor

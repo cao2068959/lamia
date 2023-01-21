@@ -156,8 +156,14 @@ public class ValueObjAssembleHandler implements AssembleHandler {
     private String createNewInstantExpression(Constructor constructor) {
         String classPath = targetTypeResolver.getTypeDefinition().getClassPath();
         // 构造器所需要的所有入参
-        List<MaterialTypeConvertBuilder> constructorParam = constructor.getParams().stream().map(this::useMaterial)
-                .collect(Collectors.toList());
+        List<MaterialTypeConvertBuilder> constructorParam = constructor.getParams().stream().map(varDefinition -> {
+                    MaterialTypeConvertBuilder materialTypeConvertBuilder = useMaterial(varDefinition);
+                    if (materialTypeConvertBuilder == null) {
+                        throw new RuntimeException("参数 [" + varDefinition.getVarName() + "] 可能已经被使用或者不存在");
+                    }
+                    return materialTypeConvertBuilder;
+                }).collect(Collectors.toList());
+
 
         // 新实例的名称生成
         String varName = CommonUtils.generateVarName("result");

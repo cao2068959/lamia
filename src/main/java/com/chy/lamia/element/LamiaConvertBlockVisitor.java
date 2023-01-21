@@ -3,6 +3,8 @@ package com.chy.lamia.element;
 
 import com.chy.lamia.annotation.MapMember;
 import com.chy.lamia.element.annotation.AnnotationProxyFactory;
+import com.chy.lamia.element.resolver.expression.LamiaExpression;
+import com.chy.lamia.element.resolver.expression.LamiaExpressionResolver;
 import com.chy.lamia.entity.TypeDefinition;
 import com.chy.lamia.entity.VarDefinition;
 import com.chy.lamia.entity.factory.TypeDefinitionFactory;
@@ -31,6 +33,8 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
     private final List<LamiaConvertHolderBlock> lamiaConvertHolderBlock;
 
     private LamiaConvertHolderBlock currentBlock;
+
+    private LamiaExpressionResolver lamiaExpressionResolver = new LamiaExpressionResolver();
 
 
     public LamiaConvertBlockVisitor() {
@@ -90,39 +94,20 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
      * @return 是否收集到了 转换表达式
      */
     private boolean lamiaConvertStatementCollect(JCTree.JCExpression jcExpression, JCTree.JCVariableDecl variableDecl) {
-        if (!(jcExpression instanceof JCTree.JCTypeCast)) {
+
+        LamiaExpression lamiaExpression = lamiaExpressionResolver.resolving(jcExpression);
+
+        if (lamiaExpression == null) {
             return false;
         }
 
-        //获取强转
-        JCTree.JCTypeCast typeCast = (JCTree.JCTypeCast) jcExpression;
-
-        JCTree.JCExpression expr = typeCast.expr;
-        if (!(expr instanceof JCTree.JCMethodInvocation)) {
-            return false;
-        }
-        JCTree.JCMethodInvocation methodInvocation = (JCTree.JCMethodInvocation) expr;
-        String methName = methodInvocation.meth.toString();
-        if (!methName.contains("Lamia.convert")) {
-            return false;
-        }
-
-        //去收集Lamia.convert() 方法中传入进来的参数
-        List<String> argsName = new LinkedList<>();
-        for (JCTree.JCExpression arg : methodInvocation.args) {
-            argsName.add(arg.toString());
-        }
-        //没传入参数可能有点不太对
-        if (argsName.size() == 0) {
-            return false;
-        }
-
-        LamiaConvertInfo lamiaConvertInfo = new LamiaConvertInfo();
+        LamiaConvertInfo lamiaConvertInfo = new LamiaConvertInfo(lamiaExpression);
         // 要转换成的目标类型
-        TypeDefinition convertTargetType = JCUtils.instance.toTypeDefinition(classTree, typeCast.clazz);
+        TypeDefinition convertTargetType = JCUtils.instance.toTypeDefinition(classTree, lamiaExpression.getTypeCast().clazz);
         lamiaConvertInfo.setTargetType(convertTargetType);
-        argsName.stream().map(vars::get).filter(Objects::nonNull).forEach(lamiaConvertInfo::addVarArgs);
-        lamiaConvertInfo.setAllArgsNames(argsName);
+
+        Set<String> allArgsName = lamiaConvertInfo.getAllArgsName();
+        allArgsName.stream().map(vars::get).filter(Objects::nonNull).forEach(lamiaConvertInfo::addVarArgs);
 
         // 替换当前的 statement
         getCurrentBlock().replaceStatement(lamiaConvertInfo);

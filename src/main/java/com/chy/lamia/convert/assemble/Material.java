@@ -21,19 +21,15 @@ public class Material {
     String supplyName;
 
     /**
-     * 该材料的变量本身， 如果该材料提供的是 a.getName(), 那这里 varDefinition 指的是 A a; 这个变量
-     */
-    VarDefinition varDefinition;
-
-    /**
-     * 真正去执行的类型是什么, 如果 var 是 Optional<A> 类型, 但是真正参与表达式的是 a.getXX() 那么这里execType 是 A类型
-     */
-    //TypeDefinition execType;
-
-    /**
      * 这个材料提供的类型是什么, 可以理解成 getXX() 返回的参数类型
      */
     TypeDefinition supplyType;
+
+
+    /**
+     * 该材料的变量本身， 如果该材料提供的是 a.getName(), 那这里 varDefinition 指的是 A a; 这个变量
+     */
+    VarDefinition varDefinition;
 
     /**
      * 表达式生成函数, 传入真实的变量名,生成执行的表达式, 如果普通对象就是变量名称,如果是map/扩散 则是 map.get("") , 或者 vobj.getVar();

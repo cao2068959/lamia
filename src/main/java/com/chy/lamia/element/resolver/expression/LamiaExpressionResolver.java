@@ -25,6 +25,7 @@ public class LamiaExpressionResolver {
         JCTree.JCTypeCast typeCast = (JCTree.JCTypeCast) jcExpression;
         JCTree.JCExpression expr = typeCast.expr;
 
+
         // 强转的应该是一个方法
         if (!(expr instanceof JCTree.JCMethodInvocation)) {
             return null;
@@ -45,6 +46,7 @@ public class LamiaExpressionResolver {
             return null;
         }
 
+        result.setTypeCast(typeCast);
         // 前置可能会有一些配置表达式, 去解析前置的配置表达式
         parseConfig(result, methodInvocation);
 
@@ -100,6 +102,7 @@ public class LamiaExpressionResolver {
             JCTree.JCFieldAccess fieldAccess = (JCTree.JCFieldAccess) expression;
             MethodWrapper methodWrapper = new MethodWrapper(fieldAccess.name.toString());
             methodWrapper.setArgs(nextMethod.args);
+            result.add(methodWrapper);
             next = fieldAccess.selected;
         }
     }
@@ -113,13 +116,13 @@ public class LamiaExpressionResolver {
         if ("convert".equals(name)) {
             LamiaExpression result = new LamiaExpression();
             List<String> argsNames = fetchArgsName(data);
-            result.setConvertArgsNames(argsNames);
+            result.addArgs(argsNames);
             return result;
         }
         if ("mapping".equals(name)) {
             LamiaExpression result = new LamiaExpression();
             List<String> argsNames = fetchArgsName(data);
-            result.setConvertArgsNames(argsNames);
+            result.addArgs(argsNames);
             result.setDefaultSpread(true);
             return result;
         }

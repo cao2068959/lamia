@@ -7,7 +7,6 @@ import com.chy.lamia.element.resolver.type.TypeResolver;
 import com.chy.lamia.entity.Getter;
 import com.chy.lamia.entity.TypeDefinition;
 import com.chy.lamia.entity.VarDefinition;
-import com.chy.lamia.entity.factory.TypeDefinitionFactory;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.utils.Lists;
 import com.sun.tools.javac.tree.JCTree;
@@ -75,10 +74,11 @@ public class ConvertFactory {
         // 根据优先级 获取出所有的参数, 高优先级的放队尾
         List<VarDefinition> args = lamiaConvertInfo.getArgsByPriority();
 
+
         List<Material> result = new ArrayList<>();
         args.forEach(varDefinition -> {
             // 判断这个参数是否需要扩散开
-            if (varDefinition.isSpread()) {
+            if (lamiaConvertInfo.isSpread(varDefinition)) {
                 List<Material> materials = spreadVarDefinition(varDefinition);
                 result.addAll(materials);
                 return;
@@ -103,10 +103,9 @@ public class ConvertFactory {
             Material material = new OmnipotentMaterial(varDefinition);
             return Lists.of(material);
         }
-        // 如果这个类型是有包装的类型
-        TypeDefinition typeDefinition = TypeDefinitionFactory.unPackage(type);
+
         // 解析对应的类型
-        TypeResolver typeResolver = TypeResolver.getTypeResolver(typeDefinition);
+        TypeResolver typeResolver = TypeResolver.getTypeResolver(type);
         Map<String, Getter> instantGetters = typeResolver.getInstantGetters();
 
         List<Material> result = new ArrayList<>();
@@ -114,7 +113,7 @@ public class ConvertFactory {
         instantGetters.forEach((fieldName, getter) -> {
             Material material = new Material();
             material.setVarDefinition(varDefinition);
-            material.setSupplyType(typeDefinition);
+            material.setSupplyType(getter.getType());
             material.setSupplyName(fieldName);
             // 生成对应的 var.getXX()
             material.setVarExpressionFunction((varExpression -> {

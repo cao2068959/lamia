@@ -13,5 +13,11 @@ public class DefaultSpreadHandler implements ConfigurationHandler {
     @Override
     public void config(LamiaExpression lamiaExpression, MethodWrapper methodWrapper, ConfigParseContext context) {
 
+        Boolean isDefaultSpread = getBaseTypeArgs(methodWrapper, 0, Boolean.class);
+        lamiaExpression.setDefaultSpread(isDefaultSpread);
     }
+
+
+
+
 }
