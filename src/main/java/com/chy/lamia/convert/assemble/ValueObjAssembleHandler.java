@@ -2,6 +2,7 @@ package com.chy.lamia.convert.assemble;
 
 import com.chy.lamia.convert.builder.MaterialStatementBuilder;
 import com.chy.lamia.convert.builder.MaterialTypeConvertBuilder;
+import com.chy.lamia.element.LamiaConvertInfo;
 import com.chy.lamia.element.resolver.type.TypeResolver;
 import com.chy.lamia.entity.Constructor;
 import com.chy.lamia.entity.Setter;
@@ -41,6 +42,7 @@ public class ValueObjAssembleHandler implements AssembleHandler {
      * 生成的表达式器列表, 最终将使用这些 builder来生成对应的转换语句
      */
     List<MaterialStatementBuilder> materialStatementBuilders = new ArrayList<>();
+    private LamiaConvertInfo lamiaConvertInfo;
 
 
     public ValueObjAssembleHandler(TypeDefinition targetType) {
@@ -83,6 +85,11 @@ public class ValueObjAssembleHandler implements AssembleHandler {
         return materialStatementBuilders;
     }
 
+    @Override
+    public void setLamiaConvertInfo(LamiaConvertInfo lamiaConvertInfo) {
+        this.lamiaConvertInfo = lamiaConvertInfo;
+    }
+
     /**
      * 生成 set赋值语句 如 : instantName.setName(xxxx)
      */
@@ -96,10 +103,9 @@ public class ValueObjAssembleHandler implements AssembleHandler {
             }
 
             MaterialStatementBuilder materialStatementBuilder = new MaterialStatementBuilder();
-            String id = materialStatementBuilder.addMaterial(material);
             // 生成对应的 set的方法
-            materialStatementBuilder.setFunction(builder -> {
-                JCTree.JCExpression expression = builder.getExpression(id);
+            materialStatementBuilder.setFunction(() -> {
+                JCTree.JCExpression expression = material.convert().getVarExpression();
                 return Lists.of(JCUtils.instance.execMethod(newInstant, setter.getMethodName(), expression));
             });
             materialStatementBuilders.add(materialStatementBuilder);
@@ -157,26 +163,37 @@ public class ValueObjAssembleHandler implements AssembleHandler {
         String classPath = targetTypeResolver.getTypeDefinition().getClassPath();
         // 构造器所需要的所有入参
         List<MaterialTypeConvertBuilder> constructorParam = constructor.getParams().stream().map(varDefinition -> {
-                    MaterialTypeConvertBuilder materialTypeConvertBuilder = useMaterial(varDefinition);
-                    if (materialTypeConvertBuilder == null) {
-                        throw new RuntimeException("参数 [" + varDefinition.getVarName() + "] 可能已经被使用或者不存在");
-                    }
-                    return materialTypeConvertBuilder;
-                }).collect(Collectors.toList());
+            MaterialTypeConvertBuilder materialTypeConvertBuilder = useMaterial(varDefinition);
+            if (materialTypeConvertBuilder == null) {
+                throw new RuntimeException("参数 [" + varDefinition.getVarName() + "] 可能已经被使用或者不存在");
+            }
+            return materialTypeConvertBuilder;
+        }).collect(Collectors.toList());
 
+        String oldResultName = lamiaConvertInfo.getVarName();
+        String varName;
+        if (oldResultName == null) {
+            // 新实例的名称生成
+            varName = CommonUtils.generateVarName("result");
+        } else {
+            varName = oldResultName;
+        }
 
-        // 新实例的名称生成
-        String varName = CommonUtils.generateVarName("result");
 
         // 表达式生成器
         MaterialStatementBuilder materialStatementBuilder = new MaterialStatementBuilder();
-        // 把所有的参数都放入构造器中, 返回对应顺序的id
-        List<String> materialIds = materialStatementBuilder.addMaterial(constructorParam);
 
-        materialStatementBuilder.setFunction((builder -> {
-            // 用 materialId 去换取 真正的表达式
-            List<JCTree.JCExpression> paramsExpression = builder.getExpression(materialIds);
-            JCTree.JCNewClass jcNewClass = JCUtils.instance.newClass(classPath, paramsExpression);
+        materialStatementBuilder.setFunction((() -> {
+
+            List<JCTree.JCExpression> expressions = constructorParam.stream().map(MaterialTypeConvertBuilder::convert)
+                    .map(MaterialTypeConvertBuilder.ConvertResult::getVarExpression).collect(Collectors.toList());
+
+            JCTree.JCNewClass jcNewClass = JCUtils.instance.newClass(classPath, expressions);
+
+            if (oldResultName != null) {
+                JCTree.JCStatement jcStatement = JCUtils.instance.varAssign(varName, jcNewClass);
+                return Lists.of(jcStatement);
+            }
             JCTree.JCVariableDecl newVar = JCUtils.instance.createVar(varName, classPath, jcNewClass);
             return Lists.of(newVar);
         }));

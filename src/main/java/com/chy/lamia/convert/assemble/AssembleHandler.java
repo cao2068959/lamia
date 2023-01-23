@@ -1,6 +1,7 @@
 package com.chy.lamia.convert.assemble;
 
 import com.chy.lamia.convert.builder.MaterialStatementBuilder;
+import com.chy.lamia.element.LamiaConvertInfo;
 
 import java.util.List;
 
@@ -25,4 +26,12 @@ public interface AssembleHandler {
      * @return
      */
     List<MaterialStatementBuilder> run();
+
+    /**
+     * 设置 LamiaConvertInfo 的接口, 配置的一些信息都在里面
+     *
+     * @param lamiaConvertInfo
+     */
+    void setLamiaConvertInfo(LamiaConvertInfo lamiaConvertInfo);
+
 }

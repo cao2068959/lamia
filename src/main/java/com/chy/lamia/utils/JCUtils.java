@@ -103,6 +103,10 @@ public class JCUtils {
     }
 
     public JCTree.JCExpression memberAccess(String components) {
+        if (components == null) {
+            return null;
+        }
+
         String[] componentArray = components.split("\\.");
         JCTree.JCExpression expr = treeMaker.Ident(elementUtils.getName(componentArray[0]));
         for (int i = 1; i < componentArray.length; i++) {
@@ -220,6 +224,7 @@ public class JCUtils {
                 memberAccess(varClass),
                 varValue
         );
+
     }
 
     /**
@@ -319,6 +324,17 @@ public class JCUtils {
                 toSunList(methodParam), List.nil(), block, null);
     }
 
+    /**
+     * 变量赋值
+     *
+     * @param varName
+     * @param expression
+     * @return
+     */
+    public JCTree.JCStatement varAssign(String varName, JCTree.JCExpression expression) {
+        JCTree.JCAssign assign = treeMaker.Assign(memberAccess(varName), expression);
+        return treeMaker.Exec(assign);
+    }
 
     /**
      * JCTypeApply 转 TypeDefinition, 会处理泛型

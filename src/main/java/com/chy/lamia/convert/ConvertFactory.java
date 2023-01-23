@@ -33,7 +33,7 @@ public class ConvertFactory {
      */
     public List<JCTree.JCStatement> make(LamiaConvertInfo lamiaConvertInfo) {
         // 寻找适合的组成器
-        AssembleHandler assembleHandler = getAssembleHandler(lamiaConvertInfo.getTargetType());
+        AssembleHandler assembleHandler = getAssembleHandler(lamiaConvertInfo);
         // 获取所有可能参与组合结果对象的材料
         List<Material> materials = createdMaterials(lamiaConvertInfo);
         // 在组装器中添加所有的材料
@@ -129,15 +129,20 @@ public class ConvertFactory {
     /**
      * 获取一个合适的组装处理器
      *
-     * @param targetType 要组装的对象
      * @return 组装器
      */
-    private AssembleHandler getAssembleHandler(TypeDefinition targetType) {
+    private AssembleHandler getAssembleHandler(LamiaConvertInfo lamiaConvertInfo) {
+
+        TypeDefinition targetType = lamiaConvertInfo.getTargetType();
+        AssembleHandler result;
         // 如果要组装的是 map, 则用map的组装器
         if (targetType.matchType(Map.class)) {
-            return new MapAssembleHandler();
+            result = new MapAssembleHandler();
+        } else {
+            result = new ValueObjAssembleHandler(targetType);
         }
-        return new ValueObjAssembleHandler(targetType);
+        result.setLamiaConvertInfo(lamiaConvertInfo);
+        return result;
 
     }
 }

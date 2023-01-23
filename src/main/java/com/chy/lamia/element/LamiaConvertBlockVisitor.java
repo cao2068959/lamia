@@ -61,6 +61,23 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
         lamiaConvertScopeBlockVisitor.accept(statement, classTree);
     }
 
+    @Override
+    public boolean expressionStatementVisit(JCTree.JCExpressionStatement expressionStatement) {
+        JCTree.JCExpression expression = expressionStatement.expr;
+        if (!(expression instanceof JCTree.JCAssign)) {
+            return false;
+        }
+        JCTree.JCAssign assign = (JCTree.JCAssign) expression;
+
+        //去收集写了 Lamia.convert 的语句
+        LamiaConvertInfo lamiaConvertInfo = lamiaConvertStatementCollect(assign.rhs);
+
+        String name = Optional.ofNullable(assign.lhs).map(Objects::toString).orElse(null);
+        lamiaConvertInfo.setVarName(name);
+
+        return lamiaConvertInfo == null;
+    }
+
 
     @Override
     public boolean variableVisit(JCTree.JCVariableDecl statement) {
@@ -79,10 +96,10 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
         vars.put(varDefinition.getVarRealName(), varDefinition);
 
         //去收集写了 Lamia.convert 的语句
-        boolean isLamiaConvert = lamiaConvertStatementCollect(statement.init, statement);
+        LamiaConvertInfo lamiaConvertInfo = lamiaConvertStatementCollect(statement.init);
 
         // 如果该语句是对应的表达式,那么就不记录, 已经替换成新的表达式
-        return !isLamiaConvert;
+        return lamiaConvertInfo == null;
     }
 
 
@@ -90,15 +107,14 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
      * 去收集写了 Lamia.convert 的语句
      *
      * @param jcExpression
-     * @param variableDecl
      * @return 是否收集到了 转换表达式
      */
-    private boolean lamiaConvertStatementCollect(JCTree.JCExpression jcExpression, JCTree.JCVariableDecl variableDecl) {
+    private LamiaConvertInfo lamiaConvertStatementCollect(JCTree.JCExpression jcExpression) {
 
         LamiaExpression lamiaExpression = lamiaExpressionResolver.resolving(jcExpression);
 
         if (lamiaExpression == null) {
-            return false;
+            return null;
         }
 
         LamiaConvertInfo lamiaConvertInfo = new LamiaConvertInfo(lamiaExpression);
@@ -112,13 +128,15 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
         // 替换当前的 statement
         getCurrentBlock().replaceStatement(lamiaConvertInfo);
 
-        return true;
+        return lamiaConvertInfo;
     }
 
 
     @Override
     public boolean returnVisit(JCTree.JCReturn statement) {
-        return lamiaConvertStatementCollect(statement.expr, null);
+        LamiaConvertInfo lamiaConvertInfo = lamiaConvertStatementCollect(statement.expr);
+
+        return lamiaConvertInfo == null;
     }
 
 
@@ -133,7 +151,7 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
         if (currentBlock != null) {
             return currentBlock;
         }
-        currentBlock = new LamiaConvertHolderBlock(getProcessedFinishStatement());
+        currentBlock = new LamiaConvertHolderBlock(getProcessedFinishStatement(), getBlock());
         return currentBlock;
     }
 

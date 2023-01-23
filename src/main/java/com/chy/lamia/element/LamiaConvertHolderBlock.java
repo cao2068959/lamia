@@ -1,5 +1,6 @@
 package com.chy.lamia.element;
 
+import com.chy.lamia.utils.Lists;
 import com.sun.tools.javac.tree.JCTree;
 import lombok.Getter;
 
@@ -15,6 +16,7 @@ import java.util.Map;
 @Getter
 public class LamiaConvertHolderBlock {
 
+    private final JCTree.JCBlock parent;
     /**
      * 在代码中的所有 lamia.convert 语句, 以及对应这个语句能够访问到所有的变量
      * <p>
@@ -25,8 +27,9 @@ public class LamiaConvertHolderBlock {
 
     private List<JCTree.JCStatement> contents;
 
-    public LamiaConvertHolderBlock(List<JCTree.JCStatement> contents) {
+    public LamiaConvertHolderBlock(List<JCTree.JCStatement> contents, JCTree.JCBlock block) {
         this.contents = contents;
+        this.parent = block;
     }
 
     public void replaceStatement(LamiaConvertInfo lamiaConvertInfo) {
@@ -42,5 +45,9 @@ public class LamiaConvertHolderBlock {
             throw new RuntimeException("id [" + id + "] 无法找到对应的 LamiaConvertInfo");
         }
         return lamiaConvertInfo;
+    }
+
+    public void modifyMethodBody(List<JCTree.JCStatement> newStatement) {
+        parent.stats =  Lists.toSunList(newStatement);
     }
 }

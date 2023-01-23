@@ -40,6 +40,11 @@ public class LamiaConvertInfo {
 
     LamiaExpression lamiaExpression;
 
+    @Getter
+    @Setter
+    String varName;
+
+
     public LamiaConvertInfo(LamiaExpression lamiaExpression) {
         this.lamiaExpression = lamiaExpression;
     }

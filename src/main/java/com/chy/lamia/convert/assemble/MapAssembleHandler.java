@@ -1,6 +1,7 @@
 package com.chy.lamia.convert.assemble;
 
 import com.chy.lamia.convert.builder.MaterialStatementBuilder;
+import com.chy.lamia.element.LamiaConvertInfo;
 
 import java.util.List;
 
@@ -12,6 +13,8 @@ import java.util.List;
 public class MapAssembleHandler implements AssembleHandler {
 
 
+    private LamiaConvertInfo lamiaConvertInfo;
+
     @Override
     public void addMaterial(List<Material> materials) {
 
@@ -20,5 +23,10 @@ public class MapAssembleHandler implements AssembleHandler {
     @Override
     public List<MaterialStatementBuilder> run() {
         return null;
+    }
+
+    @Override
+    public void setLamiaConvertInfo(LamiaConvertInfo lamiaConvertInfo) {
+        this.lamiaConvertInfo = lamiaConvertInfo;
     }
 }

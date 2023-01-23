@@ -45,7 +45,6 @@ public abstract class AbstractBlockVisitor {
     }
 
 
-
     private void visitorAllBlock(List<JCTree.JCStatement> statements) {
 
         for (JCTree.JCStatement statement : statements) {
@@ -96,6 +95,16 @@ public abstract class AbstractBlockVisitor {
             blockVisit(jcBlock);
             return true;
         }
+
+        // 普通的执行表达式
+        if (statement instanceof JCTree.JCExpressionStatement) {
+            JCTree.JCExpressionStatement expressionStatement = (JCTree.JCExpressionStatement) statement;
+            return expressionStatementVisit(expressionStatement);
+        }
+        return true;
+    }
+
+    public boolean expressionStatementVisit(JCTree.JCExpressionStatement expressionStatement) {
         return true;
     }
 

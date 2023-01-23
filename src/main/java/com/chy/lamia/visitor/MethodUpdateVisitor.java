@@ -60,7 +60,6 @@ public class MethodUpdateVisitor extends TreeTranslator {
     }
 
     private VarDefinition toVarDefinition(Symbol.VarSymbol varSymbol) {
-        String paramsTypeClassPath = varSymbol.type.tsym.toString();
         // 解析表达式，转成对应的类型描述对象，方便后续操作
         TypeDefinition typeDefinition = TypeDefinitionFactory.create(varSymbol);
 
@@ -95,7 +94,7 @@ public class MethodUpdateVisitor extends TreeTranslator {
             }
         }
         //替换原来的老代码
-       // lamiaConvertHolderBlock.modifyMethodBody(newStatement);
+        lamiaConvertHolderBlock.modifyMethodBody(newStatement);
     }
 
 
