@@ -41,7 +41,7 @@ public class ConvertFactory {
         // 生成所有组装对象 语句的构建器, 每一个builder 将会生成一行 语句, 如 result.setXXX(var.getVVV())
         List<MaterialStatementBuilder> materialStatementBuilders = assembleHandler.run();
         // 生成真正的 java语句
-        return createdStatement(materialStatementBuilders, lamiaConvertInfo);
+        return createdStatement(materialStatementBuilders,assembleHandler ,lamiaConvertInfo);
 
     }
 
@@ -52,15 +52,24 @@ public class ConvertFactory {
      * 一个 MaterialStatementBuilder 能够生成出多行 java语句
      *
      * @param expressionBuilders
+     * @param assembleHandler
      * @param lamiaConvertInfo
      * @return
      */
-    private List<JCTree.JCStatement> createdStatement(List<MaterialStatementBuilder> expressionBuilders, LamiaConvertInfo lamiaConvertInfo) {
+    private List<JCTree.JCStatement> createdStatement(List<MaterialStatementBuilder> expressionBuilders, AssembleHandler assembleHandler, LamiaConvertInfo lamiaConvertInfo) {
         List<JCTree.JCStatement> result = new ArrayList<>();
         expressionBuilders.forEach(expressionBuilder -> {
             List<JCTree.JCStatement> jcStatements = expressionBuilder.build();
             result.addAll(jcStatements);
         });
+
+        // 如果是return 后面直接接上的 转换语句,那么 还需要把return 语句补上
+        if (lamiaConvertInfo.isReturn()){
+            String newInstantName = assembleHandler.getNewInstantName();
+            JCTree.JCReturn aReturn = JCUtils.instance.createReturn(newInstantName);
+            result.add(aReturn);
+        }
+
         return result;
     }
 

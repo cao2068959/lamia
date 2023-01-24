@@ -26,6 +26,7 @@ public class LamiaExpression {
     }
 
     public void addSpreadArgs(Collection<String> args) {
+        allArgsNames.addAll(args);
         spreadArgs.addAll(args);
     }
 

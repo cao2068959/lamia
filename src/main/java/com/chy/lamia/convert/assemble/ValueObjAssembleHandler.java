@@ -90,6 +90,11 @@ public class ValueObjAssembleHandler implements AssembleHandler {
         this.lamiaConvertInfo = lamiaConvertInfo;
     }
 
+    @Override
+    public String getNewInstantName() {
+        return newInstant;
+    }
+
     /**
      * 生成 set赋值语句 如 : instantName.setName(xxxx)
      */
@@ -189,13 +194,14 @@ public class ValueObjAssembleHandler implements AssembleHandler {
                     .map(MaterialTypeConvertBuilder.ConvertResult::getVarExpression).collect(Collectors.toList());
 
             JCTree.JCNewClass jcNewClass = JCUtils.instance.newClass(classPath, expressions);
-
-            if (oldResultName != null) {
-                JCTree.JCStatement jcStatement = JCUtils.instance.varAssign(varName, jcNewClass);
-                return Lists.of(jcStatement);
+            // 变量是否已经存在,是否需要去创建类型
+            if (lamiaConvertInfo.isCreatedType()) {
+                JCTree.JCVariableDecl newVar = JCUtils.instance.createVar(varName, classPath, jcNewClass);
+                return Lists.of(newVar);
             }
-            JCTree.JCVariableDecl newVar = JCUtils.instance.createVar(varName, classPath, jcNewClass);
-            return Lists.of(newVar);
+            JCTree.JCStatement jcStatement = JCUtils.instance.varAssign(varName, jcNewClass);
+            return Lists.of(jcStatement);
+
         }));
 
         materialStatementBuilders.add(materialStatementBuilder);

@@ -65,7 +65,7 @@ public class VarDefinition {
     }
 
     public boolean isSpread() {
-        return mapMember.map(MapMember::spread).orElse(true);
+        return mapMember.map(MapMember::spread).orElse(false);
     }
 
 

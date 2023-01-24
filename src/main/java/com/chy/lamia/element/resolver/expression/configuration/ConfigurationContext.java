@@ -2,6 +2,7 @@ package com.chy.lamia.element.resolver.expression.configuration;
 
 import com.chy.lamia.element.resolver.expression.configuration.handler.ConfigurationStart;
 import com.chy.lamia.element.resolver.expression.configuration.handler.DefaultSpreadHandler;
+import com.chy.lamia.element.resolver.expression.configuration.handler.SpreadArgsHandler;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +19,7 @@ public class ConfigurationContext {
     static {
         data.put("config", new ConfigurationStart());
         data.put("config.defaultSpread", new DefaultSpreadHandler());
+        data.put("config.spreadArgs", new SpreadArgsHandler());
 
     }
 

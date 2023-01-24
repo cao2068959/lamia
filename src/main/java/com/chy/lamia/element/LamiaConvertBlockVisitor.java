@@ -73,7 +73,12 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
         LamiaConvertInfo lamiaConvertInfo = lamiaConvertStatementCollect(assign.rhs);
 
         String name = Optional.ofNullable(assign.lhs).map(Objects::toString).orElse(null);
-        lamiaConvertInfo.setVarName(name);
+
+        if (lamiaConvertInfo != null) {
+            lamiaConvertInfo.setVarName(name);
+            lamiaConvertInfo.setCreatedType(false);
+        }
+
 
         return lamiaConvertInfo == null;
     }
@@ -97,6 +102,9 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
 
         //去收集写了 Lamia.convert 的语句
         LamiaConvertInfo lamiaConvertInfo = lamiaConvertStatementCollect(statement.init);
+        if (lamiaConvertInfo != null) {
+            lamiaConvertInfo.setVarName(varDefinition.getVarRealName());
+        }
 
         // 如果该语句是对应的表达式,那么就不记录, 已经替换成新的表达式
         return lamiaConvertInfo == null;
@@ -135,7 +143,9 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
     @Override
     public boolean returnVisit(JCTree.JCReturn statement) {
         LamiaConvertInfo lamiaConvertInfo = lamiaConvertStatementCollect(statement.expr);
-
+        if (lamiaConvertInfo != null) {
+            lamiaConvertInfo.setReturn(true);
+        }
         return lamiaConvertInfo == null;
     }
 

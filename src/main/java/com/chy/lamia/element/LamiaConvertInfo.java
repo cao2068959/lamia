@@ -32,7 +32,7 @@ public class LamiaConvertInfo {
 
     /**
      * 参与转换的参数
-     * key: 参与转换变量的名称, 如果使用 @MapMember 修改过名称,那这里是修改后的名称
+     * key: 参与转换变量的名称, 如果使用 @MapMember 修改过名称 , 这里存储的是没改名前的名称
      * value: 对应的变量
      */
     @Getter
@@ -44,13 +44,21 @@ public class LamiaConvertInfo {
     @Setter
     String varName;
 
+    @Getter
+    @Setter
+    boolean createdType = true;
+
+    @Getter
+    @Setter
+    boolean isReturn = false;
+
 
     public LamiaConvertInfo(LamiaExpression lamiaExpression) {
         this.lamiaExpression = lamiaExpression;
     }
 
     public void addVarArgs(VarDefinition varDefinition) {
-        String varName = varDefinition.getVarName();
+        String varName = varDefinition.getVarRealName();
         VarDefinition existVd = args.get(varName);
         if (existVd == null) {
             args.put(varName, varDefinition);

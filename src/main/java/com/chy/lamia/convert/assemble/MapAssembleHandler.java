@@ -29,4 +29,9 @@ public class MapAssembleHandler implements AssembleHandler {
     public void setLamiaConvertInfo(LamiaConvertInfo lamiaConvertInfo) {
         this.lamiaConvertInfo = lamiaConvertInfo;
     }
+
+    @Override
+    public String getNewInstantName() {
+        return null;
+    }
 }

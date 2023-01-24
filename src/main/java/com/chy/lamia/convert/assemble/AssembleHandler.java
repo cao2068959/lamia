@@ -34,4 +34,10 @@ public interface AssembleHandler {
      */
     void setLamiaConvertInfo(LamiaConvertInfo lamiaConvertInfo);
 
+    /**
+     * 获取这次转换后的变量的名称
+     * @return
+     */
+    String getNewInstantName();
+
 }
