@@ -120,4 +120,16 @@ public class TypeDefinition {
         String current = toString();
         return current.contains(targetType.toString());
     }
+
+    /**
+     * 是否是基础数据类型
+     *
+     * @return
+     */
+    public boolean isBaseTypeOrSystemType() {
+        if (classPath.contains("java.lang")) {
+            return true;
+        }
+        return false;
+    }
 }

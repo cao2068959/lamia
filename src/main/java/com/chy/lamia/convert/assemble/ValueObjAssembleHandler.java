@@ -2,19 +2,17 @@ package com.chy.lamia.convert.assemble;
 
 import com.chy.lamia.convert.builder.MaterialStatementBuilder;
 import com.chy.lamia.convert.builder.MaterialTypeConvertBuilder;
-import com.chy.lamia.element.LamiaConvertInfo;
 import com.chy.lamia.element.resolver.type.TypeResolver;
 import com.chy.lamia.entity.Constructor;
 import com.chy.lamia.entity.Setter;
 import com.chy.lamia.entity.TypeDefinition;
 import com.chy.lamia.entity.VarDefinition;
-import com.chy.lamia.utils.CommonUtils;
-import com.chy.lamia.utils.DefaultHashMap;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.utils.Lists;
 import com.sun.tools.javac.tree.JCTree;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -22,27 +20,10 @@ import java.util.stream.Collectors;
  *
  * @author bignosecat
  */
-public class ValueObjAssembleHandler implements AssembleHandler {
+public class ValueObjAssembleHandler extends CommonAssembleHandler {
 
     private final TypeResolver targetTypeResolver;
     private final Map<String, Setter> targetSetters;
-
-    private final DefaultHashMap<String, Material> materialMap = new DefaultHashMap<>();
-    /**
-     * 已经使用过的 material，用于防止重复使用
-     */
-    private final Set<String> useMaterial = new HashSet<>();
-
-    /**
-     * 生成新实例的名称
-     */
-    private String newInstant;
-
-    /**
-     * 生成的表达式器列表, 最终将使用这些 builder来生成对应的转换语句
-     */
-    List<MaterialStatementBuilder> materialStatementBuilders = new ArrayList<>();
-    private LamiaConvertInfo lamiaConvertInfo;
 
 
     public ValueObjAssembleHandler(TypeDefinition targetType) {
@@ -53,76 +34,13 @@ public class ValueObjAssembleHandler implements AssembleHandler {
         this.targetSetters = targetTypeResolver.getInstantSetters();
     }
 
-    /**
-     * 添加参与组装的耗材, 可以是变量,或者对象的get方法
-     */
-    @Override
-    public void addMaterial(List<Material> materials) {
-        materials.forEach(material -> {
-            if (material instanceof OmnipotentMaterial) {
-                materialMap.setDefaultValue(material);
-                return;
-            }
-            materialMap.put(material.getSupplyName(), material);
-        });
-    }
-
-    /**
-     * 生成对应的转换语句
-     *
-     * @return
-     */
-    @Override
-    public List<MaterialStatementBuilder> run() {
-        // 选择一个合适的构造器
-        Constructor constructor = chooseConstructor();
-
-        // 生成一个新的实例,返回对应的实例名称
-        this.newInstant = createNewInstantExpression(constructor);
-
-        // 生成对应的 set 赋值语句
-        createSetterExpression();
-        return materialStatementBuilders;
-    }
-
-    @Override
-    public void setLamiaConvertInfo(LamiaConvertInfo lamiaConvertInfo) {
-        this.lamiaConvertInfo = lamiaConvertInfo;
-    }
-
-    @Override
-    public String getNewInstantName() {
-        return newInstant;
-    }
-
-    /**
-     * 生成 set赋值语句 如 : instantName.setName(xxxx)
-     */
-    private void createSetterExpression() {
-        // 遍历所有的 set方法， 如果能找到
-        targetSetters.forEach((varName, setter) -> {
-            MaterialTypeConvertBuilder material = useMaterial(setter.getType(), varName);
-            // 没找到 就不处理了
-            if (material == null) {
-                return;
-            }
-
-            MaterialStatementBuilder materialStatementBuilder = new MaterialStatementBuilder();
-            // 生成对应的 set的方法
-            materialStatementBuilder.setFunction(() -> {
-                JCTree.JCExpression expression = material.convert().getVarExpression();
-                return Lists.of(JCUtils.instance.execMethod(newInstant, setter.getMethodName(), expression));
-            });
-            materialStatementBuilders.add(materialStatementBuilder);
-        });
-    }
 
     /**
      * 选择一个最满足条件的构造器
      *
      * @return 构造器
      */
-    private Constructor chooseConstructor() {
+    public Constructor chooseConstructor() {
         // 获取所有的构造器
         List<Constructor> constructors = targetTypeResolver.getConstructors();
         if (constructors == null || constructors.size() == 0) {
@@ -161,10 +79,12 @@ public class ValueObjAssembleHandler implements AssembleHandler {
     /**
      * 创建一个新实例表达式,并返回对应的新实例名称
      *
-     * @param constructor
      * @return
      */
-    private String createNewInstantExpression(Constructor constructor) {
+    @Override
+    protected String createNewInstantExpression() {
+        // 选择一个合适的构造器
+        Constructor constructor = chooseConstructor();
         String classPath = targetTypeResolver.getTypeDefinition().getClassPath();
         // 构造器所需要的所有入参
         List<MaterialTypeConvertBuilder> constructorParam = constructor.getParams().stream().map(varDefinition -> {
@@ -175,15 +95,7 @@ public class ValueObjAssembleHandler implements AssembleHandler {
             return materialTypeConvertBuilder;
         }).collect(Collectors.toList());
 
-        String oldResultName = lamiaConvertInfo.getVarName();
-        String varName;
-        if (oldResultName == null) {
-            // 新实例的名称生成
-            varName = CommonUtils.generateVarName("result");
-        } else {
-            varName = oldResultName;
-        }
-
+        String instantName = genNewInstantName();
 
         // 表达式生成器
         MaterialStatementBuilder materialStatementBuilder = new MaterialStatementBuilder();
@@ -193,43 +105,37 @@ public class ValueObjAssembleHandler implements AssembleHandler {
             List<JCTree.JCExpression> expressions = constructorParam.stream().map(MaterialTypeConvertBuilder::convert)
                     .map(MaterialTypeConvertBuilder.ConvertResult::getVarExpression).collect(Collectors.toList());
 
-            JCTree.JCNewClass jcNewClass = JCUtils.instance.newClass(classPath, expressions);
-            // 变量是否已经存在,是否需要去创建类型
-            if (lamiaConvertInfo.isCreatedType()) {
-                JCTree.JCVariableDecl newVar = JCUtils.instance.createVar(varName, classPath, jcNewClass);
-                return Lists.of(newVar);
-            }
-            JCTree.JCStatement jcStatement = JCUtils.instance.varAssign(varName, jcNewClass);
+            JCTree.JCStatement jcStatement = genNewInstance(newInstant, classPath, expressions);
             return Lists.of(jcStatement);
 
         }));
 
         materialStatementBuilders.add(materialStatementBuilder);
-        return varName;
-    }
-
-    private MaterialTypeConvertBuilder useMaterial(VarDefinition varDefinition) {
-        return useMaterial(varDefinition.getType(), varDefinition.getVarName());
+        return instantName;
     }
 
 
-    private MaterialTypeConvertBuilder useMaterial(TypeDefinition typeDefinition, String varName) {
-        // 这个材料已经被使用过，不在返回了
-        if (useMaterial.contains(varName)) {
-            return null;
-        }
-        useMaterial.add(varName);
-        Material material = materialMap.get(varName);
-        if (material == null) {
-            return null;
-        }
+    /**
+     * 生成对应的转换语句
+     * 如: 生成 set赋值语句 如 : instantName.setName(xxxx)
+     */
+    @Override
+    public void createConvertExpression() {
+        // 遍历所有的 set方法， 如果能找到
+        targetSetters.forEach((varName, setter) -> {
+            MaterialTypeConvertBuilder material = useMaterial(setter.getType(), varName);
+            // 没找到 就不处理了
+            if (material == null) {
+                return;
+            }
 
-        // 万能材料，适配一下
-        if (material instanceof OmnipotentMaterial) {
-            material = ((OmnipotentMaterial) material).adapter(typeDefinition, varName);
-        }
-        return new MaterialTypeConvertBuilder(material, typeDefinition);
+            MaterialStatementBuilder materialStatementBuilder = new MaterialStatementBuilder();
+            // 生成对应的 set的方法
+            materialStatementBuilder.setFunction(() -> {
+                JCTree.JCExpression expression = material.convert().getVarExpression();
+                return Lists.of(JCUtils.instance.execMethod(newInstant, setter.getMethodName(), expression));
+            });
+            materialStatementBuilders.add(materialStatementBuilder);
+        });
     }
-
-
 }
