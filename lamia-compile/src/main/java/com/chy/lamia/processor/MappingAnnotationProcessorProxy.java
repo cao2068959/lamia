@@ -67,7 +67,7 @@ public class MappingAnnotationProcessorProxy extends AbstractProcessor {
                 "com.sun.tools.javac.processing",
                 "com.sun.tools.javac.tree",
                 "com.sun.tools.javac.util",
-                "com.sun.tools.javac.jvm",
+                "com.sun.tools.javac.jvm"
         };
 
         try {
