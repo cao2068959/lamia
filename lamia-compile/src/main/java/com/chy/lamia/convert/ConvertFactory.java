@@ -111,6 +111,11 @@ public class ConvertFactory {
             return Lists.of(material);
         }
 
+        // 是系统类型或者基础数据类型,不允许扩散
+        if (type.isBaseTypeOrSystemType()){
+            throw new RuntimeException("变量 ["+varDefinition+"] 是系统类型不允许扩散, 可以使用 Lamia.convert(不扩散的类型) 方法或者 Lamia.config().spreadArgs(需要扩散的类型).convert(不扩散的类型) 来指定");
+        }
+
         // 解析对应的类型
         TypeResolver typeResolver = TypeResolver.getTypeResolver(type);
         Map<String, Getter> instantGetters = typeResolver.getInstantGetters();

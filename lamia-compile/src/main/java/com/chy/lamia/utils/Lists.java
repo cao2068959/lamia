@@ -17,7 +17,7 @@ public class Lists {
         return result;
     }
 
-    public static  <T> com.sun.tools.javac.util.List<T> toSunList(java.util.List<T> list) {
+    public static  <T> com.sun.tools.javac.util.List<T> toSunList(List<T> list) {
         if (list == null || list.size() == 0) {
             return com.sun.tools.javac.util.List.nil();
         }
