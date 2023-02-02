@@ -34,10 +34,8 @@ public class ConvertFactory {
     public List<JCTree.JCStatement> make(LamiaConvertInfo lamiaConvertInfo) {
         // 寻找适合的组成器
         AssembleHandler assembleHandler = getAssembleHandler(lamiaConvertInfo);
-        // 获取所有可能参与组合结果对象的材料
-        List<Material> materials = createdMaterials(lamiaConvertInfo);
-        // 在组装器中添加所有的材料
-        assembleHandler.addMaterial(materials);
+        // 在组装器中添加所有的所有可能参与组合结果对象的材料
+        assembleHandler.addMaterial(createdMaterials(lamiaConvertInfo));
         // 生成所有组装对象 语句的构建器, 每一个builder 将会生成一行 语句, 如 result.setXXX(var.getVVV())
         List<MaterialStatementBuilder> materialStatementBuilders = assembleHandler.run();
         // 生成真正的 java语句

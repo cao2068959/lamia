@@ -15,8 +15,7 @@ public class SimpleMethod {
      */
     private TypeDefinition returnType;
     private List<TypeDefinition> params = new LinkedList<>();
-    boolean isStatic = false;
-
+    private boolean isStatic = false;
 
     public SimpleMethod(String name, TypeDefinition returnType) {
         this.name = name;

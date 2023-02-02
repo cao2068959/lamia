@@ -65,7 +65,7 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
     public boolean expressionStatementVisit(JCTree.JCExpressionStatement expressionStatement) {
         JCTree.JCExpression expression = expressionStatement.expr;
         if (!(expression instanceof JCTree.JCAssign)) {
-            return false;
+            return true;
         }
         JCTree.JCAssign assign = (JCTree.JCAssign) expression;
 
@@ -78,8 +78,6 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
             lamiaConvertInfo.setVarName(name);
             lamiaConvertInfo.setCreatedType(false);
         }
-
-
         return lamiaConvertInfo == null;
     }
 
