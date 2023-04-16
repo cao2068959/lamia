@@ -13,11 +13,22 @@ import java.util.Set;
  */
 @Data
 public class LamiaExpression {
+
+    /**
+     *  要设置的全部参数, 直接设置的字段对象以及需要字段映射的都在这里面
+     */
     Set<String> allArgsNames = new LinkedHashSet<>();
 
-    Set<String> spreadArgs = new HashSet<>();
+    /**
+     * 用于映射的参数名称
+     */
+    Set<String> mappingArgs = new HashSet<>();
 
-    boolean defaultSpread = false;
+    /**
+     * 是否需要自定义配置
+     */
+    boolean buildConfig = false;
+
 
     JCTree.JCTypeCast typeCast;
 
@@ -27,7 +38,7 @@ public class LamiaExpression {
 
     public void addSpreadArgs(Collection<String> args) {
         allArgsNames.addAll(args);
-        spreadArgs.addAll(args);
+        mappingArgs.addAll(args);
     }
 
 }

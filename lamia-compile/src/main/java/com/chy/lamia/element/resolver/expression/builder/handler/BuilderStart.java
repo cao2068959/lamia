@@ -1,9 +1,9 @@
-package com.chy.lamia.element.resolver.expression.configuration.handler;
+package com.chy.lamia.element.resolver.expression.builder.handler;
 
 import com.chy.lamia.element.resolver.expression.ConfigParseContext;
 import com.chy.lamia.element.resolver.expression.LamiaExpression;
 import com.chy.lamia.element.resolver.expression.MethodWrapper;
-import com.chy.lamia.element.resolver.expression.configuration.ConfigurationHandler;
+import com.chy.lamia.element.resolver.expression.builder.BuilderHandler;
 
 
 /**
@@ -11,10 +11,10 @@ import com.chy.lamia.element.resolver.expression.configuration.ConfigurationHand
  *
  * @author bignosecat
  */
-public class ConfigurationStart implements ConfigurationHandler {
+public class BuilderStart implements BuilderHandler {
 
     @Override
     public void config(LamiaExpression lamiaExpression, MethodWrapper methodWrapper, ConfigParseContext context) {
-        context.intoScope("config");
+        context.intoScope("builder");
     }
 }

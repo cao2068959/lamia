@@ -1,8 +1,8 @@
 package com.chy.lamia.element.resolver.expression;
 
 
-import com.chy.lamia.element.resolver.expression.configuration.ConfigurationContext;
-import com.chy.lamia.element.resolver.expression.configuration.ConfigurationHandler;
+import com.chy.lamia.element.resolver.expression.builder.BuilderContext;
+import com.chy.lamia.element.resolver.expression.builder.BuilderHandler;
 import com.sun.tools.javac.tree.JCTree;
 
 import java.util.ArrayList;
@@ -40,20 +40,16 @@ public class LamiaExpressionResolver {
             return null;
         }
 
-        LamiaExpression result = parseEndMethod(methodInvocation);
-        // 整个表达式的结束方法不存在,那么整个表达式应该是无效的
+        LamiaExpression result = parseMethod(methodInvocation);
+        // 表达式解析不出来说明有问题
         if (result == null) {
             return null;
         }
-
         result.setTypeCast(typeCast);
-        // 前置可能会有一些配置表达式, 去解析前置的配置表达式
-        parseConfig(result, methodInvocation);
-
         return result;
     }
 
-    private void parseConfig(LamiaExpression result, JCTree.JCMethodInvocation methodInvocation) {
+    private void parseBuildConfig(LamiaExpression result, JCTree.JCMethodInvocation methodInvocation) {
         List<MethodWrapper> methodWrappers = disassembleMethod(methodInvocation);
         // 第一个是 endMethod,已经解析过了, 所以把他移除
         methodWrappers.remove(0);
@@ -72,7 +68,7 @@ public class LamiaExpressionResolver {
             String name = methodWrapper.getName();
 
             String key = context.getScope(name);
-            ConfigurationHandler handler = ConfigurationContext.getHandler(key);
+            BuilderHandler handler = BuilderContext.getHandler(key);
             if (handler == null) {
                 throw new RuntimeException("[LamiaExpressionResolver] 无法找到 配置处理器 key: [" + key + "]");
             }
@@ -108,24 +104,30 @@ public class LamiaExpressionResolver {
     }
 
 
-    private LamiaExpression parseEndMethod(JCTree.JCMethodInvocation data) {
+    private LamiaExpression parseMethod(JCTree.JCMethodInvocation data) {
         JCTree.JCFieldAccess fieldAccess = (JCTree.JCFieldAccess) data.meth;
         String name = fieldAccess.name.toString();
 
-        // 结束方法一共有 2个  convert / mapping
+        // 结束方法一共有 3个  convert / setArgs / build
         if ("convert".equals(name)) {
             LamiaExpression result = new LamiaExpression();
             List<String> argsNames = fetchArgsName(data);
-            result.addArgs(argsNames);
+            result.addSpreadArgs(argsNames);
             return result;
         }
-        if ("mapping".equals(name)) {
+        if ("setArgs".equals(name)) {
             LamiaExpression result = new LamiaExpression();
             List<String> argsNames = fetchArgsName(data);
             result.addArgs(argsNames);
-            result.setDefaultSpread(true);
             return result;
         }
+
+        if ("build".equals(name)) {
+            LamiaExpression result = new LamiaExpression();
+            parseBuildConfig(result, data);
+            return result;
+        }
+
         return null;
     }
 

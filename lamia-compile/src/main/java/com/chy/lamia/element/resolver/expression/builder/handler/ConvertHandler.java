@@ -1,9 +1,9 @@
-package com.chy.lamia.element.resolver.expression.configuration.handler;
+package com.chy.lamia.element.resolver.expression.builder.handler;
 
 import com.chy.lamia.element.resolver.expression.ConfigParseContext;
 import com.chy.lamia.element.resolver.expression.LamiaExpression;
 import com.chy.lamia.element.resolver.expression.MethodWrapper;
-import com.chy.lamia.element.resolver.expression.configuration.ConfigurationHandler;
+import com.chy.lamia.element.resolver.expression.builder.BuilderHandler;
 import com.sun.tools.javac.tree.JCTree;
 
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ import java.util.List;
  *
  * @author bignosecat
  */
-public class SpreadArgsHandler implements ConfigurationHandler {
+public class ConvertHandler implements BuilderHandler {
     @Override
     public void config(LamiaExpression lamiaExpression, MethodWrapper methodWrapper, ConfigParseContext context) {
 

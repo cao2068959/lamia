@@ -100,14 +100,19 @@ public class LamiaConvertInfo {
     }
 
     public boolean isSpread(VarDefinition varDefinition) {
+        // 系统的基础类型不进行扩散
+        if (varDefinition.getType().isBaseTypeOrSystemType()){
+            return false;
+        }
+        // 变量的注解上面标注了一定进行扩散
         boolean spread = varDefinition.isSpread();
         if (spread) {
             return true;
         }
-        if (lamiaExpression.getSpreadArgs().contains(varDefinition.getVarRealName())) {
+        if (lamiaExpression.getMappingArgs().contains(varDefinition.getVarRealName())) {
             return true;
         }
-        return lamiaExpression.isDefaultSpread();
+        return false;
     }
 
     @AllArgsConstructor

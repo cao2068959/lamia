@@ -1,4 +1,4 @@
-package com.chy.lamia.element.resolver.expression.configuration;
+package com.chy.lamia.element.resolver.expression.builder;
 
 import com.chy.lamia.element.resolver.expression.ConfigParseContext;
 import com.chy.lamia.element.resolver.expression.LamiaExpression;
@@ -13,7 +13,7 @@ import java.util.List;
  *
  * @author bignosecat
  */
-public interface ConfigurationHandler {
+public interface BuilderHandler {
 
     public void config(LamiaExpression lamiaExpression, MethodWrapper methodWrapper, ConfigParseContext context);
 
