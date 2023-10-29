@@ -31,7 +31,7 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         try {
-            ProcessingEnvironment processingEnv = ReflectUtils.getFile(roundEnv, "processingEnv", ProcessingEnvironment.class);
+            ProcessingEnvironment   processingEnv = ReflectUtils.getFile(roundEnv, "processingEnv", ProcessingEnvironment.class);
             JCUtils.refreshJCUtils(processingEnv);
 
             if (roundEnv.processingOver()) {

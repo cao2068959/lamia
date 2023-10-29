@@ -2,6 +2,7 @@ package com.chy.lamia.convert;
 
 import com.chy.lamia.convert.assemble.*;
 import com.chy.lamia.convert.builder.MaterialStatementBuilder;
+import com.chy.lamia.element.ConvertVarInfo;
 import com.chy.lamia.element.LamiaConvertInfo;
 import com.chy.lamia.element.resolver.type.TypeResolver;
 import com.chy.lamia.entity.Getter;
@@ -39,7 +40,7 @@ public class ConvertFactory {
         // 生成所有组装对象 语句的构建器, 每一个builder 将会生成一行 语句, 如 result.setXXX(var.getVVV())
         List<MaterialStatementBuilder> materialStatementBuilders = assembleHandler.run();
         // 生成真正的 java语句
-        return createdStatement(materialStatementBuilders,assembleHandler ,lamiaConvertInfo);
+        return createdStatement(materialStatementBuilders, assembleHandler, lamiaConvertInfo);
 
     }
 
@@ -62,7 +63,7 @@ public class ConvertFactory {
         });
 
         // 如果是return 后面直接接上的 转换语句,那么 还需要把return 语句补上
-        if (lamiaConvertInfo.isReturn()){
+        if (lamiaConvertInfo.isReturn()) {
             String newInstantName = assembleHandler.getNewInstantName();
             JCTree.JCReturn aReturn = JCUtils.instance.createReturn(newInstantName);
             result.add(aReturn);
@@ -79,19 +80,20 @@ public class ConvertFactory {
      */
     private List<Material> createdMaterials(LamiaConvertInfo lamiaConvertInfo) {
         // 根据优先级 获取出所有的参数, 高优先级的放队尾
-        List<VarDefinition> args = lamiaConvertInfo.getArgsByPriority();
+        List<ConvertVarInfo> args = lamiaConvertInfo.getArgsByPriority();
 
 
         List<Material> result = new ArrayList<>();
-        args.forEach(varDefinition -> {
+        args.forEach(convertVarInfo -> {
+            VarDefinition varDefinition = convertVarInfo.getVarDefinition();
             // 判断这个参数是否需要扩散开
             if (lamiaConvertInfo.isSpread(varDefinition)) {
-                List<Material> materials = spreadVarDefinition(varDefinition);
+                List<Material> materials = spreadVarDefinition(convertVarInfo);
                 result.addAll(materials);
                 return;
             }
             // 不需要扩散那 直接封装了
-            Material material = Material.simpleMaterial(varDefinition);
+            Material material = Material.simpleMaterial(convertVarInfo);
             result.add(material);
         });
         return result;
@@ -100,10 +102,11 @@ public class ConvertFactory {
     /**
      * 扩散 varDefinition 转成对应的 Material
      *
-     * @param varDefinition varDefinition
+     * @param convertVarInfo ConvertVarInfo
      * @return
      */
-    private List<Material> spreadVarDefinition(VarDefinition varDefinition) {
+    private List<Material> spreadVarDefinition(ConvertVarInfo convertVarInfo) {
+        VarDefinition varDefinition = convertVarInfo.getVarDefinition();
         TypeDefinition type = varDefinition.getType();
         // 如果扩散的是一个 map
         if (type.matchType(Map.class)) {
@@ -112,8 +115,8 @@ public class ConvertFactory {
         }
 
         // 是系统类型或者基础数据类型,不允许扩散
-        if (type.isBaseTypeOrSystemType()){
-            throw new RuntimeException("变量 ["+varDefinition+"] 是系统类型不允许扩散, 可以使用 Lamia.convert(不扩散的类型) 方法或者 Lamia.config().spreadArgs(需要扩散的类型).convert(不扩散的类型) 来指定");
+        if (type.isBaseTypeOrSystemType()) {
+            throw new RuntimeException("变量 [" + varDefinition + "] 是系统类型不允许扩散, 可以使用 Lamia.convert(不扩散的类型) 方法或者 Lamia.config().spreadArgs(需要扩散的类型).convert(不扩散的类型) 来指定");
         }
 
         // 解析对应的类型
@@ -127,6 +130,7 @@ public class ConvertFactory {
             material.setVarDefinition(varDefinition);
             material.setSupplyType(getter.getType());
             material.setSupplyName(fieldName);
+            material.setRuleInfo(convertVarInfo.getRuleInfo());
             // 生成对应的 var.getXX()
             material.setVarExpressionFunction((varExpression -> {
                 JCTree.JCExpressionStatement statement = JCUtils.instance.execMethod(varExpression, getter.getMethodName(), Lists.of());

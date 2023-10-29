@@ -1,8 +1,11 @@
 package com.chy.lamia.element.resolver.expression.builder;
 
 import com.chy.lamia.element.resolver.expression.builder.handler.BuilderStart;
-import com.chy.lamia.element.resolver.expression.builder.handler.ConvertHandler;
-import com.chy.lamia.element.resolver.expression.builder.handler.SetArgsHandler;
+import com.chy.lamia.element.resolver.expression.builder.handler.MappingHandler;
+import com.chy.lamia.element.resolver.expression.builder.handler.SetFieldHandler;
+import com.chy.lamia.element.resolver.expression.builder.handler.rule.RuleHandler;
+import com.chy.lamia.element.resolver.expression.builder.handler.rule.RuleMappingHandler;
+import com.chy.lamia.element.resolver.expression.builder.handler.rule.RuleSetFieldHandler;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,8 +21,11 @@ public class BuilderContext {
 
     static {
         data.put("builder", new BuilderStart());
-        data.put("builder.convert", new ConvertHandler());
-        data.put("builder.setArgs", new SetArgsHandler());
+        data.put("builder.mapping", new MappingHandler());
+        data.put("builder.setField", new SetFieldHandler());
+        data.put("builder.rule", new RuleHandler());
+        data.put("builder.rule.mapping", new RuleMappingHandler());
+        data.put("builder.rule.setField", new RuleSetFieldHandler());
 
     }
 

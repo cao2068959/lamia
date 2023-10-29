@@ -9,6 +9,7 @@ import com.chy.lamia.utils.CommonUtils;
 import com.chy.lamia.utils.DefaultHashMap;
 import com.chy.lamia.utils.JCUtils;
 import com.sun.tools.javac.tree.JCTree;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -22,8 +23,8 @@ import java.util.Set;
  */
 public abstract class CommonAssembleHandler implements AssembleHandler {
 
-
-    protected final DefaultHashMap<String, Material> materialMap = new DefaultHashMap<>();
+    @Getter
+    private final DefaultHashMap<String, Material> materialMap = new DefaultHashMap<>();
     /**
      * 已经使用过的 material，用于防止重复使用
      */
@@ -37,7 +38,7 @@ public abstract class CommonAssembleHandler implements AssembleHandler {
     /**
      * 生成的表达式器列表, 最终将使用这些 builder来生成对应的转换语句
      */
-    protected List<MaterialStatementBuilder> materialStatementBuilders = new ArrayList<>();
+    private List<MaterialStatementBuilder> materialStatementBuilders = new ArrayList<>();
     protected LamiaConvertInfo lamiaConvertInfo;
 
 
@@ -66,7 +67,7 @@ public abstract class CommonAssembleHandler implements AssembleHandler {
         this.newInstant = createNewInstantExpression();
 
         // 生成对应的 set 赋值语句
-        createConvertExpression();
+        createConvertExpression(materialMap);
         return materialStatementBuilders;
     }
 
@@ -102,7 +103,7 @@ public abstract class CommonAssembleHandler implements AssembleHandler {
      * 生成对应的转换语句
      * 如: 生成 set赋值语句 如 : instantName.setName(xxxx)
      */
-    public abstract void createConvertExpression();
+    public abstract void createConvertExpression(DefaultHashMap<String, Material> materialMap);
 
 
     @Override
@@ -156,4 +157,8 @@ public abstract class CommonAssembleHandler implements AssembleHandler {
         return new MaterialTypeConvertBuilder(material, typeDefinition);
     }
 
+
+    protected void addStatementBuilders(MaterialStatementBuilder materialStatementBuilder) {
+        materialStatementBuilders.add(materialStatementBuilder);
+    }
 }

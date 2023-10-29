@@ -21,8 +21,6 @@ public class MaterialStatementBuilder {
     BuilderFunction function;
 
 
-
-
     /**
      * 生成对应的代码
      *

@@ -51,6 +51,11 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>io.github.cao2068959</groupId>
+            <artifactId>lamia-runtime</artifactId>
+            <version>${version}</version>
+        </dependency>
 
 
         <dependency>

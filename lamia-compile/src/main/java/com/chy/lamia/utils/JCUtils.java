@@ -155,6 +155,10 @@ public class JCUtils {
 
 
     public JCTree.JCBlock createBlock(java.util.List<JCTree.JCStatement> statements) {
+        if (statements == null) {
+            return null;
+        }
+
         List<JCTree.JCStatement> jcStatements = toSunList(statements);
         return treeMaker.Block(0, jcStatements);
     }
@@ -271,6 +275,32 @@ public class JCUtils {
         JCTree.JCVariableDecl forVar = createVar(itemName, itemType.getTypePatch(), null);
         JCTree.JCBlock block = createBlock(statements);
         return treeMaker.ForeachLoop(forVar, collectionExpression, block);
+    }
+
+
+    /**
+     * 生成 if语句
+     *
+     * @param condition     if的判断语句
+     * @param thanStatement true执行块
+     * @param elseStatement false执行块
+     */
+    public JCTree.JCIf createIf(JCTree.JCExpression condition, java.util.List<JCTree.JCStatement> thanStatement,
+                                java.util.List<JCTree.JCStatement> elseStatement) {
+
+        JCTree.JCBlock thanBlock = createBlock(thanStatement);
+        JCTree.JCBlock elseBlock = createBlock(elseStatement);
+        return treeMaker.If(condition, thanBlock, elseBlock);
+    }
+
+    /**
+     * 生成 变量 != null
+     *
+     * @param var 变量
+     * @return
+     */
+    public JCTree.JCBinary createVarNotEqNull(JCTree.JCExpression var) {
+        return treeMaker.Binary(JCTree.Tag.NE, var, getNullExpression());
     }
 
 

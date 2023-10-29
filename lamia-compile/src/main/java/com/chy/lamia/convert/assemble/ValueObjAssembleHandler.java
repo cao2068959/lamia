@@ -1,5 +1,6 @@
 package com.chy.lamia.convert.assemble;
 
+import com.chy.lamia.convert.builder.ConvertResult;
 import com.chy.lamia.convert.builder.MaterialStatementBuilder;
 import com.chy.lamia.convert.builder.MaterialTypeConvertBuilder;
 import com.chy.lamia.element.resolver.type.TypeResolver;
@@ -7,6 +8,7 @@ import com.chy.lamia.entity.Constructor;
 import com.chy.lamia.entity.Setter;
 import com.chy.lamia.entity.TypeDefinition;
 import com.chy.lamia.entity.VarDefinition;
+import com.chy.lamia.utils.DefaultHashMap;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.utils.Lists;
 import com.sun.tools.javac.tree.JCTree;
@@ -47,7 +49,7 @@ public class ValueObjAssembleHandler extends CommonAssembleHandler {
             throw new RuntimeException("类:[" + targetTypeResolver.getTypeDefinition().getClassPath() + "] 无法获取构造器");
         }
         Constructor result = null;
-
+        DefaultHashMap<String, Material> materialMap = getMaterialMap();
         constructorLoop:
         for (Constructor constructor : constructors) {
 
@@ -110,7 +112,7 @@ public class ValueObjAssembleHandler extends CommonAssembleHandler {
 
         }));
 
-        materialStatementBuilders.add(materialStatementBuilder);
+        addStatementBuilders(materialStatementBuilder);
         return instantName;
     }
 
@@ -120,7 +122,7 @@ public class ValueObjAssembleHandler extends CommonAssembleHandler {
      * 如: 生成 set赋值语句 如 : instantName.setName(xxxx)
      */
     @Override
-    public void createConvertExpression() {
+    public void createConvertExpression(DefaultHashMap<String, Material> materialMap) {
         // 遍历所有的 set方法， 如果能找到
         targetSetters.forEach((varName, setter) -> {
             MaterialTypeConvertBuilder material = useMaterial(setter.getType(), varName);
@@ -132,10 +134,10 @@ public class ValueObjAssembleHandler extends CommonAssembleHandler {
             MaterialStatementBuilder materialStatementBuilder = new MaterialStatementBuilder();
             // 生成对应的 set的方法
             materialStatementBuilder.setFunction(() -> {
-                JCTree.JCExpression expression = material.convert().getVarExpression();
-                return Lists.of(JCUtils.instance.execMethod(newInstant, setter.getMethodName(), expression));
+                ConvertResult convert = material.convert(jcExpression -> Lists.of(JCUtils.instance.execMethod(newInstant, setter.getMethodName(), jcExpression)));
+                return convert.getConvertStatement();
             });
-            materialStatementBuilders.add(materialStatementBuilder);
+            addStatementBuilders(materialStatementBuilder);
         });
     }
 }

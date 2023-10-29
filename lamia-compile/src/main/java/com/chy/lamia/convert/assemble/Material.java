@@ -1,6 +1,8 @@
 package com.chy.lamia.convert.assemble;
 
 import com.chy.lamia.convert.builder.VarExpressionFunction;
+import com.chy.lamia.element.ConvertVarInfo;
+import com.chy.lamia.element.resolver.expression.RuleInfo;
 import com.chy.lamia.entity.TypeDefinition;
 import com.chy.lamia.entity.VarDefinition;
 import lombok.Getter;
@@ -36,13 +38,17 @@ public class Material {
      */
     VarExpressionFunction varExpressionFunction;
 
+    RuleInfo ruleInfo;
 
-    public static Material simpleMaterial(VarDefinition varDefinition) {
+
+    public static Material simpleMaterial(ConvertVarInfo convertVarInfo) {
+        VarDefinition varDefinition = convertVarInfo.getVarDefinition();
         Material result = new Material();
         result.setSupplyName(varDefinition.getVarName());
         result.setVarDefinition(varDefinition);
         // 包装成一个表达式
         result.setVarExpressionFunction(expression -> expression);
+        result.setRuleInfo(convertVarInfo.getRuleInfo());
         return result;
     }
 

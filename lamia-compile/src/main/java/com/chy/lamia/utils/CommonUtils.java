@@ -8,6 +8,8 @@ public class CommonUtils {
 
     public static String lamiaPrefix = "lamia$$";
 
+    public static String tempPrefix = "Temp$";
+
     public static String generateVarName(String type) {
         StringBuilder result = new StringBuilder(lamiaPrefix);
         String randomString = getRandomString(6);
@@ -16,6 +18,13 @@ public class CommonUtils {
         }
 
         result.append(randomString);
+        return result.toString();
+    }
+
+    public static String tempName(String name){
+        StringBuilder result = new StringBuilder(name);
+        String randomString = getRandomString(3);
+        result.append(tempPrefix).append(randomString);
         return result.toString();
     }
 

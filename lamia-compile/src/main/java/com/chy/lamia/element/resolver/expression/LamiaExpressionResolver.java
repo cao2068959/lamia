@@ -109,13 +109,13 @@ public class LamiaExpressionResolver {
         String name = fieldAccess.name.toString();
 
         // 结束方法一共有 3个  convert / setArgs / build
-        if ("convert".equals(name)) {
+        if ("mapping".equals(name)) {
             LamiaExpression result = new LamiaExpression();
             List<String> argsNames = fetchArgsName(data);
-            result.addSpreadArgs(argsNames);
+            result.addSpreadArgs(argsNames, null);
             return result;
         }
-        if ("setArgs".equals(name)) {
+        if ("setField".equals(name)) {
             LamiaExpression result = new LamiaExpression();
             List<String> argsNames = fetchArgsName(data);
             result.addArgs(argsNames);

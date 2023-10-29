@@ -6,6 +6,7 @@ import com.chy.lamia.element.resolver.expression.MethodWrapper;
 import com.sun.tools.javac.code.TypeTag;
 import com.sun.tools.javac.tree.JCTree;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -44,5 +45,13 @@ public interface BuilderHandler {
             return (T) ("1".equals(value.toString()) ? Boolean.TRUE : Boolean.FALSE);
         }
         return null;
+    }
+
+    default List<String> fetchArgsName(List<JCTree.JCExpression> args) {
+        List<String> result = new ArrayList<>();
+        for (JCTree.JCExpression arg : args) {
+            result.add(arg.toString());
+        }
+        return result;
     }
 }

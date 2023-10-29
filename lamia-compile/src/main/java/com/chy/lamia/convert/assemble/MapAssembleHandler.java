@@ -2,6 +2,7 @@ package com.chy.lamia.convert.assemble;
 
 import com.chy.lamia.convert.builder.MaterialStatementBuilder;
 import com.chy.lamia.convert.builder.MaterialTypeConvertBuilder;
+import com.chy.lamia.utils.DefaultHashMap;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.utils.Lists;
 import com.sun.tools.javac.tree.JCTree;
@@ -29,25 +30,29 @@ public class MapAssembleHandler extends CommonAssembleHandler {
             JCTree.JCStatement jcStatement = genNewInstance(newInstant, classPath, Lists.of());
             return Lists.of(jcStatement);
         }));
-        materialStatementBuilders.add(materialStatementBuilder);
+
+        // 把转换语句给放进去
+        super.addStatementBuilders(materialStatementBuilder);
         return instantName;
     }
 
     @Override
-    public void createConvertExpression() {
+    public void createConvertExpression(DefaultHashMap<String, Material> materialMap) {
         // 找到所有的材料, 放入 map中,将生成对应的 put函数
         materialMap.forEach((key, material) -> {
             MaterialTypeConvertBuilder materialTypeConvertBuilder = toMaterialTypeConvertBuilder(material);
 
             MaterialStatementBuilder materialStatementBuilder = new MaterialStatementBuilder();
             materialStatementBuilder.setFunction(() -> {
+
+
+
                 JCTree.JCExpression expression = materialTypeConvertBuilder.convert().getVarExpression();
                 JCTree.JCExpression putName = JCUtils.instance.geStringExpression(material.getSupplyName());
                 List<JCTree.JCExpression> args = Lists.of(putName, expression);
-
                 return Lists.of(JCUtils.instance.execMethod(newInstant, "put", args));
             });
-            materialStatementBuilders.add(materialStatementBuilder);
+            super.addStatementBuilders(materialStatementBuilder);
         });
 
     }

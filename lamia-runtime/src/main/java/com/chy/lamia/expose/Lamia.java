@@ -9,7 +9,7 @@ public class Lamia {
      * @param param
      * @return
      */
-    public static Object convert(Object... param) {
+    public static Object mapping(Object... param) {
         throw new RuntimeException("转换失败，无效的表达式");
     }
 
@@ -20,7 +20,7 @@ public class Lamia {
      * @param param
      * @return
      */
-    public static Object setArgs(Object... param) {
+    public static Object setField(Object... param) {
         throw new RuntimeException("转换失败，无效的表达式");
     }
 

@@ -2,6 +2,7 @@ package com.chy.lamia.element;
 
 
 import com.chy.lamia.element.resolver.expression.LamiaExpression;
+import com.chy.lamia.element.resolver.expression.RuleInfo;
 import com.chy.lamia.entity.TypeDefinition;
 import com.chy.lamia.entity.VarDefinition;
 import com.chy.lamia.utils.CommonUtils;
@@ -14,7 +15,7 @@ import lombok.Setter;
 import java.util.*;
 
 /**
- * 每一个 Lamia.convert 表达式能够使用到的作用域
+ * 每一个 Lamia.convert(setFiled/mapping) 表达式能够使用到的作用域
  *
  * @author bignosecat
  */
@@ -81,11 +82,14 @@ public class LamiaConvertInfo {
      *
      * @return 对应的 var列表
      */
-    public List<VarDefinition> getArgsByPriority() {
-        List<VarDefinition> result = new ArrayList<>();
-        getAllArgsName().forEach(name -> result.add(args.get(name)));
+    public List<ConvertVarInfo> getArgsByPriority() {
+        List<ConvertVarInfo> result = new ArrayList<>();
+        getAllArgs().forEach((name, rule) -> {
+            VarDefinition varDefinition = args.get(name);
+            result.add(new ConvertVarInfo(varDefinition, rule));
+        });
         // 排序
-        result.sort(Comparator.comparingInt(VarDefinition::getPriority));
+        result.sort(Comparator.comparingInt(cvi-> cvi.getVarDefinition().getPriority()));
 
         return result;
     }
@@ -96,12 +100,16 @@ public class LamiaConvertInfo {
     }
 
     public Set<String> getAllArgsName() {
-        return lamiaExpression.getAllArgsNames();
+        return lamiaExpression.getAllArgs().keySet();
+    }
+
+    public Map<String, RuleInfo> getAllArgs() {
+        return lamiaExpression.getAllArgs();
     }
 
     public boolean isSpread(VarDefinition varDefinition) {
         // 系统的基础类型不进行扩散
-        if (varDefinition.getType().isBaseTypeOrSystemType()){
+        if (varDefinition.getType().isBaseTypeOrSystemType()) {
             return false;
         }
         // 变量的注解上面标注了一定进行扩散
