@@ -104,8 +104,8 @@ public class ValueObjAssembleHandler extends CommonAssembleHandler {
 
         materialStatementBuilder.setFunction((() -> {
 
-            List<JCTree.JCExpression> expressions = constructorParam.stream().map(MaterialTypeConvertBuilder::convert)
-                    .map(MaterialTypeConvertBuilder.ConvertResult::getVarExpression).collect(Collectors.toList());
+            List<JCTree.JCExpression> expressions = constructorParam.stream()
+                    .map(MaterialTypeConvertBuilder::convertSimple).collect(Collectors.toList());
 
             JCTree.JCStatement jcStatement = genNewInstance(newInstant, classPath, expressions);
             return Lists.of(jcStatement);

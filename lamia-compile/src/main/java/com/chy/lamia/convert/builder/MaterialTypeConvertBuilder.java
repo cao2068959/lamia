@@ -45,6 +45,17 @@ public class MaterialTypeConvertBuilder {
         return ruleConvert(expression, callBack);
     }
 
+
+    /**
+     * 将这个类型 转换成 指定的类型
+     */
+    public JCTree.JCExpression convertSimple() {
+
+        VarDefinition materialVarDefinition = material.getVarDefinition();
+        JCTree.JCExpression materialExpression = JCUtils.instance.memberAccess(materialVarDefinition.getVarRealName());
+        return material.getVarExpressionFunction().run(materialExpression);
+    }
+
     /**
      * 根据固定的规则进行转换
      *
@@ -59,8 +70,10 @@ public class MaterialTypeConvertBuilder {
         RuleInfo ruleInfo = material.getRuleInfo();
         RuleChain ruleChain = ruleHandlerContext.getRuleChain(ruleInfo);
 
+        boolean noRule = true;
         // 没有任何的规则要处理
         if (ruleChain.size() > 0) {
+            noRule = false;
             // 里面有规则处理，用一个变量承接一下
             ruleChain.addFirstRule(((__, chain) -> {
                 String name = CommonUtils.tempName(material.getSupplyName());
@@ -70,9 +83,8 @@ public class MaterialTypeConvertBuilder {
                 chain.addStatement(var);
 
                 // 继续下面的执行
-                chain.continueCall(var.nameexpr);
+                chain.continueCall(JCUtils.instance.memberAccess(name));
             }));
-
         }
 
         // 添加一个规则，用来给外面生成真正的赋值语句
@@ -82,9 +94,13 @@ public class MaterialTypeConvertBuilder {
             chain.continueCall(varExpression);
         });
 
+        if (noRule) {
+            ruleChain.continueCall(expression);
+        } else {
+            // 开始执行规则链路
+            ruleChain.continueCall(null);
+        }
 
-        // 开始执行规则链路
-        ruleChain.continueCall(null);
 
         return new ConvertResult(ruleChain.getResult());
     }

@@ -11,6 +11,10 @@ public class LamiaBuilder {
         throw new RuntimeException("转换失败，无效的表达式");
     }
 
+    public <T> T build(T t) {
+        throw new RuntimeException("转换失败，无效的表达式");
+    }
+
 
     /**
      * 设置一些转换规则，紧接着规则后面的  mapping、setField 将会生效

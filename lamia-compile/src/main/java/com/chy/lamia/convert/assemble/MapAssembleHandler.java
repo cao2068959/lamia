@@ -43,15 +43,11 @@ public class MapAssembleHandler extends CommonAssembleHandler {
             MaterialTypeConvertBuilder materialTypeConvertBuilder = toMaterialTypeConvertBuilder(material);
 
             MaterialStatementBuilder materialStatementBuilder = new MaterialStatementBuilder();
-            materialStatementBuilder.setFunction(() -> {
-
-
-
-                JCTree.JCExpression expression = materialTypeConvertBuilder.convert().getVarExpression();
+            materialStatementBuilder.setFunction(() -> materialTypeConvertBuilder.convert(expression -> {
                 JCTree.JCExpression putName = JCUtils.instance.geStringExpression(material.getSupplyName());
                 List<JCTree.JCExpression> args = Lists.of(putName, expression);
                 return Lists.of(JCUtils.instance.execMethod(newInstant, "put", args));
-            });
+            }).getConvertStatement());
             super.addStatementBuilders(materialStatementBuilder);
         });
 

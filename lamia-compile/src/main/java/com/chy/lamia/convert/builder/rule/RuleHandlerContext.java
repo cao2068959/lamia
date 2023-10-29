@@ -27,6 +27,10 @@ public class RuleHandlerContext {
 
 
     public RuleChain getRuleChain(RuleInfo ruleInfo) {
+        if (ruleInfo == null) {
+            return new RuleChain(new ArrayList<>());
+        }
+
         List<RuleType> ruleTypes = ruleInfo.getRuleTypes();
 
         List<IRuleHandler> ruleHandlers = new ArrayList<>();
