@@ -34,7 +34,10 @@ public class LamiaExpression {
     boolean buildConfig = false;
 
 
-    JCTree.JCTypeCast typeCast;
+    JCTree.JCTypeCast targetType;
+
+    JCTree.JCExpression target;
+
 
     public void addArgs(Collection<String> args) {
 
@@ -48,7 +51,7 @@ public class LamiaExpression {
     public void addArgs(Collection<String> args, RuleInfo ruleInfo) {
         for (String arg : args) {
             RuleInfo oldRule = allArgs.get(arg);
-            if (oldRule == null){
+            if (oldRule == null) {
                 allArgs.put(arg, ruleInfo);
                 continue;
             }

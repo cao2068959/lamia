@@ -82,10 +82,6 @@ public class ClassMetadataReadingVisitor extends ClassVisitor {
 
     private void setterHandle(String name, Type[] argumentTypes, Type returnType, ParameterTypeSignatureHandleWarpper signatureHandleWarpper) {
 
-        if (!"void".equals(returnType.getClassName().toLowerCase())) {
-            return;
-        }
-
         if (argumentTypes == null || argumentTypes.length != 1) {
             return;
         }

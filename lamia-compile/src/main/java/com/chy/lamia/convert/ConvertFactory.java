@@ -153,9 +153,9 @@ public class ConvertFactory {
         AssembleHandler result;
         // 如果要组装的是 map, 则用map的组装器
         if (targetType.matchType(Map.class)) {
-            result = new MapAssembleHandler();
+            result = new MapAssembleHandler(lamiaConvertInfo.getTarget());
         } else {
-            result = new ValueObjAssembleHandler(targetType);
+            result = new ValueObjAssembleHandler(targetType, lamiaConvertInfo.getTarget());
         }
         result.setLamiaConvertInfo(lamiaConvertInfo);
         return result;

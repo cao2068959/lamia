@@ -16,4 +16,12 @@ public class MethodWrapper {
         this.name = name;
     }
 
+
+    public JCTree.JCExpression getOnlyArgs() {
+        if (args == null || args.isEmpty()) {
+            return null;
+        }
+        return args.get(0);
+    }
+
 }

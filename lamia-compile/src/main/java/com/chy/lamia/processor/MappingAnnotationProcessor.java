@@ -1,6 +1,6 @@
 package com.chy.lamia.processor;
 
-import com.chy.lamia.annotation.Mapping;
+import com.chy.lamia.annotation.LamiaMapping;
 import com.chy.lamia.element.funicle.FunicleFactory;
 import com.chy.lamia.log.Logger;
 import com.chy.lamia.processor.marked.MarkedContext;
@@ -70,7 +70,7 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
      * @param roundEnv
      */
     private void prepare(RoundEnvironment roundEnv) {
-        for (Element element : roundEnv.getElementsAnnotatedWith(Mapping.class)) {
+        for (Element element : roundEnv.getElementsAnnotatedWith(LamiaMapping.class)) {
             Symbol.MethodSymbol methodSymbol = (Symbol.MethodSymbol) element;
             String key = methodSymbol.owner.toString();
             markedContext.put(key, methodSymbol);

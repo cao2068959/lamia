@@ -8,6 +8,7 @@ import com.chy.lamia.entity.VarDefinition;
 import com.chy.lamia.utils.CommonUtils;
 import com.chy.lamia.utils.DefaultHashMap;
 import com.chy.lamia.utils.JCUtils;
+import com.chy.lamia.utils.Lists;
 import com.sun.tools.javac.tree.JCTree;
 import lombok.Getter;
 
@@ -34,6 +35,7 @@ public abstract class CommonAssembleHandler implements AssembleHandler {
      * 生成新实例的名称
      */
     protected String newInstant;
+    protected VarDefinition target;
 
     /**
      * 生成的表达式器列表, 最终将使用这些 builder来生成对应的转换语句
@@ -63,8 +65,25 @@ public abstract class CommonAssembleHandler implements AssembleHandler {
      */
     @Override
     public List<MaterialStatementBuilder> run() {
-        // 生成一个新的实例,返回对应的实例名称
-        this.newInstant = createNewInstantExpression();
+        // 没有实例，去生成一个新的实例
+        if (target == null) {
+            // 生成一个新的实例,返回对应的实例名称
+            this.newInstant = createNewInstantExpression();
+        } else {
+            this.newInstant = target.getVarRealName();
+            // 如果不是return，那么需要用一个变量来承接一下
+            if (!lamiaConvertInfo.isReturn() && lamiaConvertInfo.getVarName() != null) {
+                MaterialStatementBuilder statementBuilder = new MaterialStatementBuilder();
+                statementBuilder.setFunction(() -> {
+                    JCTree.JCVariableDecl variableDecl = JCUtils.instance.createVar(lamiaConvertInfo.getVarName(),
+                            lamiaConvertInfo.getTargetType().getClassPath(), JCUtils.instance.memberAccess(newInstant));
+
+                    return Lists.of(variableDecl);
+                });
+                addStatementBuilders(statementBuilder);
+            }
+
+        }
 
         // 生成对应的 set 赋值语句
         createConvertExpression(materialMap);

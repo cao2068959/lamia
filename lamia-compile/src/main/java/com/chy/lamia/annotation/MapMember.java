@@ -15,7 +15,6 @@ public @interface MapMember {
      * 优先级
      */
     int priority() default -1;
-
     /**
      * 要转换到的属性的名称
      *

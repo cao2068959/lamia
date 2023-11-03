@@ -19,7 +19,5 @@ public class RuleInfo {
             }
             ruleTypes.addAll(srcRuleTypes);
         }
-
-
     }
 }

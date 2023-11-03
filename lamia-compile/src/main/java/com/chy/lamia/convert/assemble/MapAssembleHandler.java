@@ -2,6 +2,7 @@ package com.chy.lamia.convert.assemble;
 
 import com.chy.lamia.convert.builder.MaterialStatementBuilder;
 import com.chy.lamia.convert.builder.MaterialTypeConvertBuilder;
+import com.chy.lamia.entity.VarDefinition;
 import com.chy.lamia.utils.DefaultHashMap;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.utils.Lists;
@@ -18,6 +19,10 @@ public class MapAssembleHandler extends CommonAssembleHandler {
 
 
     String classPath = "java.util.HashMap";
+
+    public MapAssembleHandler(VarDefinition target) {
+        this.target = target;
+    }
 
     @Override
     protected String createNewInstantExpression() {

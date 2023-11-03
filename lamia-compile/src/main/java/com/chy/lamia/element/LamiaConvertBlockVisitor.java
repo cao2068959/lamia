@@ -124,9 +124,28 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
         }
 
         LamiaConvertInfo lamiaConvertInfo = new LamiaConvertInfo(lamiaExpression);
-        // 要转换成的目标类型
-        TypeDefinition convertTargetType = JCUtils.instance.toTypeDefinition(classTree, lamiaExpression.getTypeCast().clazz);
-        lamiaConvertInfo.setTargetType(convertTargetType);
+
+        JCTree.JCExpression targetExpression = lamiaExpression.getTarget();
+        if (targetExpression != null) {
+            String targetName = targetExpression.toString();
+            VarDefinition varDefinition = vars.get(targetName);
+            if (varDefinition == null) {
+                throw new RuntimeException("表达式[" + jcExpression.toString() + "] 设置的target 实例有误[" + targetName + "]");
+            }
+            lamiaConvertInfo.setTarget(varDefinition);
+            lamiaConvertInfo.setTargetType(varDefinition.getType());
+
+        } else {
+            JCTree.JCTypeCast targetType = lamiaExpression.getTargetType();
+            if (targetType == null) {
+                throw new RuntimeException("表达式[" + jcExpression.toString() + "] 没有设置强转类型");
+            }
+            JCTree targetTypeJcTree = lamiaExpression.getTargetType().clazz;
+            // 要转换成的目标类型
+            TypeDefinition convertTargetType = JCUtils.instance.toTypeDefinition(classTree, targetTypeJcTree);
+            lamiaConvertInfo.setTargetType(convertTargetType);
+        }
+
 
         Set<String> allArgsName = lamiaConvertInfo.getAllArgsName();
         allArgsName.stream().map(vars::get).filter(Objects::nonNull).forEach(lamiaConvertInfo::addVarArgs);

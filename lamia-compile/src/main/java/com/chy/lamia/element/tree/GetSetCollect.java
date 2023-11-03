@@ -38,11 +38,7 @@ public class GetSetCollect extends InstantMethodVisitor {
     }
 
     private void setterHandle(String name, JCTree.JCMethodDecl that) {
-        JCTree returnType = that.getReturnType();
-        // 他如果有返回值，那么也不是一个 setter
-        if (returnType.type.getTag() != TypeTag.VOID) {
-            return;
-        }
+
         List<JCTree.JCVariableDecl> parameters = that.getParameters();
         if (parameters.length() != 1) {
             return;

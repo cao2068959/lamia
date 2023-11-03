@@ -17,21 +17,24 @@ public class LamiaExpressionResolver {
 
 
     public LamiaExpression resolving(JCTree.JCExpression jcExpression) {
-        // 首先这个表达式应该是一个 强转类型, 如果不是强转类型就直接 不处理了
-        if (!(jcExpression instanceof JCTree.JCTypeCast)) {
+
+        JCTree.JCMethodInvocation methodInvocation;
+        JCTree.JCTypeCast typeCast = null;
+        if (jcExpression instanceof JCTree.JCTypeCast) {
+            typeCast = (JCTree.JCTypeCast) jcExpression;
+            JCTree.JCExpression expr = typeCast.expr;
+            // 强转的应该是一个方法
+            if (!(expr instanceof JCTree.JCMethodInvocation)) {
+                return null;
+            }
+            methodInvocation = (JCTree.JCMethodInvocation) expr;
+        } else if (jcExpression instanceof JCTree.JCMethodInvocation) {
+            methodInvocation = (JCTree.JCMethodInvocation) jcExpression;
+        } else {
             return null;
         }
 
-        JCTree.JCTypeCast typeCast = (JCTree.JCTypeCast) jcExpression;
-        JCTree.JCExpression expr = typeCast.expr;
 
-
-        // 强转的应该是一个方法
-        if (!(expr instanceof JCTree.JCMethodInvocation)) {
-            return null;
-        }
-
-        JCTree.JCMethodInvocation methodInvocation = (JCTree.JCMethodInvocation) expr;
         // 整个表达式string
         String expressionStr = methodInvocation.toString();
 
@@ -45,17 +48,19 @@ public class LamiaExpressionResolver {
         if (result == null) {
             return null;
         }
-        result.setTypeCast(typeCast);
+        result.setTargetType(typeCast);
         return result;
     }
 
     private void parseBuildConfig(LamiaExpression result, JCTree.JCMethodInvocation methodInvocation) {
         List<MethodWrapper> methodWrappers = disassembleMethod(methodInvocation);
         // 第一个是 endMethod,已经解析过了, 所以把他移除
-        methodWrappers.remove(0);
+        MethodWrapper buildMethod = methodWrappers.remove(0);
+        JCTree.JCExpression target = buildMethod.getOnlyArgs();
+        result.setTarget(target);
 
         // 没有任何的配置项, 直接返回了
-        if (methodWrappers.size() == 0) {
+        if (methodWrappers.isEmpty()) {
             return;
         }
         ConfigParseContext context = new ConfigParseContext();
@@ -78,6 +83,7 @@ public class LamiaExpressionResolver {
 
 
     }
+
 
     private List<MethodWrapper> disassembleMethod(JCTree.JCMethodInvocation methodInvocation) {
 

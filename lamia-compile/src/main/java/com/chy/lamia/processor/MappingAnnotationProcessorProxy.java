@@ -10,7 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Set;
 
-@SupportedAnnotationTypes({"com.chy.lamia.annotation.Mapping"})
+@SupportedAnnotationTypes({"com.chy.lamia.annotation.LamiaMapping"})
 public class MappingAnnotationProcessorProxy extends AbstractProcessor {
 
     static Processor processor;
@@ -113,6 +113,7 @@ public class MappingAnnotationProcessorProxy extends AbstractProcessor {
 
     private static Object getJdkCompilerModule() {
         try {
+
             Class<?> cModuleLayer = Class.forName("java.lang.ModuleLayer");
             Method mBoot = cModuleLayer.getDeclaredMethod("boot");
             Object bootLayer = mBoot.invoke(null);

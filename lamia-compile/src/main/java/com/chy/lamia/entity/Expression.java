@@ -2,7 +2,6 @@ package com.chy.lamia.entity;
 
 import com.sun.tools.javac.tree.JCTree;
 
-import java.util.function.Function;
 
 public class Expression {
 
@@ -14,6 +13,7 @@ public class Expression {
     public Expression(JCTree.JCExpression expression, ExpressionHandleFun expressionHandle) {
         this.expression = expression;
         this.expressionHandle = expressionHandle;
+
     }
 
     public Expression(JCTree.JCExpression expression) {

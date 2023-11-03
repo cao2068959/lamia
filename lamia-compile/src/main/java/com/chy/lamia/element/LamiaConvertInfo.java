@@ -32,6 +32,13 @@ public class LamiaConvertInfo {
     TypeDefinition targetType;
 
     /**
+     * 要转的实例
+     */
+    @Getter
+    @Setter
+    VarDefinition target;
+
+    /**
      * 参与转换的参数
      * key: 参与转换变量的名称, 如果使用 @MapMember 修改过名称 , 这里存储的是没改名前的名称
      * value: 对应的变量
@@ -89,7 +96,7 @@ public class LamiaConvertInfo {
             result.add(new ConvertVarInfo(varDefinition, rule));
         });
         // 排序
-        result.sort(Comparator.comparingInt(cvi-> cvi.getVarDefinition().getPriority()));
+        result.sort(Comparator.comparingInt(cvi -> cvi.getVarDefinition().getPriority()));
 
         return result;
     }

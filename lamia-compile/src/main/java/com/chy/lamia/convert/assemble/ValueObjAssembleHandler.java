@@ -28,12 +28,13 @@ public class ValueObjAssembleHandler extends CommonAssembleHandler {
     private final Map<String, Setter> targetSetters;
 
 
-    public ValueObjAssembleHandler(TypeDefinition targetType) {
+    public ValueObjAssembleHandler(TypeDefinition targetType, VarDefinition target) {
         // 解析这个类型, 获取这个类型里面的 方法/变量 等
         this.targetTypeResolver = TypeResolver.getTypeResolver(targetType);
 
         // 获取这个类中所有的 setter方法
         this.targetSetters = targetTypeResolver.getInstantSetters();
+        super.target = target;
     }
 
 
@@ -107,7 +108,7 @@ public class ValueObjAssembleHandler extends CommonAssembleHandler {
             List<JCTree.JCExpression> expressions = constructorParam.stream()
                     .map(MaterialTypeConvertBuilder::convertSimple).collect(Collectors.toList());
 
-            JCTree.JCStatement jcStatement = genNewInstance(newInstant, classPath, expressions);
+            JCTree.JCStatement jcStatement = genNewInstance(instantName, classPath, expressions);
             return Lists.of(jcStatement);
 
         }));

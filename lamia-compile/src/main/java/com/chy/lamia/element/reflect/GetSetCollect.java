@@ -34,10 +34,6 @@ public class GetSetCollect {
     }
 
     private void setterHandle(String name, Method method) {
-        String returnTypeName = method.getReturnType().getName();
-        if (!"void".equals(returnTypeName.toLowerCase())) {
-            return;
-        }
 
         Parameter[] parameters = method.getParameters();
         if (parameters == null || parameters.length != 1) {
