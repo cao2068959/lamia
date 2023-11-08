@@ -1,7 +1,6 @@
 package com.chy.lamia.utils;
 
 import com.chy.lamia.entity.ParameterType;
-import com.chy.lamia.entity.TypeDefinition;
 import com.chy.lamia.entity.factory.TypeDefinitionFactory;
 import com.chy.lamia.visitor.RandomMethodCreateVisitor;
 import com.sun.tools.javac.code.Flags;

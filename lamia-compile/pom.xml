@@ -51,21 +51,13 @@
     </properties>
 
     <dependencies>
+
         <dependency>
             <groupId>io.github.cao2068959</groupId>
-            <artifactId>lamia-runtime</artifactId>
+            <artifactId>lamia-convert-core</artifactId>
             <version>${version}</version>
         </dependency>
 
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>io.github.cao2068959</groupId>

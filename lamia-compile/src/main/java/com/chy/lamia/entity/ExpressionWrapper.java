@@ -1,5 +1,6 @@
 package com.chy.lamia.entity;
 
+import com.chy.lamia.convert.core.entity.TypeDefinition;
 import com.sun.tools.javac.tree.JCTree;
 import lombok.Getter;
 import lombok.Setter;

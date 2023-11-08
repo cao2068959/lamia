@@ -1,10 +1,10 @@
 package com.chy.lamia.element.class_define;
 
 
+import com.chy.lamia.convert.core.log.Logger;
+import com.chy.lamia.convert.core.utils.ClassPath;
 import com.chy.lamia.element.asm.ClassMetadataReadingVisitor;
 import com.chy.lamia.entity.*;
-import com.chy.lamia.log.Logger;
-import com.chy.lamia.utils.ClassPath;
 import com.chy.lamia.utils.JCUtils;
 import org.objectweb.asm.ClassReader;
 

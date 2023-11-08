@@ -1,9 +1,7 @@
 package com.chy.lamia.element.resolver.expression.builder.handler.rule;
 
 import com.chy.lamia.element.resolver.expression.ConfigParseContext;
-import com.chy.lamia.element.resolver.expression.LamiaExpression;
 import com.chy.lamia.element.resolver.expression.MethodWrapper;
-import com.chy.lamia.element.resolver.expression.RuleInfo;
 import com.chy.lamia.element.resolver.expression.builder.BuilderHandler;
 import com.chy.lamia.expose.rule.RuleType;
 import com.sun.tools.javac.tree.JCTree;

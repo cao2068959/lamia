@@ -1,8 +1,7 @@
 package com.chy.lamia.utils;
 
 
-import com.chy.lamia.entity.ParameterType;
-import com.chy.lamia.entity.TypeDefinition;
+import com.chy.lamia.convert.core.entity.TypeDefinition;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.util.List;

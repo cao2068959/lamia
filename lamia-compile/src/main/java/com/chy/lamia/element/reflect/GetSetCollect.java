@@ -3,7 +3,6 @@ package com.chy.lamia.element.reflect;
 
 import com.chy.lamia.entity.Getter;
 import com.chy.lamia.entity.Setter;
-import com.chy.lamia.entity.TypeDefinition;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;

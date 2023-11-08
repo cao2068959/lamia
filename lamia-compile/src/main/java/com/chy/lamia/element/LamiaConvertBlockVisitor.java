@@ -2,11 +2,11 @@ package com.chy.lamia.element;
 
 
 import com.chy.lamia.annotation.MapMember;
+import com.chy.lamia.convert.core.entity.LamiaExpression;
+import com.chy.lamia.convert.core.entity.TypeDefinition;
+import com.chy.lamia.convert.core.entity.VarDefinition;
 import com.chy.lamia.element.annotation.AnnotationProxyFactory;
-import com.chy.lamia.element.resolver.expression.LamiaExpression;
 import com.chy.lamia.element.resolver.expression.LamiaExpressionResolver;
-import com.chy.lamia.entity.TypeDefinition;
-import com.chy.lamia.entity.VarDefinition;
 import com.chy.lamia.entity.factory.TypeDefinitionFactory;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.visitor.AbstractBlockVisitor;

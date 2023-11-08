@@ -1,8 +1,6 @@
 package com.chy.lamia.element.tree;
 
 import com.chy.lamia.entity.Constructor;
-import com.chy.lamia.entity.TypeDefinition;
-import com.chy.lamia.entity.VarDefinition;
 import com.chy.lamia.entity.factory.TypeDefinitionFactory;
 import com.chy.lamia.visitor.InstantMethodVisitor;
 import com.sun.tools.javac.code.Type;

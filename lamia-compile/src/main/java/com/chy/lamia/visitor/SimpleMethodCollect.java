@@ -2,7 +2,6 @@ package com.chy.lamia.visitor;
 
 
 import com.chy.lamia.entity.SimpleMethod;
-import com.chy.lamia.entity.TypeDefinition;
 import com.chy.lamia.entity.factory.TypeDefinitionFactory;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.TypeTag;

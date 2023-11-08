@@ -2,8 +2,6 @@ package com.chy.lamia.element.asm;
 
 
 import com.chy.lamia.entity.Constructor;
-import com.chy.lamia.entity.TypeDefinition;
-import com.chy.lamia.entity.VarDefinition;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
