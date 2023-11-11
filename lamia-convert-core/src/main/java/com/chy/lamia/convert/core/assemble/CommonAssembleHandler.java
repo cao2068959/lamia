@@ -1,6 +1,10 @@
 package com.chy.lamia.convert.core.assemble;
 
 
+import com.chy.lamia.convert.core.components.ComponentFactory;
+import com.chy.lamia.convert.core.components.TreeFactory;
+import com.chy.lamia.convert.core.components.entity.Expression;
+import com.chy.lamia.convert.core.components.entity.Statement;
 import com.chy.lamia.convert.core.entity.LamiaConvertInfo;
 import com.chy.lamia.convert.core.entity.TypeDefinition;
 import com.chy.lamia.convert.core.entity.VarDefinition;
@@ -8,7 +12,7 @@ import com.chy.lamia.convert.core.expression.builder.MaterialStatementBuilder;
 import com.chy.lamia.convert.core.expression.builder.MaterialTypeConvertBuilder;
 import com.chy.lamia.convert.core.utils.CommonUtils;
 import com.chy.lamia.convert.core.utils.DefaultHashMap;
-
+import com.chy.lamia.convert.core.utils.Lists;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -29,6 +33,7 @@ public abstract class CommonAssembleHandler implements AssembleHandler {
      * 已经使用过的 material，用于防止重复使用
      */
     protected final Set<String> useMaterial = new HashSet<>();
+    protected final TreeFactory treeFactory;
 
     /**
      * 生成新实例的名称
@@ -42,6 +47,9 @@ public abstract class CommonAssembleHandler implements AssembleHandler {
     private List<MaterialStatementBuilder> materialStatementBuilders = new ArrayList<>();
     protected LamiaConvertInfo lamiaConvertInfo;
 
+    public CommonAssembleHandler() {
+        this.treeFactory = ComponentFactory.getComponent(TreeFactory.class);
+    }
 
     /**
      * 添加参与组装的耗材, 可以是变量,或者对象的get方法
@@ -73,10 +81,10 @@ public abstract class CommonAssembleHandler implements AssembleHandler {
             // 如果不是return，那么需要用一个变量来承接一下
             if (!lamiaConvertInfo.isReturn() && lamiaConvertInfo.getVarName() != null) {
                 MaterialStatementBuilder statementBuilder = new MaterialStatementBuilder();
-                statementBuilder.setFunction(() -> {
-                    JCTree.JCVariableDecl variableDecl = JCUtils.instance.createVar(lamiaConvertInfo.getVarName(),
-                            lamiaConvertInfo.getTargetType().getClassPath(), JCUtils.instance.memberAccess(newInstant));
 
+                statementBuilder.setFunction(() -> {
+                    Statement variableDecl = treeFactory.createVar(lamiaConvertInfo.getVarName(),
+                            lamiaConvertInfo.getTargetType().getClassPath(), treeFactory.toExpression(newInstant));
                     return Lists.of(variableDecl);
                 });
                 addStatementBuilders(statementBuilder);
@@ -97,15 +105,15 @@ public abstract class CommonAssembleHandler implements AssembleHandler {
      * @param newInstanceParam 新实例的参数
      * @return
      */
-    protected JCTree.JCStatement genNewInstance(String instantName, String classPath, List<JCTree.JCExpression> newInstanceParam) {
-        JCTree.JCNewClass jcNewClass = JCUtils.instance.newClass(classPath, newInstanceParam);
+    protected Statement genNewInstance(String instantName, String classPath, List<Expression> newInstanceParam) {
+
+        Expression newClass = treeFactory.newClass(classPath, newInstanceParam);
 
         // 变量是否已经存在,是否需要去创建类型
         if (lamiaConvertInfo.isCreatedType()) {
-            JCTree.JCVariableDecl newVar = JCUtils.instance.createVar(instantName, classPath, jcNewClass);
-            return newVar;
+            return treeFactory.createVar(instantName, classPath, newClass);
         }
-        return JCUtils.instance.varAssign(instantName, jcNewClass);
+        return treeFactory.varAssign(instantName, newClass);
     }
 
 

@@ -1,16 +1,17 @@
 package com.chy.lamia.convert.core;
 
-import com.chy.lamia.convert.assemble.*;
-import com.chy.lamia.convert.builder.MaterialStatementBuilder;
-import com.chy.lamia.element.ConvertVarInfo;
-import com.chy.lamia.element.LamiaConvertInfo;
-import com.chy.lamia.element.resolver.type.TypeResolver;
-import com.chy.lamia.entity.Getter;
-import com.chy.lamia.entity.TypeDefinition;
-import com.chy.lamia.entity.VarDefinition;
-import com.chy.lamia.utils.JCUtils;
-import com.chy.lamia.utils.Lists;
-import com.sun.tools.javac.tree.JCTree;
+
+import com.chy.lamia.convert.core.assemble.AssembleHandler;
+import com.chy.lamia.convert.core.assemble.MapAssembleHandler;
+import com.chy.lamia.convert.core.assemble.Material;
+import com.chy.lamia.convert.core.assemble.OmnipotentMaterial;
+import com.chy.lamia.convert.core.components.entity.Statement;
+import com.chy.lamia.convert.core.entity.ConvertVarInfo;
+import com.chy.lamia.convert.core.entity.LamiaConvertInfo;
+import com.chy.lamia.convert.core.entity.TypeDefinition;
+import com.chy.lamia.convert.core.entity.VarDefinition;
+import com.chy.lamia.convert.core.expression.builder.MaterialStatementBuilder;
+import com.chy.lamia.convert.core.utils.Lists;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,7 @@ public class ConvertFactory {
      * @param lamiaConvertInfo 表达式信息
      * @return
      */
-    public List<JCTree.JCStatement> make(LamiaConvertInfo lamiaConvertInfo) {
+    public List<Statement> make(LamiaConvertInfo lamiaConvertInfo) {
         // 寻找适合的组成器
         AssembleHandler assembleHandler = getAssembleHandler(lamiaConvertInfo);
         // 在组装器中添加所有的所有可能参与组合结果对象的材料

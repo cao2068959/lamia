@@ -1,10 +1,10 @@
 package com.chy.lamia.convert.core.assemble;
 
-import com.chy.lamia.convert.builder.VarExpressionFunction;
-import com.chy.lamia.element.ConvertVarInfo;
-import com.chy.lamia.element.resolver.expression.RuleInfo;
-import com.chy.lamia.entity.TypeDefinition;
-import com.chy.lamia.entity.VarDefinition;
+import com.chy.lamia.convert.core.entity.ConvertVarInfo;
+import com.chy.lamia.convert.core.entity.RuleInfo;
+import com.chy.lamia.convert.core.entity.TypeDefinition;
+import com.chy.lamia.convert.core.entity.VarDefinition;
+import com.chy.lamia.convert.core.expression.builder.VarExpressionFunction;
 import lombok.Getter;
 import lombok.Setter;
 

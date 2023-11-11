@@ -1,6 +1,6 @@
 package com.chy.lamia.convert.core.expression.builder;
 
-import com.sun.tools.javac.tree.JCTree;
+import com.chy.lamia.convert.core.components.entity.Statement;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -26,7 +26,7 @@ public class MaterialStatementBuilder {
      *
      * @return
      */
-    public List<JCTree.JCStatement> build() {
+    public List<Statement> build() {
         return function.builder();
     }
 
@@ -38,7 +38,7 @@ public class MaterialStatementBuilder {
          *
          * @return
          */
-        List<JCTree.JCStatement> builder();
+        List<Statement> builder();
 
     }
 

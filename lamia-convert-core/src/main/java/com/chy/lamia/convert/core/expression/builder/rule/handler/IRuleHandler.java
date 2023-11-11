@@ -1,6 +1,7 @@
 package com.chy.lamia.convert.core.expression.builder.rule.handler;
 
-import com.sun.tools.javac.tree.JCTree;
+
+import com.chy.lamia.convert.core.components.entity.Expression;
 
 /**
  * @author bignosecat
@@ -8,5 +9,5 @@ import com.sun.tools.javac.tree.JCTree;
 public interface IRuleHandler {
 
 
-    void run(JCTree.JCExpression varExpression, RuleChain chain);
+    void run(Expression varExpression, RuleChain chain);
 }

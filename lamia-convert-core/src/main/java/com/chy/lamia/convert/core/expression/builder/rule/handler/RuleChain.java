@@ -1,6 +1,7 @@
 package com.chy.lamia.convert.core.expression.builder.rule.handler;
 
-import com.sun.tools.javac.tree.JCTree;
+import com.chy.lamia.convert.core.components.entity.Expression;
+import com.chy.lamia.convert.core.components.entity.Statement;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -9,7 +10,7 @@ import java.util.List;
 public class RuleChain {
 
     @Getter
-    List<JCTree.JCStatement> result = new ArrayList<>();
+    List<Statement> result = new ArrayList<>();
 
     List<IRuleHandler> allHandler = new ArrayList<>();
 
@@ -21,16 +22,16 @@ public class RuleChain {
     }
 
 
-    public void addStatement(JCTree.JCStatement statement) {
+    public void addStatement(Statement statement) {
         result.add(statement);
     }
 
-    public void addStatement(List<JCTree.JCStatement> statement) {
+    public void addStatement(List<Statement> statement) {
         result.addAll(statement);
     }
 
 
-    public List<JCTree.JCStatement> continueCallAndReturn(JCTree.JCExpression var) {
+    public List<Statement> continueCallAndReturn(Expression var) {
         RuleChain copy = copy();
         copy.continueCall(var);
 
@@ -39,7 +40,7 @@ public class RuleChain {
         return copy.result;
     }
 
-    public void continueCall(JCTree.JCExpression var) {
+    public void continueCall(Expression var) {
         // 这个调用链到头了
         if (index >= allHandler.size()) {
             return;

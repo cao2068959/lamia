@@ -1,6 +1,7 @@
 package com.chy.lamia.convert.core.expression.builder;
 
-import com.sun.tools.javac.tree.JCTree;
+
+import com.chy.lamia.convert.core.components.entity.Expression;
 
 /**
  * 变量表达式生成式
@@ -15,6 +16,6 @@ public interface VarExpressionFunction {
      * @param  expression 变量原本的表达式
      * @return 表达式
      */
-    JCTree.JCExpression run(JCTree.JCExpression expression);
+    Expression run(Expression expression);
 
 }

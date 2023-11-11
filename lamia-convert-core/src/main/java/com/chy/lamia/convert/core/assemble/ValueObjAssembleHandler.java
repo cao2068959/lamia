@@ -1,17 +1,10 @@
 package com.chy.lamia.convert.core.assemble;
 
-import com.chy.lamia.convert.builder.ConvertResult;
-import com.chy.lamia.convert.builder.MaterialStatementBuilder;
-import com.chy.lamia.convert.builder.MaterialTypeConvertBuilder;
+
+import com.chy.lamia.convert.core.entity.TypeDefinition;
+import com.chy.lamia.convert.core.entity.VarDefinition;
 import com.chy.lamia.convert.core.utils.DefaultHashMap;
-import com.chy.lamia.element.resolver.type.TypeResolver;
-import com.chy.lamia.entity.Constructor;
-import com.chy.lamia.entity.Setter;
-import com.chy.lamia.entity.TypeDefinition;
-import com.chy.lamia.entity.VarDefinition;
-import com.chy.lamia.utils.JCUtils;
-import com.chy.lamia.utils.Lists;
-import com.sun.tools.javac.tree.JCTree;
+import com.sun.beans.TypeResolver;
 
 import java.util.List;
 import java.util.Map;

@@ -1,7 +1,8 @@
 package com.chy.lamia.convert.core.assemble;
 
-import com.chy.lamia.convert.builder.MaterialStatementBuilder;
-import com.chy.lamia.element.LamiaConvertInfo;
+
+import com.chy.lamia.convert.core.entity.LamiaConvertInfo;
+import com.chy.lamia.convert.core.expression.builder.MaterialStatementBuilder;
 
 import java.util.List;
 

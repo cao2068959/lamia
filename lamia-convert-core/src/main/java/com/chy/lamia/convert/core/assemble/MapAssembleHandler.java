@@ -1,12 +1,13 @@
 package com.chy.lamia.convert.core.assemble;
 
-import com.chy.lamia.convert.builder.MaterialStatementBuilder;
-import com.chy.lamia.convert.builder.MaterialTypeConvertBuilder;
+
+import com.chy.lamia.convert.core.components.entity.Expression;
+import com.chy.lamia.convert.core.components.entity.Statement;
+import com.chy.lamia.convert.core.entity.VarDefinition;
+import com.chy.lamia.convert.core.expression.builder.MaterialStatementBuilder;
+import com.chy.lamia.convert.core.expression.builder.MaterialTypeConvertBuilder;
 import com.chy.lamia.convert.core.utils.DefaultHashMap;
-import com.chy.lamia.entity.VarDefinition;
-import com.chy.lamia.utils.JCUtils;
-import com.chy.lamia.utils.Lists;
-import com.sun.tools.javac.tree.JCTree;
+import com.chy.lamia.convert.core.utils.Lists;
 
 import java.util.List;
 
@@ -20,6 +21,7 @@ public class MapAssembleHandler extends CommonAssembleHandler {
 
     String classPath = "java.util.HashMap";
 
+
     public MapAssembleHandler(VarDefinition target) {
         this.target = target;
     }
@@ -32,7 +34,7 @@ public class MapAssembleHandler extends CommonAssembleHandler {
         MaterialStatementBuilder materialStatementBuilder = new MaterialStatementBuilder();
 
         materialStatementBuilder.setFunction((() -> {
-            JCTree.JCStatement jcStatement = genNewInstance(newInstant, classPath, Lists.of());
+            Statement jcStatement = genNewInstance(newInstant, classPath, Lists.of());
             return Lists.of(jcStatement);
         }));
 
@@ -49,9 +51,11 @@ public class MapAssembleHandler extends CommonAssembleHandler {
 
             MaterialStatementBuilder materialStatementBuilder = new MaterialStatementBuilder();
             materialStatementBuilder.setFunction(() -> materialTypeConvertBuilder.convert(expression -> {
-                JCTree.JCExpression putName = JCUtils.instance.geStringExpression(material.getSupplyName());
-                List<JCTree.JCExpression> args = Lists.of(putName, expression);
-                return Lists.of(JCUtils.instance.execMethod(newInstant, "put", args));
+
+                Expression putName = treeFactory.geStringExpression(material.getSupplyName());
+                List<Expression> args = Lists.of(putName, expression);
+
+                return Lists.of(treeFactory.execMethod(newInstant, "put", args));
             }).getConvertStatement());
             super.addStatementBuilders(materialStatementBuilder);
         });

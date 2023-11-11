@@ -1,6 +1,6 @@
 package com.chy.lamia.convert.core.expression.builder;
 
-import com.sun.tools.javac.tree.JCTree;
+import com.chy.lamia.convert.core.components.entity.Statement;
 import lombok.Data;
 
 import java.util.List;
@@ -11,10 +11,10 @@ public class ConvertResult {
     /**
      * 转换的时候，中间可能有一些过程，这些过程存这里面
      */
-    List<JCTree.JCStatement> convertStatement;
+    List<Statement> convertStatement;
 
 
-    public ConvertResult(List<JCTree.JCStatement> convertStatement) {
+    public ConvertResult(List<Statement> convertStatement) {
         this.convertStatement = convertStatement;
     }
 

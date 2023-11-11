@@ -1,10 +1,9 @@
 package com.chy.lamia.convert.core.assemble;
 
-import com.chy.lamia.entity.TypeDefinition;
-import com.chy.lamia.entity.VarDefinition;
-import com.chy.lamia.utils.JCUtils;
-import com.chy.lamia.utils.Lists;
-import com.sun.tools.javac.tree.JCTree;
+
+import com.chy.lamia.convert.core.entity.TypeDefinition;
+import com.chy.lamia.convert.core.entity.VarDefinition;
+import com.chy.lamia.convert.core.utils.Lists;
 
 /**
  * 万能的 Material 可以代替所有的 Material
