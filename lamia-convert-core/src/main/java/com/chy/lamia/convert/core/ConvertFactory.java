@@ -1,15 +1,13 @@
 package com.chy.lamia.convert.core;
 
 
-import com.chy.lamia.convert.core.assemble.AssembleHandler;
-import com.chy.lamia.convert.core.assemble.MapAssembleHandler;
-import com.chy.lamia.convert.core.assemble.Material;
-import com.chy.lamia.convert.core.assemble.OmnipotentMaterial;
+import com.chy.lamia.convert.core.assemble.*;
+import com.chy.lamia.convert.core.components.ComponentFactory;
+import com.chy.lamia.convert.core.components.TreeFactory;
+import com.chy.lamia.convert.core.components.TypeResolver;
+import com.chy.lamia.convert.core.components.TypeResolverFactory;
 import com.chy.lamia.convert.core.components.entity.Statement;
-import com.chy.lamia.convert.core.entity.ConvertVarInfo;
-import com.chy.lamia.convert.core.entity.LamiaConvertInfo;
-import com.chy.lamia.convert.core.entity.TypeDefinition;
-import com.chy.lamia.convert.core.entity.VarDefinition;
+import com.chy.lamia.convert.core.entity.*;
 import com.chy.lamia.convert.core.expression.builder.MaterialStatementBuilder;
 import com.chy.lamia.convert.core.utils.Lists;
 
@@ -25,7 +23,12 @@ import java.util.Map;
 public class ConvertFactory {
 
     public static ConvertFactory INSTANCE = new ConvertFactory();
+    private final TreeFactory treeFactory
+            ;
 
+    public ConvertFactory() {
+        treeFactory = ComponentFactory.getComponent(TreeFactory.class);
+    }
 
     /**
      * 开始生成对应的转换代码
@@ -56,17 +59,17 @@ public class ConvertFactory {
      * @param lamiaConvertInfo
      * @return
      */
-    private List<JCTree.JCStatement> createdStatement(List<MaterialStatementBuilder> expressionBuilders, AssembleHandler assembleHandler, LamiaConvertInfo lamiaConvertInfo) {
-        List<JCTree.JCStatement> result = new ArrayList<>();
+    private List<Statement> createdStatement(List<MaterialStatementBuilder> expressionBuilders, AssembleHandler assembleHandler, LamiaConvertInfo lamiaConvertInfo) {
+        List<Statement> result = new ArrayList<>();
         expressionBuilders.forEach(expressionBuilder -> {
-            List<JCTree.JCStatement> jcStatements = expressionBuilder.build();
+            List<Statement> jcStatements = expressionBuilder.build();
             result.addAll(jcStatements);
         });
 
         // 如果是return 后面直接接上的 转换语句,那么 还需要把return 语句补上
         if (lamiaConvertInfo.isReturn()) {
             String newInstantName = assembleHandler.getNewInstantName();
-            JCTree.JCReturn aReturn = JCUtils.instance.createReturn(newInstantName);
+            Statement aReturn = treeFactory.createReturn(newInstantName);
             result.add(aReturn);
         }
 
@@ -121,7 +124,7 @@ public class ConvertFactory {
         }
 
         // 解析对应的类型
-        TypeResolver typeResolver = TypeResolver.getTypeResolver(type);
+        TypeResolver typeResolver = ComponentFactory.getComponent(TypeResolverFactory.class).getTypeResolver(type);
         Map<String, Getter> instantGetters = typeResolver.getInstantGetters();
 
         List<Material> result = new ArrayList<>();
@@ -134,7 +137,7 @@ public class ConvertFactory {
             material.setRuleInfo(convertVarInfo.getRuleInfo());
             // 生成对应的 var.getXX()
             material.setVarExpressionFunction((varExpression -> {
-                JCTree.JCExpressionStatement statement = JCUtils.instance.execMethod(varExpression, getter.getMethodName(), Lists.of());
+                Statement statement = treeFactory.execMethod(varExpression, getter.getMethodName(), Lists.of());
                 return statement.getExpression();
             }));
             result.add(material);

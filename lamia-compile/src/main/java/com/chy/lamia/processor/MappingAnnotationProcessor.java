@@ -1,8 +1,18 @@
 package com.chy.lamia.processor;
 
-import com.chy.lamia.annotation.LamiaMapping;
+import com.chy.lamia.components.JcTreeFactory;
+import com.chy.lamia.components.JcTypeResolverFactory;
+import com.chy.lamia.components.entity.JcExpression;
+import com.chy.lamia.components.entity.JcStatement;
+import com.chy.lamia.convert.core.annotation.LamiaMapping;
+import com.chy.lamia.convert.core.components.ComponentFactory;
+import com.chy.lamia.convert.core.components.TreeFactory;
+import com.chy.lamia.convert.core.components.TypeResolverFactory;
+import com.chy.lamia.convert.core.components.entity.Expression;
+import com.chy.lamia.convert.core.components.entity.Statement;
+import com.chy.lamia.convert.core.log.Logger;
+import com.chy.lamia.convert.core.utils.ReflectUtils;
 import com.chy.lamia.element.funicle.FunicleFactory;
-import com.chy.lamia.log.Logger;
 import com.chy.lamia.processor.marked.MarkedContext;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.visitor.MethodUpdateVisitor;
@@ -30,7 +40,7 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         try {
-            ProcessingEnvironment   processingEnv = ReflectUtils.getFile(roundEnv, "processingEnv", ProcessingEnvironment.class);
+            ProcessingEnvironment processingEnv = ReflectUtils.getFile(roundEnv, "processingEnv", ProcessingEnvironment.class);
             JCUtils.refreshJCUtils(processingEnv);
 
             if (roundEnv.processingOver()) {
@@ -51,16 +61,22 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
      * 处理标注了@Mapping 的方法， 生成对应的实现代码
      */
     private void handleSignMethod() {
+        if (!markedContext.isEmpty()) {
+            // 注册lamia的通用组件
+            registerComponents();
+        }
+
         markedContext.forEach((className, markedMethods) -> {
             JCTree tree = JCUtils.instance.getJCTree(className);
             //去修改原本方法中的逻辑
             tree.accept(new MethodUpdateVisitor(markedMethods, tree, className));
             //给这个类加上对应的脐带方法
-            FunicleFactory.createFunicleMethod(tree,className);
+            FunicleFactory.createFunicleMethod(tree, className);
         });
 
         FunicleFactory.persistence();
     }
+
 
     /**
      * 收集项目里所有类的 Element 对象
@@ -75,5 +91,15 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
             markedContext.put(key, methodSymbol);
         }
     }
+
+    private void registerComponents() {
+        ComponentFactory.registerComponents(TreeFactory.class, new JcTreeFactory(JCUtils.instance));
+        ComponentFactory.registerComponents(TypeResolverFactory.class, new JcTypeResolverFactory());
+
+        ComponentFactory.registerEntityStructure(Expression.class, JcExpression::new);
+        ComponentFactory.registerEntityStructure(Statement.class, JcStatement::new);
+
+    }
+
 
 }

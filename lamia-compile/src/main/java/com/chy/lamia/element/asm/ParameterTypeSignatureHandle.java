@@ -1,6 +1,7 @@
 package com.chy.lamia.element.asm;
 
 
+import com.chy.lamia.convert.core.entity.TypeDefinition;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.signature.SignatureVisitor;

@@ -1,6 +1,6 @@
 package com.chy.lamia.convert.core.expression.builder;
 
-import com.sun.tools.javac.tree.JCTree;
+import com.chy.lamia.convert.core.components.entity.Statement;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class StatementBuilder {
 
-    public void build(List<JCTree.JCStatement> result){
+    public void build(List<Statement> result){
 
     }
 

@@ -1,9 +1,15 @@
 package com.chy.lamia.element.resolver.type;
 
-import com.chy.lamia.element.class_define.IClassDefine;
+import com.chy.lamia.convert.core.components.TypeResolver;
+import com.chy.lamia.convert.core.entity.Constructor;
+import com.chy.lamia.convert.core.entity.Getter;
+import com.chy.lamia.convert.core.entity.Setter;
+import com.chy.lamia.convert.core.entity.TypeDefinition;
 import com.chy.lamia.element.class_define.AsmClassDefine;
+import com.chy.lamia.element.class_define.IClassDefine;
 import com.chy.lamia.element.class_define.TreeClassDefine;
-import com.chy.lamia.entity.*;
+import com.chy.lamia.entity.SimpleMethod;
+import com.chy.lamia.entity.Var;
 import com.chy.lamia.utils.JCUtils;
 import com.sun.tools.javac.tree.JCTree;
 
@@ -19,16 +25,16 @@ import java.util.stream.Collectors;
  * 根据文件类型不同分成 class解析 以及 java文件解析, 会自动判断对应的文件类型选择对应的解析器
  * @author bignosecat
  */
-public class TypeResolver {
+public class JcTypeResolver implements TypeResolver {
 
     IClassDefine classDefine;
 
     @lombok.Getter
     TypeDefinition typeDefinition;
     boolean canUpdate = true;
-    List<TypeResolver> generic = new LinkedList<>();
+    List<JcTypeResolver> generic = new LinkedList<>();
 
-    private static Map<String, TypeResolver> cache = new HashMap<>();
+    private static Map<String, JcTypeResolver> cache = new HashMap<>();
 
 
     /**
@@ -36,11 +42,11 @@ public class TypeResolver {
      *
      * @param typeDefinition
      */
-    private TypeResolver(TypeDefinition typeDefinition) {
+    private JcTypeResolver(TypeDefinition typeDefinition) {
         this.typeDefinition = typeDefinition;
         List<TypeDefinition> generics = typeDefinition.getGeneric();
         if (generics != null) {
-            generic = generics.stream().map(TypeResolver::getTypeResolver)
+            generic = generics.stream().map(JcTypeResolver::getTypeResolver)
                     .collect(Collectors.toList());
         }
         JCUtils jcUtils = JCUtils.instance;
@@ -92,6 +98,7 @@ public class TypeResolver {
      *
      * @return
      */
+    @Override
     public Map<String, Getter> getInstantGetters() {
         return classDefine.getInstantGetters();
     }
@@ -101,11 +108,13 @@ public class TypeResolver {
      *
      * @return
      */
+    @Override
     public Map<String, Setter> getInstantSetters() {
         return classDefine.getInstantSetters();
     }
 
 
+    @Override
     public List<Constructor> getConstructors(){
         return classDefine.getConstructors();
     }
@@ -126,16 +135,17 @@ public class TypeResolver {
      * @param typeDefinition
      * @return
      */
-    public static TypeResolver getTypeResolver(TypeDefinition typeDefinition) {
+    public static JcTypeResolver getTypeResolver(TypeDefinition typeDefinition) {
         String key = typeDefinition.toString();
-        TypeResolver result = cache.get(key);
+        JcTypeResolver result = cache.get(key);
         if (result != null) {
             return result;
         }
-        result = new TypeResolver(typeDefinition);
+        result = new JcTypeResolver(typeDefinition);
         cache.put(key, result);
         return result;
     }
+
 
     
 }

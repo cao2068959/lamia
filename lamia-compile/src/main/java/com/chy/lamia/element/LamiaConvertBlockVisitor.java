@@ -1,7 +1,9 @@
 package com.chy.lamia.element;
 
 
-import com.chy.lamia.annotation.MapMember;
+import com.chy.lamia.convert.core.annotation.MapMember;
+import com.chy.lamia.convert.core.components.entity.Expression;
+import com.chy.lamia.convert.core.entity.LamiaConvertInfo;
 import com.chy.lamia.convert.core.entity.LamiaExpression;
 import com.chy.lamia.convert.core.entity.TypeDefinition;
 import com.chy.lamia.convert.core.entity.VarDefinition;
@@ -117,7 +119,7 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
      */
     private LamiaConvertInfo lamiaConvertStatementCollect(JCTree.JCExpression jcExpression) {
 
-        LamiaExpression lamiaExpression = lamiaExpressionResolver.resolving(jcExpression);
+        LamiaExpression lamiaExpression = lamiaExpressionResolver.resolving(classTree, jcExpression);
 
         if (lamiaExpression == null) {
             return null;
@@ -125,9 +127,10 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
 
         LamiaConvertInfo lamiaConvertInfo = new LamiaConvertInfo(lamiaExpression);
 
-        JCTree.JCExpression targetExpression = lamiaExpression.getTarget();
+        Expression targetExpression = lamiaExpression.getTarget();
+
         if (targetExpression != null) {
-            String targetName = targetExpression.toString();
+            String targetName = targetExpression.get().toString();
             VarDefinition varDefinition = vars.get(targetName);
             if (varDefinition == null) {
                 throw new RuntimeException("表达式[" + jcExpression.toString() + "] 设置的target 实例有误[" + targetName + "]");
@@ -136,14 +139,11 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
             lamiaConvertInfo.setTargetType(varDefinition.getType());
 
         } else {
-            JCTree.JCTypeCast targetType = lamiaExpression.getTargetType();
+            TypeDefinition targetType = lamiaExpression.getTargetType();
             if (targetType == null) {
                 throw new RuntimeException("表达式[" + jcExpression.toString() + "] 没有设置强转类型");
             }
-            JCTree targetTypeJcTree = lamiaExpression.getTargetType().clazz;
-            // 要转换成的目标类型
-            TypeDefinition convertTargetType = JCUtils.instance.toTypeDefinition(classTree, targetTypeJcTree);
-            lamiaConvertInfo.setTargetType(convertTargetType);
+            lamiaConvertInfo.setTargetType(targetType);
         }
 
 

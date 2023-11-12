@@ -30,4 +30,12 @@ public class ComponentFactory {
     }
 
 
+    public static <T> void registerComponents(Class<T> type, T instances) {
+        allComponent.put(type, instances);
+    }
+
+    public static <T> void registerEntityStructure(Class<T> type, Supplier<T> instances) {
+        entityCreateCache.put(type, instances);
+
+    }
 }

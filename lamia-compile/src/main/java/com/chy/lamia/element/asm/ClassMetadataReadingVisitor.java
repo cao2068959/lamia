@@ -1,7 +1,12 @@
 package com.chy.lamia.element.asm;
 
 
-import com.chy.lamia.entity.*;
+import com.chy.lamia.convert.core.entity.Constructor;
+import com.chy.lamia.convert.core.entity.Getter;
+import com.chy.lamia.convert.core.entity.Setter;
+import com.chy.lamia.convert.core.entity.TypeDefinition;
+import com.chy.lamia.entity.SimpleMethod;
+import com.chy.lamia.entity.Var;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;

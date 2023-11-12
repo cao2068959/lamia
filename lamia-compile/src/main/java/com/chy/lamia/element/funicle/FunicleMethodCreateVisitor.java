@@ -1,5 +1,6 @@
 package com.chy.lamia.element.funicle;
 
+import com.chy.lamia.convert.core.utils.CommonUtils;
 import com.chy.lamia.entity.SimpleMethod;
 import com.chy.lamia.utils.JCUtils;
 import com.sun.tools.javac.tree.JCTree;

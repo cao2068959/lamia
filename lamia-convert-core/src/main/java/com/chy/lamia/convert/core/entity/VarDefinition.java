@@ -4,8 +4,6 @@ package com.chy.lamia.convert.core.entity;
 import com.chy.lamia.convert.core.annotation.MapMember;
 import lombok.Data;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -34,8 +32,6 @@ public class VarDefinition {
      * 这个边上是否标注了注解 @MapMember
      */
     private Optional<MapMember> mapMember = Optional.empty();
-
-    private Map<String, BoxingExpressionBuilder> boxingExpressionBuilderCache = new HashMap<>();
 
 
     public VarDefinition(String name, TypeDefinition type) {

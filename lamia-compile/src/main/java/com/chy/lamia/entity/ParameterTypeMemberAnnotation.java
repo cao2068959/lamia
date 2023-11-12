@@ -1,7 +1,7 @@
 package com.chy.lamia.entity;
 
 
-import com.chy.lamia.annotation.MapMember;
+import com.chy.lamia.convert.core.annotation.MapMember;
 
 import java.util.Optional;
 

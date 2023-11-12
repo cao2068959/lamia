@@ -1,11 +1,15 @@
 package com.chy.lamia.visitor;
 
-
-import com.chy.lamia.annotation.MapMember;
-import com.chy.lamia.convert.ConvertFactory;
+import com.chy.lamia.convert.core.ConvertFactory;
+import com.chy.lamia.convert.core.annotation.MapMember;
+import com.chy.lamia.convert.core.components.entity.Statement;
+import com.chy.lamia.convert.core.entity.LamiaConvertInfo;
+import com.chy.lamia.convert.core.entity.TypeDefinition;
+import com.chy.lamia.convert.core.entity.VarDefinition;
 import com.chy.lamia.element.LamiaConvertBlockVisitor;
 import com.chy.lamia.element.LamiaConvertHolderBlock;
 import com.chy.lamia.element.annotation.AnnotationProxyFactory;
+import com.chy.lamia.entity.StatementWrapper;
 import com.chy.lamia.entity.factory.TypeDefinitionFactory;
 import com.chy.lamia.processor.marked.MarkedMethods;
 import com.sun.tools.javac.code.Symbol;
@@ -79,13 +83,14 @@ public class MethodUpdateVisitor extends TreeTranslator {
         List<JCTree.JCStatement> newStatement = new LinkedList<>();
         for (JCTree.JCStatement statement : statements) {
             // 如果是 LamiaConvertInfo.Statement 说明这段代码本身就需要修改的
-            if (statement instanceof LamiaConvertInfo.Statement) {
-                LamiaConvertInfo lamiaConvertInfo = lamiaConvertHolderBlock.getLamiaConvertInfo((LamiaConvertInfo.Statement) statement);
+            if (statement instanceof StatementWrapper) {
+                LamiaConvertInfo lamiaConvertInfo = lamiaConvertHolderBlock.getLamiaConvertInfo((StatementWrapper) statement);
                 // 合并所有参数 之前只添加了 方法体中参与转换的参数, 现在把入参中的也添加进去
                 lamiaConvertInfo.getAllArgsName().stream().map(paramMap::get).filter(Objects::nonNull).forEach(lamiaConvertInfo::addVarArgs);
                 // 生成对应的转换语句
-                List<JCTree.JCStatement> makeResult = ConvertFactory.INSTANCE.make(lamiaConvertInfo);
-                newStatement.addAll(makeResult);
+                List<Statement> makeResult = ConvertFactory.INSTANCE.make(lamiaConvertInfo);
+
+                makeResult.stream().map(s-> (JCTree.JCStatement)s.get()).forEach(newStatement::add);
             } else {
                 newStatement.add(statement);
             }

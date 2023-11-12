@@ -1,8 +1,11 @@
 package com.chy.lamia.element.funicle;
 
-import com.chy.lamia.element.resolver.type.TypeResolver;
+import com.chy.lamia.convert.core.entity.TypeDefinition;
+import com.chy.lamia.convert.core.log.Logger;
+import com.chy.lamia.convert.core.utils.CommonUtils;
+import com.chy.lamia.convert.core.utils.FileUtils;
+import com.chy.lamia.element.resolver.type.JcTypeResolver;
 import com.chy.lamia.entity.SimpleMethod;
-import com.chy.lamia.log.Logger;
 import com.chy.lamia.utils.JCUtils;
 import com.sun.tools.javac.tree.JCTree;
 
@@ -129,7 +132,7 @@ public class FunicleFactory {
 
     private static SimpleMethod findOrCreateFunicleMethod(String classpath) {
 
-        TypeResolver classElement = TypeResolver.getTypeResolver(new TypeDefinition(classpath));
+        JcTypeResolver classElement = JcTypeResolver.getTypeResolver(new TypeDefinition(classpath));
         List<SimpleMethod> allMethod = classElement.getAllMethod();
         //先去这个类中的所有方法看看，有没有对应的脐带方法
         return findFunicleMethodByClass(allMethod).orElseGet(() -> {

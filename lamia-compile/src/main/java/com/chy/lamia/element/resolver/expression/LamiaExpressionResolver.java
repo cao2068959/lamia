@@ -1,8 +1,11 @@
 package com.chy.lamia.element.resolver.expression;
 
 
+import com.chy.lamia.components.entity.JcExpression;
+import com.chy.lamia.convert.core.entity.LamiaExpression;
 import com.chy.lamia.element.resolver.expression.builder.BuilderContext;
 import com.chy.lamia.element.resolver.expression.builder.BuilderHandler;
+import com.chy.lamia.utils.JCUtils;
 import com.sun.tools.javac.tree.JCTree;
 
 import java.util.ArrayList;
@@ -16,7 +19,7 @@ import java.util.List;
 public class LamiaExpressionResolver {
 
 
-    public LamiaExpression resolving(JCTree.JCExpression jcExpression) {
+    public LamiaExpression resolving(JCTree contextTree, JCTree.JCExpression jcExpression) {
 
         JCTree.JCMethodInvocation methodInvocation;
         JCTree.JCTypeCast typeCast = null;
@@ -48,7 +51,9 @@ public class LamiaExpressionResolver {
         if (result == null) {
             return null;
         }
-        result.setTargetType(typeCast);
+        if (typeCast != null) {
+            result.setTargetType(JCUtils.instance.toTypeDefinition(contextTree, typeCast.clazz));
+        }
         return result;
     }
 
@@ -57,8 +62,9 @@ public class LamiaExpressionResolver {
         // 第一个是 endMethod,已经解析过了, 所以把他移除
         MethodWrapper buildMethod = methodWrappers.remove(0);
         JCTree.JCExpression target = buildMethod.getOnlyArgs();
-        result.setTarget(target);
-
+        if (target != null){
+            result.setTarget(new JcExpression(target));
+        }
         // 没有任何的配置项, 直接返回了
         if (methodWrappers.isEmpty()) {
             return;

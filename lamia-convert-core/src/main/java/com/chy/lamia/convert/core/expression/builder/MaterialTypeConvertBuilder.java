@@ -103,5 +103,14 @@ public class MaterialTypeConvertBuilder {
         return new ConvertResult(ruleChain.getResult());
     }
 
+    /**
+     * 将这个类型 转换成 指定的类型
+     */
+    public Expression convertSimple() {
+
+        VarDefinition materialVarDefinition = material.getVarDefinition();
+        Expression materialExpression = treeFactory.toExpression(materialVarDefinition.getVarRealName());
+        return material.getVarExpressionFunction().run(materialExpression);
+    }
 
 }

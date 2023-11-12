@@ -7,4 +7,5 @@ public interface Statement {
 
     Object get();
 
+    Expression getExpression();
 }

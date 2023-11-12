@@ -29,6 +29,10 @@ public class MarkedContext {
         });
     }
 
+    public boolean isEmpty() {
+        return data.isEmpty();
+    }
+
 
     public Map<String, MarkedMethods> getData() {
         return data;

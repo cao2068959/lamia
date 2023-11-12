@@ -1,10 +1,14 @@
 package com.chy.lamia.element.class_define;
 
 
+import com.chy.lamia.convert.core.entity.Constructor;
+import com.chy.lamia.convert.core.entity.Getter;
+import com.chy.lamia.convert.core.entity.Setter;
 import com.chy.lamia.convert.core.log.Logger;
 import com.chy.lamia.convert.core.utils.ClassPath;
 import com.chy.lamia.element.asm.ClassMetadataReadingVisitor;
-import com.chy.lamia.entity.*;
+import com.chy.lamia.entity.SimpleMethod;
+import com.chy.lamia.entity.Var;
 import com.chy.lamia.utils.JCUtils;
 import org.objectweb.asm.ClassReader;
 

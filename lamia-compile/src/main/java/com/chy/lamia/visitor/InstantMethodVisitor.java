@@ -1,5 +1,6 @@
 package com.chy.lamia.visitor;
 
+import com.chy.lamia.convert.core.entity.TypeDefinition;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.util.List;

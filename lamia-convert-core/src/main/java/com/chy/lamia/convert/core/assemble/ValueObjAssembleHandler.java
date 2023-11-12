@@ -1,10 +1,20 @@
 package com.chy.lamia.convert.core.assemble;
 
 
+import com.chy.lamia.convert.core.components.ComponentFactory;
+import com.chy.lamia.convert.core.components.TypeResolver;
+import com.chy.lamia.convert.core.components.TypeResolverFactory;
+import com.chy.lamia.convert.core.components.entity.Expression;
+import com.chy.lamia.convert.core.components.entity.Statement;
+import com.chy.lamia.convert.core.entity.Constructor;
+import com.chy.lamia.convert.core.entity.Setter;
 import com.chy.lamia.convert.core.entity.TypeDefinition;
 import com.chy.lamia.convert.core.entity.VarDefinition;
+import com.chy.lamia.convert.core.expression.builder.ConvertResult;
+import com.chy.lamia.convert.core.expression.builder.MaterialStatementBuilder;
+import com.chy.lamia.convert.core.expression.builder.MaterialTypeConvertBuilder;
 import com.chy.lamia.convert.core.utils.DefaultHashMap;
-import com.sun.beans.TypeResolver;
+import com.chy.lamia.convert.core.utils.Lists;
 
 import java.util.List;
 import java.util.Map;
@@ -22,8 +32,10 @@ public class ValueObjAssembleHandler extends CommonAssembleHandler {
 
 
     public ValueObjAssembleHandler(TypeDefinition targetType, VarDefinition target) {
+        TypeResolverFactory typeResolverFactory = ComponentFactory.getComponent(TypeResolverFactory.class);
+
         // 解析这个类型, 获取这个类型里面的 方法/变量 等
-        this.targetTypeResolver = TypeResolver.getTypeResolver(targetType);
+        this.targetTypeResolver = typeResolverFactory.getTypeResolver(targetType);
 
         // 获取这个类中所有的 setter方法
         this.targetSetters = targetTypeResolver.getInstantSetters();
@@ -98,10 +110,10 @@ public class ValueObjAssembleHandler extends CommonAssembleHandler {
 
         materialStatementBuilder.setFunction((() -> {
 
-            List<JCTree.JCExpression> expressions = constructorParam.stream()
+            List<Expression> expressions = constructorParam.stream()
                     .map(MaterialTypeConvertBuilder::convertSimple).collect(Collectors.toList());
 
-            JCTree.JCStatement jcStatement = genNewInstance(instantName, classPath, expressions);
+            Statement jcStatement = genNewInstance(instantName, classPath, expressions);
             return Lists.of(jcStatement);
 
         }));
@@ -128,7 +140,7 @@ public class ValueObjAssembleHandler extends CommonAssembleHandler {
             MaterialStatementBuilder materialStatementBuilder = new MaterialStatementBuilder();
             // 生成对应的 set的方法
             materialStatementBuilder.setFunction(() -> {
-                ConvertResult convert = material.convert(jcExpression -> Lists.of(JCUtils.instance.execMethod(newInstant, setter.getMethodName(), jcExpression)));
+                ConvertResult convert = material.convert(jcExpression -> Lists.of(treeFactory.execMethod(newInstant, setter.getMethodName(), Lists.of(jcExpression))));
                 return convert.getConvertStatement();
             });
             addStatementBuilders(materialStatementBuilder);

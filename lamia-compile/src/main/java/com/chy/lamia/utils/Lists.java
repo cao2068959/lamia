@@ -6,6 +6,8 @@ import java.util.List;
 
 public class Lists {
 
+    public static List empty = new ArrayList();
+
     public static <T> List<T> of(T... t) {
         if (t == null || t.length == 0) {
             return new LinkedList<>();
@@ -17,7 +19,8 @@ public class Lists {
         return result;
     }
 
-    public static  <T> com.sun.tools.javac.util.List<T> toSunList(List<T> list) {
+
+    public static <T> com.sun.tools.javac.util.List<T> toSunList(List<T> list) {
         if (list == null || list.size() == 0) {
             return com.sun.tools.javac.util.List.nil();
         }
@@ -25,7 +28,7 @@ public class Lists {
     }
 
     public static String toString(List<String> data) {
-        if (data == null){
+        if (data == null) {
             return "null";
         }
         return String.join(",", data);

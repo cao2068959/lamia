@@ -1,5 +1,7 @@
 package com.chy.lamia.utils;
 
+import com.chy.lamia.convert.core.entity.TypeDefinition;
+import com.chy.lamia.convert.core.utils.CommonUtils;
 import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.entity.factory.TypeDefinitionFactory;
 import com.chy.lamia.visitor.RandomMethodCreateVisitor;

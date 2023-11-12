@@ -1,10 +1,15 @@
 package com.chy.lamia.element.class_define;
 
-import com.chy.lamia.element.resolver.type.TypeResolver;
+import com.chy.lamia.convert.core.entity.Constructor;
+import com.chy.lamia.convert.core.entity.Getter;
+import com.chy.lamia.convert.core.entity.Setter;
+import com.chy.lamia.convert.core.entity.TypeDefinition;
+import com.chy.lamia.element.resolver.type.JcTypeResolver;
 import com.chy.lamia.element.tree.ConstructorCollect;
 import com.chy.lamia.element.tree.GetSetCollect;
 import com.chy.lamia.element.tree.VarCollect;
-import com.chy.lamia.entity.*;
+import com.chy.lamia.entity.SimpleMethod;
+import com.chy.lamia.entity.Var;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.visitor.SimpleMethodCollect;
 import com.sun.tools.javac.tree.JCTree;
@@ -83,7 +88,7 @@ public class TreeClassDefine implements IClassDefine {
 
         //看是否有父类,如果有那么还要对父类解析
         if (parentType != null) {
-            TypeResolver parentClassElement = TypeResolver.getTypeResolver(parentType);
+            JcTypeResolver parentClassElement = JcTypeResolver.getTypeResolver(parentType);
             instantGetters.putAll(parentClassElement.getInstantGetters());
             instantSetters.putAll(parentClassElement.getInstantSetters());
         }

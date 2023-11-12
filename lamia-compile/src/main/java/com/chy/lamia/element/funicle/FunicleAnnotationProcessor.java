@@ -1,6 +1,7 @@
 package com.chy.lamia.element.funicle;
 
-import com.chy.lamia.log.Logger;
+import com.chy.lamia.convert.core.log.Logger;
+import com.chy.lamia.convert.core.utils.ReflectUtils;
 import com.chy.lamia.utils.JCUtils;
 
 import javax.annotation.processing.*;

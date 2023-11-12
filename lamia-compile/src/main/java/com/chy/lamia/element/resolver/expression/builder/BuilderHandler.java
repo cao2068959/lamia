@@ -1,5 +1,6 @@
 package com.chy.lamia.element.resolver.expression.builder;
 
+import com.chy.lamia.convert.core.entity.LamiaExpression;
 import com.chy.lamia.element.resolver.expression.ConfigParseContext;
 import com.chy.lamia.element.resolver.expression.MethodWrapper;
 import com.sun.tools.javac.code.TypeTag;

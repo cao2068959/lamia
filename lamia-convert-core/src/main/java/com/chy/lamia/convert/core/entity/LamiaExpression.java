@@ -1,5 +1,6 @@
 package com.chy.lamia.convert.core.entity;
 
+import com.chy.lamia.convert.core.components.entity.Expression;
 import lombok.Data;
 
 import java.util.*;
@@ -35,7 +36,7 @@ public class LamiaExpression {
 
     TypeDefinition targetType;
 
-    ExpressionItem target;
+    Expression target;
 
 
     public void addArgs(Collection<String> args) {

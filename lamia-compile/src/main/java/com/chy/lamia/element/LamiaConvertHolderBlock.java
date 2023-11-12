@@ -1,5 +1,7 @@
 package com.chy.lamia.element;
 
+import com.chy.lamia.convert.core.entity.LamiaConvertInfo;
+import com.chy.lamia.entity.StatementWrapper;
 import com.chy.lamia.utils.Lists;
 import com.sun.tools.javac.tree.JCTree;
 import lombok.Getter;
@@ -34,11 +36,12 @@ public class LamiaConvertHolderBlock {
 
     public void replaceStatement(LamiaConvertInfo lamiaConvertInfo) {
         lamiaConvertScopes.put(lamiaConvertInfo.getId(), lamiaConvertInfo);
-        contents.add(lamiaConvertInfo.getStatement());
+        String id = lamiaConvertInfo.getId();
+        contents.add(new StatementWrapper(id));
     }
 
 
-    public LamiaConvertInfo getLamiaConvertInfo(LamiaConvertInfo.Statement statement) {
+    public LamiaConvertInfo getLamiaConvertInfo(StatementWrapper statement) {
         String id = statement.getId();
         LamiaConvertInfo lamiaConvertInfo = lamiaConvertScopes.get(id);
         if (lamiaConvertInfo == null) {
@@ -48,6 +51,6 @@ public class LamiaConvertHolderBlock {
     }
 
     public void modifyMethodBody(List<JCTree.JCStatement> newStatement) {
-        parent.stats =  Lists.toSunList(newStatement);
+        parent.stats = Lists.toSunList(newStatement);
     }
 }

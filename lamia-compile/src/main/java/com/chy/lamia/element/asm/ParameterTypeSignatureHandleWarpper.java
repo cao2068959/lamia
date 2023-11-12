@@ -1,5 +1,6 @@
 package com.chy.lamia.element.asm;
 
+import com.chy.lamia.convert.core.entity.TypeDefinition;
 import org.objectweb.asm.signature.SignatureReader;
 
 import java.util.ArrayList;

@@ -1,6 +1,7 @@
 package com.chy.lamia.entity;
 
 
+import com.chy.lamia.convert.core.entity.TypeDefinition;
 import lombok.Data;
 
 import java.util.LinkedList;

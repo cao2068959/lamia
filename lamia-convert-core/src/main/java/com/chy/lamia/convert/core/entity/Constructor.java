@@ -1,4 +1,5 @@
-package com.chy.lamia.entity;
+package com.chy.lamia.convert.core.entity;
+
 
 import lombok.Getter;
 

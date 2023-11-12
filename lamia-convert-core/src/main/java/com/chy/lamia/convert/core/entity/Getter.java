@@ -1,9 +1,10 @@
-package com.chy.lamia.entity;
+package com.chy.lamia.convert.core.entity;
 
 import lombok.Data;
 
 @Data
-public class Setter {
+public class Getter {
+
 
     /**
      * set方法 设置的字段的名称

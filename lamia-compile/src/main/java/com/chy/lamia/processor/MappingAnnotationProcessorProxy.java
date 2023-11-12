@@ -1,5 +1,6 @@
 package com.chy.lamia.processor;
 
+import com.chy.lamia.convert.core.utils.ReflectUtils;
 import sun.misc.Unsafe;
 
 import javax.annotation.processing.*;
@@ -9,7 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Set;
 
-@SupportedAnnotationTypes({"com.chy.lamia.annotation.LamiaMapping"})
+@SupportedAnnotationTypes({"com.chy.lamia.convert.core.annotation.LamiaMapping"})
 public class MappingAnnotationProcessorProxy extends AbstractProcessor {
 
     static Processor processor;
@@ -27,9 +28,9 @@ public class MappingAnnotationProcessorProxy extends AbstractProcessor {
         return processor.process(annotations, roundEnv);
     }
 
-    private Processor getMappingAnnotationProcessor(ProcessingEnvironment processingEnv){
+    private Processor getMappingAnnotationProcessor(ProcessingEnvironment processingEnv) {
         try {
-            return  (Processor) Class.forName("com.chy.lamia.processor.MappingAnnotationProcessor", false, MappingAnnotationProcessorProxy.class.getClassLoader())
+            return (Processor) Class.forName("com.chy.lamia.processor.MappingAnnotationProcessor", false, MappingAnnotationProcessorProxy.class.getClassLoader())
                     .getConstructor().newInstance();
         } catch (InstantiationException e) {
             throw new RuntimeException(e);
@@ -76,7 +77,8 @@ public class MappingAnnotationProcessorProxy extends AbstractProcessor {
             for (String p : allPkgs) {
                 m.invoke(jdkCompilerModule, p, ownModule);
             }
-        } catch (Exception ignore) {}
+        } catch (Exception ignore) {
+        }
     }
 
     private static long getFirstFieldOffset(Unsafe unsafe) {
