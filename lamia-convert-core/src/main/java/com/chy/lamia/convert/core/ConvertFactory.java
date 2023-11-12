@@ -23,8 +23,7 @@ import java.util.Map;
 public class ConvertFactory {
 
     public static ConvertFactory INSTANCE = new ConvertFactory();
-    private final TreeFactory treeFactory
-            ;
+    private final TreeFactory treeFactory;
 
     public ConvertFactory() {
         treeFactory = ComponentFactory.getComponent(TreeFactory.class);
@@ -85,9 +84,9 @@ public class ConvertFactory {
     private List<Material> createdMaterials(LamiaConvertInfo lamiaConvertInfo) {
         // 根据优先级 获取出所有的参数, 高优先级的放队尾
         List<ConvertVarInfo> args = lamiaConvertInfo.getArgsByPriority();
-
-
         List<Material> result = new ArrayList<>();
+        List<Material> highPriority = new ArrayList<>();
+
         args.forEach(convertVarInfo -> {
             VarDefinition varDefinition = convertVarInfo.getVarDefinition();
             // 判断这个参数是否需要扩散开
@@ -98,8 +97,9 @@ public class ConvertFactory {
             }
             // 不需要扩散那 直接封装了
             Material material = Material.simpleMaterial(convertVarInfo);
-            result.add(material);
+            highPriority.add(material);
         });
+        result.addAll(highPriority);
         return result;
     }
 
