@@ -10,9 +10,9 @@ import com.chy.lamia.convert.core.entity.Constructor;
 import com.chy.lamia.convert.core.entity.Setter;
 import com.chy.lamia.convert.core.entity.TypeDefinition;
 import com.chy.lamia.convert.core.entity.VarDefinition;
-import com.chy.lamia.convert.core.expression.builder.ConvertResult;
-import com.chy.lamia.convert.core.expression.builder.MaterialStatementBuilder;
-import com.chy.lamia.convert.core.expression.builder.MaterialTypeConvertBuilder;
+import com.chy.lamia.convert.core.expression.imp.builder.ConvertResult;
+import com.chy.lamia.convert.core.expression.imp.builder.MaterialStatementBuilder;
+import com.chy.lamia.convert.core.expression.imp.builder.MaterialTypeConvertBuilder;
 import com.chy.lamia.convert.core.utils.DefaultHashMap;
 import com.chy.lamia.convert.core.utils.Lists;
 

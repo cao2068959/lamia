@@ -1,6 +1,6 @@
-package com.chy.lamia.element.resolver.expression;
+package com.chy.lamia.convert.core.expression.parse;
 
-import com.sun.tools.javac.tree.JCTree;
+import com.chy.lamia.convert.core.components.entity.Expression;
 import lombok.Data;
 
 import java.util.List;
@@ -10,14 +10,14 @@ public class MethodWrapper {
 
     String name;
 
-    List<JCTree.JCExpression> args;
+    List<Expression> args;
 
     public MethodWrapper(String name) {
         this.name = name;
     }
 
 
-    public JCTree.JCExpression getOnlyArgs() {
+    public Expression getOnlyArgs() {
         if (args == null || args.isEmpty()) {
             return null;
         }

@@ -1,12 +1,12 @@
-package com.chy.lamia.element.resolver.expression.builder.handler.rule;
+package com.chy.lamia.convert.core.expression.parse.builder.handler.rule;
 
+import com.chy.lamia.convert.core.components.entity.Expression;
 import com.chy.lamia.convert.core.entity.LamiaExpression;
 import com.chy.lamia.convert.core.entity.RuleInfo;
-import com.chy.lamia.element.resolver.expression.ConfigParseContext;
-import com.chy.lamia.element.resolver.expression.MethodWrapper;
-import com.chy.lamia.element.resolver.expression.builder.BuilderHandler;
+import com.chy.lamia.convert.core.expression.parse.ConfigParseContext;
+import com.chy.lamia.convert.core.expression.parse.MethodWrapper;
+import com.chy.lamia.convert.core.expression.parse.builder.BuilderHandler;
 import com.chy.lamia.expose.rule.RuleType;
-import com.sun.tools.javac.tree.JCTree;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,10 +30,10 @@ public class RuleHandler implements BuilderHandler {
     }
 
 
-    public List<RuleType> fetchRuleType(List<JCTree.JCExpression> args) {
+    public List<RuleType> fetchRuleType(List<Expression> args) {
         List<RuleType> result = new ArrayList<>();
-        for (JCTree.JCExpression arg : args) {
-            String argName = arg.toString();
+        for (Expression arg : args) {
+            String argName = String.valueOf(arg.get());
             String ruleTypeName = getLastName(argName);
             result.add(RuleType.valueOf(ruleTypeName));
         }

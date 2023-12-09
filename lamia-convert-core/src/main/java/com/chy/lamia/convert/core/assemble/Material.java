@@ -4,7 +4,7 @@ import com.chy.lamia.convert.core.entity.ConvertVarInfo;
 import com.chy.lamia.convert.core.entity.RuleInfo;
 import com.chy.lamia.convert.core.entity.TypeDefinition;
 import com.chy.lamia.convert.core.entity.VarDefinition;
-import com.chy.lamia.convert.core.expression.builder.VarExpressionFunction;
+import com.chy.lamia.convert.core.expression.imp.builder.VarExpressionFunction;
 import lombok.Getter;
 import lombok.Setter;
 

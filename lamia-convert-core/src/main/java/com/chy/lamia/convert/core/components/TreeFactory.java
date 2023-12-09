@@ -14,7 +14,6 @@ public interface TreeFactory {
      * @return
      */
     Expression newClass(String classPath, List<Expression> newInstanceParam);
-
     /**
      * 创建一个变量
      *

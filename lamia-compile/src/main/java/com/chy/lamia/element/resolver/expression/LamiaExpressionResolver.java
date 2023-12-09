@@ -2,9 +2,12 @@ package com.chy.lamia.element.resolver.expression;
 
 
 import com.chy.lamia.components.entity.JcExpression;
+import com.chy.lamia.convert.core.components.entity.Expression;
 import com.chy.lamia.convert.core.entity.LamiaExpression;
-import com.chy.lamia.element.resolver.expression.builder.BuilderContext;
-import com.chy.lamia.element.resolver.expression.builder.BuilderHandler;
+import com.chy.lamia.convert.core.expression.parse.ConfigParseContext;
+import com.chy.lamia.convert.core.expression.parse.MethodWrapper;
+import com.chy.lamia.convert.core.expression.parse.builder.BuilderContext;
+import com.chy.lamia.convert.core.expression.parse.builder.BuilderHandler;
 import com.chy.lamia.utils.JCUtils;
 import com.sun.tools.javac.tree.JCTree;
 
@@ -61,9 +64,9 @@ public class LamiaExpressionResolver {
         List<MethodWrapper> methodWrappers = disassembleMethod(methodInvocation);
         // 第一个是 endMethod,已经解析过了, 所以把他移除
         MethodWrapper buildMethod = methodWrappers.remove(0);
-        JCTree.JCExpression target = buildMethod.getOnlyArgs();
-        if (target != null){
-            result.setTarget(new JcExpression(target));
+        Expression target = buildMethod.getOnlyArgs();
+        if (target != null) {
+            result.setTarget(target);
         }
         // 没有任何的配置项, 直接返回了
         if (methodWrappers.isEmpty()) {
@@ -109,10 +112,19 @@ public class LamiaExpressionResolver {
 
             JCTree.JCFieldAccess fieldAccess = (JCTree.JCFieldAccess) expression;
             MethodWrapper methodWrapper = new MethodWrapper(fieldAccess.name.toString());
-            methodWrapper.setArgs(nextMethod.args);
+            methodWrapper.setArgs(toExpression(nextMethod.args));
             result.add(methodWrapper);
             next = fieldAccess.selected;
         }
+    }
+
+    private List<Expression> toExpression(List<JCTree.JCExpression> list) {
+        List<Expression> result = new ArrayList<>();
+        for (JCTree.JCExpression data : list) {
+            JcExpression jcExpression = new JcExpression(data);
+            result.add(jcExpression);
+        }
+        return result;
     }
 
 
