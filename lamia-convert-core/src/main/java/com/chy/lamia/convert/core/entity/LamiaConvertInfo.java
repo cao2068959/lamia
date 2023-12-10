@@ -2,7 +2,6 @@ package com.chy.lamia.convert.core.entity;
 
 
 import com.chy.lamia.convert.core.utils.CommonUtils;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -57,6 +56,9 @@ public class LamiaConvertInfo {
 
     public LamiaConvertInfo(LamiaExpression lamiaExpression) {
         this.lamiaExpression = lamiaExpression;
+    }
+
+    public LamiaConvertInfo() {
     }
 
     public void addVarArgs(VarDefinition varDefinition) {

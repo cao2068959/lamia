@@ -2,7 +2,7 @@ package com.chy.lamia.convert.core.expression.parse.builder.handler.rule;
 
 import com.chy.lamia.convert.core.entity.LamiaExpression;
 import com.chy.lamia.convert.core.expression.parse.ConfigParseContext;
-import com.chy.lamia.convert.core.expression.parse.MethodWrapper;
+import com.chy.lamia.convert.core.expression.parse.entity.MethodWrapper;
 import com.chy.lamia.convert.core.expression.parse.builder.BuilderHandler;
 
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.List;
 public class RuleSetFieldHandler implements BuilderHandler {
     @Override
     public void config(LamiaExpression lamiaExpression, MethodWrapper methodWrapper, ConfigParseContext context) {
-        List<String> argsName = fetchArgsName(methodWrapper.getArgs());
+        List<String> argsName = methodWrapper.useAllArgsToName();
 
         lamiaExpression.addArgs(argsName, lamiaExpression.getRuleInfos());
 

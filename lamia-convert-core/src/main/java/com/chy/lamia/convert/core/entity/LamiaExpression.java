@@ -40,7 +40,6 @@ public class LamiaExpression {
 
 
     public void addArgs(Collection<String> args) {
-
         for (String arg : args) {
             if (!allArgs.containsKey(arg)) {
                 allArgs.put(arg, null);

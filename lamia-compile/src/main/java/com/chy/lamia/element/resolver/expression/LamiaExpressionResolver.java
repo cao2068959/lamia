@@ -5,9 +5,11 @@ import com.chy.lamia.components.entity.JcExpression;
 import com.chy.lamia.convert.core.components.entity.Expression;
 import com.chy.lamia.convert.core.entity.LamiaExpression;
 import com.chy.lamia.convert.core.expression.parse.ConfigParseContext;
-import com.chy.lamia.convert.core.expression.parse.MethodWrapper;
+import com.chy.lamia.convert.core.expression.parse.entity.ArgWrapper;
+import com.chy.lamia.convert.core.expression.parse.entity.MethodWrapper;
 import com.chy.lamia.convert.core.expression.parse.builder.BuilderContext;
 import com.chy.lamia.convert.core.expression.parse.builder.BuilderHandler;
+import com.chy.lamia.convert.core.expression.parse.entity.RuleTypeArgWrapper;
 import com.chy.lamia.utils.JCUtils;
 import com.sun.tools.javac.tree.JCTree;
 
@@ -64,7 +66,7 @@ public class LamiaExpressionResolver {
         List<MethodWrapper> methodWrappers = disassembleMethod(methodInvocation);
         // 第一个是 endMethod,已经解析过了, 所以把他移除
         MethodWrapper buildMethod = methodWrappers.remove(0);
-        Expression target = buildMethod.getOnlyArgs();
+        Expression target = buildMethod.useOnlyArgs();
         if (target != null) {
             result.setTarget(target);
         }
@@ -112,17 +114,20 @@ public class LamiaExpressionResolver {
 
             JCTree.JCFieldAccess fieldAccess = (JCTree.JCFieldAccess) expression;
             MethodWrapper methodWrapper = new MethodWrapper(fieldAccess.name.toString());
-            methodWrapper.setArgs(toExpression(nextMethod.args));
+            methodWrapper.setArgs(toArgWrapper(nextMethod.args));
             result.add(methodWrapper);
             next = fieldAccess.selected;
         }
     }
 
-    private List<Expression> toExpression(List<JCTree.JCExpression> list) {
-        List<Expression> result = new ArrayList<>();
+    private List<ArgWrapper> toArgWrapper(List<JCTree.JCExpression> list) {
+        List<ArgWrapper> result = new ArrayList<>();
         for (JCTree.JCExpression data : list) {
+            ArgWrapper argWrapper = new RuleTypeArgWrapper();
             JcExpression jcExpression = new JcExpression(data);
-            result.add(jcExpression);
+            argWrapper.setExpression(jcExpression);
+            argWrapper.setName(data.toString());
+            result.add(argWrapper);
         }
         return result;
     }

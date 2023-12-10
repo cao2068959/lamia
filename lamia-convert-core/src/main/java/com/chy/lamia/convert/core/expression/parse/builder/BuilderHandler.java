@@ -3,7 +3,7 @@ package com.chy.lamia.convert.core.expression.parse.builder;
 import com.chy.lamia.convert.core.components.entity.Expression;
 import com.chy.lamia.convert.core.entity.LamiaExpression;
 import com.chy.lamia.convert.core.expression.parse.ConfigParseContext;
-import com.chy.lamia.convert.core.expression.parse.MethodWrapper;
+import com.chy.lamia.convert.core.expression.parse.entity.MethodWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
