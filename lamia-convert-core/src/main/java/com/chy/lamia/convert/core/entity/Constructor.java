@@ -14,4 +14,8 @@ public class Constructor {
     public void add(VarDefinition varDefinition) {
         params.add(varDefinition);
     }
+
+    public void setParams(List<VarDefinition> params) {
+        this.params = params;
+    }
 }

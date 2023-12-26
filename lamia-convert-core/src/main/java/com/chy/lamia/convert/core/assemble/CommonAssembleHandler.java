@@ -2,6 +2,7 @@ package com.chy.lamia.convert.core.assemble;
 
 
 import com.chy.lamia.convert.core.components.ComponentFactory;
+import com.chy.lamia.convert.core.components.NameHandler;
 import com.chy.lamia.convert.core.components.TreeFactory;
 import com.chy.lamia.convert.core.components.entity.Expression;
 import com.chy.lamia.convert.core.components.entity.Statement;
@@ -10,7 +11,6 @@ import com.chy.lamia.convert.core.entity.TypeDefinition;
 import com.chy.lamia.convert.core.entity.VarDefinition;
 import com.chy.lamia.convert.core.expression.imp.builder.MaterialStatementBuilder;
 import com.chy.lamia.convert.core.expression.imp.builder.MaterialTypeConvertBuilder;
-import com.chy.lamia.convert.core.utils.CommonUtils;
 import com.chy.lamia.convert.core.utils.DefaultHashMap;
 import com.chy.lamia.convert.core.utils.Lists;
 import lombok.Getter;
@@ -147,7 +147,7 @@ public abstract class CommonAssembleHandler implements AssembleHandler {
         String varName;
         if (oldResultName == null) {
             // 新实例的名称生成
-            varName = CommonUtils.generateVarName("result");
+            varName = ComponentFactory.getComponent(NameHandler.class).generateName("result");
         } else {
             varName = oldResultName;
         }

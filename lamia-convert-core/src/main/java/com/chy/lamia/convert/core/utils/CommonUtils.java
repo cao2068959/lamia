@@ -12,7 +12,7 @@ public class CommonUtils {
 
     public static String generateVarName(String type) {
         StringBuilder result = new StringBuilder(lamiaPrefix);
-        String randomString = getRandomString(6);
+        String randomString = getRandomString(4);
         if (type != null) {
             result.append(type).append("$$");
         }

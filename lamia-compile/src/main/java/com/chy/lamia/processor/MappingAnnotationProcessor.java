@@ -1,11 +1,13 @@
 package com.chy.lamia.processor;
 
+import com.chy.lamia.components.CommonNameHandler;
 import com.chy.lamia.components.JcTreeFactory;
 import com.chy.lamia.components.JcTypeResolverFactory;
 import com.chy.lamia.components.entity.JcExpression;
 import com.chy.lamia.components.entity.JcStatement;
 import com.chy.lamia.convert.core.annotation.LamiaMapping;
 import com.chy.lamia.convert.core.components.ComponentFactory;
+import com.chy.lamia.convert.core.components.NameHandler;
 import com.chy.lamia.convert.core.components.TreeFactory;
 import com.chy.lamia.convert.core.components.TypeResolverFactory;
 import com.chy.lamia.convert.core.components.entity.Expression;
@@ -95,6 +97,7 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
     private void registerComponents() {
         ComponentFactory.registerComponents(TreeFactory.class, new JcTreeFactory(JCUtils.instance));
         ComponentFactory.registerComponents(TypeResolverFactory.class, new JcTypeResolverFactory());
+        ComponentFactory.registerComponents(NameHandler.class, new CommonNameHandler());
 
         ComponentFactory.registerEntityStructure(Expression.class, JcExpression::new);
         ComponentFactory.registerEntityStructure(Statement.class, JcStatement::new);

@@ -1,7 +1,8 @@
 package com.chy.lamia.utils;
 
+import com.chy.lamia.convert.core.components.ComponentFactory;
+import com.chy.lamia.convert.core.components.NameHandler;
 import com.chy.lamia.convert.core.entity.TypeDefinition;
-import com.chy.lamia.convert.core.utils.CommonUtils;
 import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.entity.factory.TypeDefinitionFactory;
 import com.chy.lamia.visitor.RandomMethodCreateVisitor;
@@ -255,7 +256,8 @@ public class JCUtils {
      */
     public JCTree.JCEnhancedForLoop createForeachLoop(ParameterType forVarType, String collectionVar,
                                                       Function<JCTree.JCVariableDecl, java.util.List<JCTree.JCStatement>> blockFun) {
-        String forVarName = CommonUtils.generateVarName("forVar");
+
+        String forVarName = ComponentFactory.getComponent(NameHandler.class).generateName("forVar");
         JCTree.JCVariableDecl forVar = createVar(forVarName, forVarType.getTypePatch(), null);
         JCTree.JCBlock block = createBlock(blockFun.apply(forVar));
         return treeMaker.ForeachLoop(forVar, memberAccess(collectionVar), block);

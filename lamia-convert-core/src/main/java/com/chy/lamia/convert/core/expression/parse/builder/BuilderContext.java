@@ -1,6 +1,7 @@
 package com.chy.lamia.convert.core.expression.parse.builder;
 
 
+import com.chy.lamia.convert.core.expression.parse.builder.handler.BuilderEnd;
 import com.chy.lamia.convert.core.expression.parse.builder.handler.BuilderStart;
 import com.chy.lamia.convert.core.expression.parse.builder.handler.MappingHandler;
 import com.chy.lamia.convert.core.expression.parse.builder.handler.SetFieldHandler;
@@ -22,6 +23,7 @@ public class BuilderContext {
 
     static {
         data.put("builder", new BuilderStart());
+        data.put("builder.build", new BuilderEnd());
         data.put("builder.mapping", new MappingHandler());
         data.put("builder.setField", new SetFieldHandler());
         data.put("builder.rule", new RuleHandler());

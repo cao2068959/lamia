@@ -3,6 +3,7 @@ package com.chy.lamia.convert.core.expression.imp.builder;
 
 import com.chy.lamia.convert.core.assemble.Material;
 import com.chy.lamia.convert.core.components.ComponentFactory;
+import com.chy.lamia.convert.core.components.NameHandler;
 import com.chy.lamia.convert.core.components.TreeFactory;
 import com.chy.lamia.convert.core.components.entity.Expression;
 import com.chy.lamia.convert.core.components.entity.Statement;
@@ -11,7 +12,6 @@ import com.chy.lamia.convert.core.entity.TypeDefinition;
 import com.chy.lamia.convert.core.entity.VarDefinition;
 import com.chy.lamia.convert.core.expression.imp.builder.rule.RuleHandlerContext;
 import com.chy.lamia.convert.core.expression.imp.builder.rule.handler.RuleChain;
-import com.chy.lamia.convert.core.utils.CommonUtils;
 import lombok.Data;
 
 import java.util.List;
@@ -52,7 +52,6 @@ public class MaterialTypeConvertBuilder {
     }
 
 
-
     /**
      * 根据固定的规则进行转换
      *
@@ -73,7 +72,7 @@ public class MaterialTypeConvertBuilder {
             noRule = false;
             // 里面有规则处理，用一个变量承接一下
             ruleChain.addFirstRule(((__, chain) -> {
-                String name = CommonUtils.tempName(material.getSupplyName());
+                String name = ComponentFactory.getComponent(NameHandler.class).generateTempName(material.getSupplyName());
                 TypeDefinition type = material.getSupplyType();
                 // 先生成一个变量承接一下
 

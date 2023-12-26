@@ -39,6 +39,8 @@ public class LamiaConvertInfo {
     @Getter
     Map<String, VarDefinition> args = new HashMap<>();
 
+    @Getter
+    @Setter
     LamiaExpression lamiaExpression;
 
     @Getter
