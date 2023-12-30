@@ -187,4 +187,14 @@ public abstract class CommonAssembleHandler implements AssembleHandler {
     protected void addStatementBuilders(MaterialStatementBuilder materialStatementBuilder) {
         materialStatementBuilders.add(materialStatementBuilder);
     }
+
+    @Override
+    public Set<String> getMappingVarName() {
+        return useMaterial;
+    }
+
+    @Override
+    public Material getMaterial(String name) {
+        return materialMap.get(name);
+    }
 }

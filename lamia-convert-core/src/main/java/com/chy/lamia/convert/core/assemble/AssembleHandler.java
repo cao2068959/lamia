@@ -5,6 +5,7 @@ import com.chy.lamia.convert.core.entity.LamiaConvertInfo;
 import com.chy.lamia.convert.core.expression.imp.builder.MaterialStatementBuilder;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 组装处理器接口
@@ -37,8 +38,24 @@ public interface AssembleHandler {
 
     /**
      * 获取这次转换后的变量的名称
+     *
      * @return
      */
     String getNewInstantName();
+
+    /**
+     * 获取映射上的所有字段的 名称
+     *
+     * @return
+     */
+    Set<String> getMappingVarName();
+
+    /**
+     * 使用 varName 来获取 对应的 Material
+     *
+     * @param name
+     * @return
+     */
+    Material getMaterial(String name);
 
 }
