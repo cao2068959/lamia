@@ -170,11 +170,11 @@ public abstract class CommonAssembleHandler implements AssembleHandler {
         if (useMaterial.contains(varName)) {
             return null;
         }
-        useMaterial.add(varName);
         Material material = materialMap.get(varName);
         if (material == null) {
             return null;
         }
+        useMaterial.add(varName);
 
         // 万能材料，适配一下
         if (material instanceof OmnipotentMaterial) {

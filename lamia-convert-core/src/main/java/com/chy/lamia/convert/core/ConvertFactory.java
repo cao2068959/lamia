@@ -62,7 +62,14 @@ public class ConvertFactory {
         Set<String> mappingVarName = assembleHandler.getMappingVarName();
         for (String varName : mappingVarName) {
             Material material = assembleHandler.getMaterial(varName);
+            if (material == null) {
+                continue;
+            }
+
             if (material instanceof OmnipotentMaterial) {
+                continue;
+            }
+            if (material.getSupplyType() == null) {
                 continue;
             }
             String supplyName = material.getSupplyName();
