@@ -5,6 +5,7 @@ import com.chy.lamia.components.JcTreeFactory;
 import com.chy.lamia.components.JcTypeResolverFactory;
 import com.chy.lamia.components.entity.JcExpression;
 import com.chy.lamia.components.entity.JcStatement;
+import com.chy.lamia.convert.core.ConvertFactory;
 import com.chy.lamia.convert.core.annotation.LamiaMapping;
 import com.chy.lamia.convert.core.components.ComponentFactory;
 import com.chy.lamia.convert.core.components.NameHandler;
@@ -96,8 +97,9 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
 
     private void registerComponents() {
         ComponentFactory.registerComponents(TreeFactory.class, new JcTreeFactory(JCUtils.instance));
-        ComponentFactory.registerComponents(TypeResolverFactory.class, new JcTypeResolverFactory());
         ComponentFactory.registerComponents(NameHandler.class, new CommonNameHandler());
+
+        ComponentFactory.registerInstanceComponents(ConvertFactory.INSTANCE, TypeResolverFactory.class, new JcTypeResolverFactory());
 
         ComponentFactory.registerEntityStructure(Expression.class, JcExpression::new);
         ComponentFactory.registerEntityStructure(Statement.class, JcStatement::new);

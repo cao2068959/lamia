@@ -1,6 +1,7 @@
 package com.chy.lamia.convert.core.assemble;
 
 
+import com.chy.lamia.convert.core.ConvertFactory;
 import com.chy.lamia.convert.core.components.ComponentFactory;
 import com.chy.lamia.convert.core.components.TypeResolver;
 import com.chy.lamia.convert.core.components.TypeResolverFactory;
@@ -31,8 +32,8 @@ public class ValueObjAssembleHandler extends CommonAssembleHandler {
     private final Map<String, Setter> targetSetters;
 
 
-    public ValueObjAssembleHandler(TypeDefinition targetType, VarDefinition target) {
-        TypeResolverFactory typeResolverFactory = ComponentFactory.getComponent(TypeResolverFactory.class);
+    public ValueObjAssembleHandler(ConvertFactory convertFactory, TypeDefinition targetType, VarDefinition target) {
+        TypeResolverFactory typeResolverFactory = ComponentFactory.getInstanceComponent(convertFactory, TypeResolverFactory.class);
 
         // 解析这个类型, 获取这个类型里面的 方法/变量 等
         this.targetTypeResolver = typeResolverFactory.getTypeResolver(targetType);

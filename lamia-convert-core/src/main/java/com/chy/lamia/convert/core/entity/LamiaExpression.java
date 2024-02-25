@@ -38,6 +38,33 @@ public class LamiaExpression {
 
     Expression target;
 
+    /**
+     * 是否已经解析完成
+     */
+    private boolean parseComplete = true;
+
+
+    /**
+     * 判断这一个表达式是否完整
+     *
+     * @return
+     */
+    public boolean isComplete() {
+        return parseComplete;
+    }
+
+    /**
+     * 是否 有转换数据
+     *
+     * @return
+     */
+    public boolean hasConvertData() {
+        return !allArgs.isEmpty() || !mappingArgs.isEmpty();
+    }
+
+    public void setParseComplete(boolean parseComplete) {
+        this.parseComplete = parseComplete;
+    }
 
     public void addArgs(Collection<String> args) {
         for (String arg : args) {

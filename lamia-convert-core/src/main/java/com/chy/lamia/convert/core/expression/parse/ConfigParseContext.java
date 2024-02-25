@@ -21,6 +21,10 @@ public class ConfigParseContext {
         genScopeText();
     }
 
+    public boolean isEnd() {
+        return scope.isEmpty();
+    }
+
     public String getScope() {
         return scopeText;
     }

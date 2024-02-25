@@ -165,7 +165,7 @@ public class ConvertFactory {
         }
 
         // 解析对应的类型
-        TypeResolver typeResolver = ComponentFactory.getComponent(TypeResolverFactory.class).getTypeResolver(type);
+        TypeResolver typeResolver = ComponentFactory.getInstanceComponent(this, TypeResolverFactory.class).getTypeResolver(type);
         Map<String, Getter> instantGetters = typeResolver.getInstantGetters();
 
         List<Material> result = new ArrayList<>();
@@ -200,7 +200,7 @@ public class ConvertFactory {
         if (targetType.matchType(Map.class)) {
             result = new MapAssembleHandler(lamiaConvertInfo.getTarget());
         } else {
-            result = new ValueObjAssembleHandler(targetType, lamiaConvertInfo.getTarget());
+            result = new ValueObjAssembleHandler(this, targetType, lamiaConvertInfo.getTarget());
         }
         result.setLamiaConvertInfo(lamiaConvertInfo);
         return result;

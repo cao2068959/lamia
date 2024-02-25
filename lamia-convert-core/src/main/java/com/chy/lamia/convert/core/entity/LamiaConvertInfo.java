@@ -123,4 +123,23 @@ public class LamiaConvertInfo {
         return false;
     }
 
+    /**
+     * 判断是否是完整的转换语句
+     *
+     * @return
+     */
+    public boolean isCompleteConvert() {
+        // 先检查表达式是否完整，如果不完整直接返回
+        boolean complete = lamiaExpression.isComplete();
+        if (!complete) {
+            return false;
+        }
+        // 没有设置返回值也是直接返回
+        if (target == null && targetType == null) {
+            return false;
+        }
+        // 看这个表达式是否有需要转换的数据
+        return lamiaExpression.hasConvertData();
+    }
+
 }
