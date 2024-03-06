@@ -15,10 +15,8 @@ import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.tree.JCTree;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * 类型解析器, 可以把 TypeDefinition 转成可解析的类型, 从而获取 type中的 方法
@@ -34,7 +32,8 @@ public class JcTypeResolver implements TypeResolver {
     @lombok.Getter
     TypeDefinition typeDefinition;
     boolean canUpdate = true;
-    List<JcTypeResolver> generic = new LinkedList<>();
+
+    boolean isInit = false;
 
     private static Map<String, JcTypeResolver> cache = new HashMap<>();
 
@@ -46,11 +45,10 @@ public class JcTypeResolver implements TypeResolver {
      */
     private JcTypeResolver(TypeDefinition typeDefinition) {
         this.typeDefinition = typeDefinition;
-        List<TypeDefinition> generics = typeDefinition.getGeneric();
-        if (generics != null) {
-            generic = generics.stream().map(JcTypeResolver::getTypeResolver)
-                    .collect(Collectors.toList());
-        }
+        init();
+    }
+
+    public void init() {
         JCUtils jcUtils = JCUtils.instance;
         String classPath = typeDefinition.getClassPath();
 
@@ -76,7 +74,6 @@ public class JcTypeResolver implements TypeResolver {
             return;
         }
         throw new RuntimeException("无法解析类： " + classPath);
-
     }
 
 
