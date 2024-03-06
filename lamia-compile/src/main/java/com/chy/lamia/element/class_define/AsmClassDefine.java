@@ -48,7 +48,6 @@ public class AsmClassDefine implements IClassDefine {
         }
     }
 
-    @Override
     public List<SimpleMethod> getAllMethod() {
         return classMetadataReadingVisitor.getAllMethod();
     }

@@ -104,7 +104,6 @@ public class TreeClassDefine implements IClassDefine {
         return constructors;
     }
 
-    @Override
     public List<SimpleMethod> getAllMethod() {
         if (allMethod == null) {
             SimpleMethodCollect simpleMethodCollect = new SimpleMethodCollect();

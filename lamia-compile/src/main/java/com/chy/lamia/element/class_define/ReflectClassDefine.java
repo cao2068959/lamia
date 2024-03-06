@@ -95,7 +95,6 @@ public class ReflectClassDefine implements IClassDefine {
         return null;
     }
 
-    @Override
     public List<SimpleMethod> getAllMethod() {
         return null;
     }

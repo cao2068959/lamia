@@ -7,8 +7,8 @@ import com.chy.lamia.convert.core.entity.Setter;
 import com.chy.lamia.convert.core.entity.TypeDefinition;
 import com.chy.lamia.element.class_define.AsmClassDefine;
 import com.chy.lamia.element.class_define.IClassDefine;
+import com.chy.lamia.element.class_define.SymbolClassDefine;
 import com.chy.lamia.element.class_define.TreeClassDefine;
-import com.chy.lamia.entity.SimpleMethod;
 import com.chy.lamia.entity.Var;
 import com.chy.lamia.utils.JCUtils;
 import com.sun.tools.javac.code.Symbol;
@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
  * 类型解析器, 可以把 TypeDefinition 转成可解析的类型, 从而获取 type中的 方法
  * <p>
  * 根据文件类型不同分成 class解析 以及 java文件解析, 会自动判断对应的文件类型选择对应的解析器
+ *
  * @author bignosecat
  */
 public class JcTypeResolver implements TypeResolver {
@@ -55,7 +56,7 @@ public class JcTypeResolver implements TypeResolver {
 
         Symbol.ClassSymbol classSymbol = jcUtils.getClassSymbol(classPath);
         JCTree tree = jcUtils.getTree(classSymbol);
-        if (tree != null){
+        if (tree != null) {
             classDefine = new TreeClassDefine(jcUtils, tree);
             return;
         }
@@ -63,8 +64,8 @@ public class JcTypeResolver implements TypeResolver {
         // 上面tree没找到说明不是 通过java文件进行编译的, 下面将解析 class, 所以改文件不可修改了
         canUpdate = false;
 
-        if (classSymbol != null){
-            classDefine = new AsmClassDefine(jcUtils, classSymbol);
+        if (classSymbol != null) {
+            classDefine = new SymbolClassDefine(classSymbol);
             return;
         }
 
@@ -125,11 +126,9 @@ public class JcTypeResolver implements TypeResolver {
 
 
     @Override
-    public List<Constructor> getConstructors(){
+    public List<Constructor> getConstructors() {
         return classDefine.getConstructors();
     }
-
-
 
 
     /**
@@ -150,5 +149,4 @@ public class JcTypeResolver implements TypeResolver {
     }
 
 
-    
 }
