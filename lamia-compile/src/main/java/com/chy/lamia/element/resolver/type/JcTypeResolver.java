@@ -11,6 +11,7 @@ import com.chy.lamia.element.class_define.TreeClassDefine;
 import com.chy.lamia.entity.SimpleMethod;
 import com.chy.lamia.entity.Var;
 import com.chy.lamia.utils.JCUtils;
+import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.tree.JCTree;
 
 import java.util.HashMap;
@@ -51,13 +52,22 @@ public class JcTypeResolver implements TypeResolver {
         }
         JCUtils jcUtils = JCUtils.instance;
         String classPath = typeDefinition.getClassPath();
-        JCTree tree = jcUtils.getTree(classPath);
-        if (tree != null) {
+
+        Symbol.ClassSymbol classSymbol = jcUtils.getClassSymbol(classPath);
+        JCTree tree = jcUtils.getTree(classSymbol);
+        if (tree != null){
             classDefine = new TreeClassDefine(jcUtils, tree);
             return;
         }
+
         // 上面tree没找到说明不是 通过java文件进行编译的, 下面将解析 class, 所以改文件不可修改了
         canUpdate = false;
+
+        if (classSymbol != null){
+            classDefine = new AsmClassDefine(jcUtils, classSymbol);
+            return;
+        }
+
         //使用 ASM  解析class文件
         Class<?> classForReflect = getClassForReflect(classPath);
         if (classForReflect != null) {
@@ -120,14 +130,7 @@ public class JcTypeResolver implements TypeResolver {
     }
 
 
-    /**
-     * 获取这个类中所有的方法
-     *
-     * @return
-     */
-    public List<SimpleMethod> getAllMethod() {
-        return classDefine.getAllMethod();
-    }
+
 
     /**
      * 获取对应的 类型处理器, 这里做一层缓存

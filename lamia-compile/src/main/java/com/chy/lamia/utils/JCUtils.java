@@ -181,13 +181,17 @@ public class JCUtils {
         return execMethod(methodInstanceName, methodName, params);
     }
 
-    public JCTree getTree(String treePath) {
-        Symbol.ClassSymbol typeElement = elementUtils.getTypeElement(treePath);
-        if (typeElement == null) {
+    public JCTree getTree(Symbol.ClassSymbol classSymbol) {
+        if (classSymbol == null) {
             return null;
         }
-        return elementUtils.getTree(typeElement);
+        return elementUtils.getTree(classSymbol);
     }
+
+    public Symbol.ClassSymbol getClassSymbol(String treePath) {
+        return elementUtils.getTypeElement(treePath);
+    }
+
 
     /**
      * 生成一个 new语句 比如 new User("1","2")

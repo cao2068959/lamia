@@ -15,7 +15,6 @@ import com.chy.lamia.convert.core.components.entity.Expression;
 import com.chy.lamia.convert.core.components.entity.Statement;
 import com.chy.lamia.convert.core.log.Logger;
 import com.chy.lamia.convert.core.utils.ReflectUtils;
-import com.chy.lamia.element.funicle.FunicleFactory;
 import com.chy.lamia.processor.marked.MarkedContext;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.visitor.MethodUpdateVisitor;
@@ -73,11 +72,7 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
             JCTree tree = JCUtils.instance.getJCTree(className);
             //去修改原本方法中的逻辑
             tree.accept(new MethodUpdateVisitor(markedMethods, tree, className));
-            //给这个类加上对应的脐带方法
-            FunicleFactory.createFunicleMethod(tree, className);
         });
-
-        FunicleFactory.persistence();
     }
 
 

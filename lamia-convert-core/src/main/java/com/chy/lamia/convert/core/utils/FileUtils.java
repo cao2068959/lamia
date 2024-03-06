@@ -5,11 +5,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URL;
 
 public class FileUtils {
 
-    static String classPath = null;
+    static String classPath = "lamia";
 
     public static File openFile(String fileName, String path) {
         if (path == null || path.length() == 0) {
@@ -53,14 +52,6 @@ public class FileUtils {
 
 
     public static String getClassPath() {
-        String result = classPath;
-        if (result != null && result.length() > 0) {
-            return result;
-        }
-        URL resource = FileUtils.class.getClassLoader().getResource("");
-        if (resource != null) {
-            classPath = resource.getPath();
-        }
         return classPath;
     }
 
