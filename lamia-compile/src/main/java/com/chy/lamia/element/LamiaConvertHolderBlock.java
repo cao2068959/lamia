@@ -3,6 +3,7 @@ package com.chy.lamia.element;
 import com.chy.lamia.convert.core.entity.LamiaConvertInfo;
 import com.chy.lamia.entity.StatementWrapper;
 import com.chy.lamia.utils.Lists;
+import com.sun.source.tree.BlockTree;
 import com.sun.tools.javac.tree.JCTree;
 import lombok.Getter;
 
@@ -18,7 +19,7 @@ import java.util.Map;
 @Getter
 public class LamiaConvertHolderBlock {
 
-    private final JCTree.JCBlock parent;
+    private final BlockTree parent;
     /**
      * 在代码中的所有 lamia.convert 语句, 以及对应这个语句能够访问到所有的变量
      * <p>
@@ -29,7 +30,7 @@ public class LamiaConvertHolderBlock {
 
     private List<JCTree.JCStatement> contents;
 
-    public LamiaConvertHolderBlock(List<JCTree.JCStatement> contents, JCTree.JCBlock block) {
+    public LamiaConvertHolderBlock(List<JCTree.JCStatement> contents, BlockTree block) {
         this.contents = contents;
         this.parent = block;
     }
@@ -51,6 +52,13 @@ public class LamiaConvertHolderBlock {
     }
 
     public void modifyMethodBody(List<JCTree.JCStatement> newStatement) {
-        parent.stats = Lists.toSunList(newStatement);
+        if (parent == null) {
+            return;
+        }
+
+        if (parent instanceof JCTree.JCBlock) {
+            ((JCTree.JCBlock) parent).stats = Lists.toSunList(newStatement);
+        }
+
     }
 }

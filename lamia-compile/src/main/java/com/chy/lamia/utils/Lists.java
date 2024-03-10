@@ -19,6 +19,13 @@ public class Lists {
         return result;
     }
 
+    public static <T> com.sun.tools.javac.util.List<T> ofSunList(T... t) {
+        if (t == null || t.length == 0) {
+            return com.sun.tools.javac.util.List.nil();
+        }
+        return com.sun.tools.javac.util.List.from(t);
+    }
+
 
     public static <T> com.sun.tools.javac.util.List<T> toSunList(List<T> list) {
         if (list == null || list.size() == 0) {

@@ -12,6 +12,10 @@ import com.chy.lamia.element.resolver.expression.LamiaExpressionResolver;
 import com.chy.lamia.entity.factory.TypeDefinitionFactory;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.visitor.AbstractBlockVisitor;
+import com.chy.lamia.visitor.SimpleBlockTree;
+import com.sun.source.tree.LambdaExpressionTree;
+import com.sun.source.tree.Tree;
+import com.sun.source.tree.VariableTree;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.tree.JCTree;
 
@@ -30,37 +34,40 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
 
 
     /**
+     * 需要去更新的块
      * 持有了 所有 lamia.convert 语句 的代码块, 这些代码块也就是后续需要去修改内容的
      */
-    private final List<LamiaConvertHolderBlock> lamiaConvertHolderBlock;
+    private List<LamiaConvertHolderBlock> updateBlocks = new ArrayList<>();
 
+    /**
+     * 当前块中的内容，这个块里面存在 lamia表达式才会去记录，否则是null
+     */
     private LamiaConvertHolderBlock currentBlock;
 
     private LamiaExpressionResolver lamiaExpressionResolver = new LamiaExpressionResolver();
 
 
     public LamiaConvertBlockVisitor() {
-        lamiaConvertHolderBlock = new ArrayList<>();
+        this.updateBlocks = new ArrayList<>();
         vars = new HashMap<>();
     }
 
     public LamiaConvertBlockVisitor(Map<String, VarDefinition> vars, List<LamiaConvertHolderBlock> lamiaConvertHolderBlock) {
         // 镜像拷贝
         this.vars = new HashMap<>(vars);
-        this.lamiaConvertHolderBlock = lamiaConvertHolderBlock;
+        this.updateBlocks = lamiaConvertHolderBlock;
     }
 
 
     /**
      * 如果 遇到了 代码块 if while for 等 都递归进去 再次扫描一次
      *
-     * @param statement statement
+     * @param block statement
      */
     @Override
-    public void blockVisit(JCTree.JCBlock statement) {
-        LamiaConvertBlockVisitor lamiaConvertScopeBlockVisitor = new LamiaConvertBlockVisitor(vars, lamiaConvertHolderBlock);
+    public void blockVisit(JCTree.JCBlock block) {
         //继续去扫描代码块里面的代码
-        lamiaConvertScopeBlockVisitor.accept(statement, classTree);
+        getNewVisitor().accept(block, classTree);
     }
 
     @Override
@@ -79,8 +86,12 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
         if (lamiaConvertInfo != null) {
             lamiaConvertInfo.setVarName(name);
             lamiaConvertInfo.setCreatedType(false);
+            // 这一行就是 lamia表达式，就不记录了
+            return false;
         }
-        return lamiaConvertInfo == null;
+
+        scanLambdaExpression(assign);
+        return true;
     }
 
 
@@ -104,10 +115,58 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
         LamiaConvertInfo lamiaConvertInfo = lamiaConvertStatementCollect(statement.init);
         if (lamiaConvertInfo != null) {
             lamiaConvertInfo.setVarName(varDefinition.getVarRealName());
+            // 这一行就是 lamia表达式，就不记录了
+            return false;
+        }
+        scanLambdaExpression(statement);
+        return true;
+    }
+
+    /**
+     * 扫描lambda 表达式
+     *
+     * @param tree
+     */
+    private void scanLambdaExpression(Tree tree) {
+        LambdaBodyFinder lambdaBodyFinder = new LambdaBodyFinder(classTree);
+        lambdaBodyFinder.scan(tree, null);
+        List<JCTree.JCLambda> lambdaExpressionTrees = lambdaBodyFinder.getResult();
+        if (lambdaExpressionTrees == null) {
+            return;
         }
 
-        // 如果该语句是对应的表达式,那么就不记录, 已经替换成新的表达式
-        return lamiaConvertInfo == null;
+        for (LambdaExpressionTree lambdaExpressionTree : lambdaExpressionTrees) {
+            lambdaExpressionHandle( tree,lambdaExpressionTree);
+        }
+    }
+
+    private void lambdaExpressionHandle(Tree tree, LambdaExpressionTree lambdaExpressionTree) {
+        Tree body = lambdaExpressionTree.getBody();
+        for (VariableTree parameter : lambdaExpressionTree.getParameters()) {
+            JCUtils.instance.attribStat((JCTree) tree, (JCTree.JCVariableDecl) parameter);
+        }
+
+        if (body instanceof JCTree.JCBlock) {
+            blockVisit((JCTree.JCBlock) body);
+            return;
+        }
+        // 没有 {} 的单纯的lambda 的形式
+        if (body instanceof JCTree.JCExpression) {
+            JCTree.JCExpression expression = (JCTree.JCExpression) body;
+            JCTree.JCStatement statement;
+            // 生成的代码需要 重新生成{} 这里要先判断这个表达式是否有返回值
+            if (expression.isPoly()) {
+                // 有返回值的，生成 return 语句
+                statement = JCUtils.instance.createReturn(expression);
+            } else {
+                statement = JCUtils.instance.toJCStatement(expression);
+            }
+
+            SimpleBlockTree blockTree = new SimpleBlockTree(statement);
+            //继续去扫描代码块里面的代码
+            getNewVisitor().accept(blockTree, classTree);
+            return;
+        }
     }
 
 
@@ -156,21 +215,27 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
         return lamiaConvertInfo;
     }
 
+    private LamiaConvertBlockVisitor getNewVisitor() {
+        return new LamiaConvertBlockVisitor(vars, updateBlocks);
+    }
 
     @Override
     public boolean returnVisit(JCTree.JCReturn statement) {
         LamiaConvertInfo lamiaConvertInfo = lamiaConvertStatementCollect(statement.expr);
         if (lamiaConvertInfo != null) {
             lamiaConvertInfo.setReturn(true);
+            return false;
         }
-        return lamiaConvertInfo == null;
+
+        scanLambdaExpression(statement);
+        return true;
     }
 
 
     @Override
     public void visitorEnd() {
         if (currentBlock != null) {
-            lamiaConvertHolderBlock.add(currentBlock);
+            updateBlocks.add(currentBlock);
         }
     }
 
@@ -183,7 +248,7 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
     }
 
     public List<LamiaConvertHolderBlock> getResult() {
-        return lamiaConvertHolderBlock;
+        return updateBlocks;
     }
 
 }

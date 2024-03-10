@@ -28,11 +28,11 @@ import java.util.function.Function;
 
 public class JCUtils {
 
-    private final Attr attr;
-    private final Enter enter;
-    private final Annotate annotate;
-    private final Names names;
-    final Context context;
+    public final Attr attr;
+    public final Enter enter;
+    public final Annotate annotate;
+    public final Names names;
+    public final Context context;
     TreeMaker treeMaker;
     JavacElements elementUtils;
     public static JCUtils instance;
@@ -104,6 +104,12 @@ public class JCUtils {
         return attr.attribType(expression, classEnv);
     }
 
+    public Type attribStat(JCTree node, JCTree.JCVariableDecl parameter) {
+        JCTree.JCClassDecl jcClassDecl = (JCTree.JCClassDecl) node;
+        Env<AttrContext> env = enter.getClassEnv(jcClassDecl.sym);
+        return attr.attribStat(parameter, env);
+    }
+
     public JCTree.JCExpression memberAccess(String components) {
         if (components == null) {
             return null;
@@ -166,9 +172,13 @@ public class JCUtils {
     }
 
     public JCTree.JCReturn createReturn(String returnName) {
-
         return treeMaker.Return(treeMaker.Ident(elementUtils.getName(returnName)));
     }
+
+    public JCTree.JCReturn createReturn(JCTree.JCExpression expression) {
+        return treeMaker.Return(expression);
+    }
+
 
     public JCTree.JCReturn createReturnToStringType(String returnContext) {
         return treeMaker.Return(geStringExpression(returnContext));
@@ -397,6 +407,10 @@ public class JCUtils {
     }
 
 
+    public JCTree.JCStatement toJCStatement(JCTree.JCExpression expression) {
+        return treeMaker.Exec(expression);
+    }
+
     /**
      * 强转类型
      *
@@ -415,6 +429,11 @@ public class JCUtils {
         return List.from(list);
     }
 
+    public Env<AttrContext> getEnv(Symbol.TypeSymbol symbol) {
+        Env<AttrContext> env = enter.getEnv(symbol);
+        return null;
+    }
+
 
     public TreeMaker getTreeMaker() {
         return treeMaker;
@@ -427,4 +446,6 @@ public class JCUtils {
     public Context getContext() {
         return context;
     }
+
+
 }

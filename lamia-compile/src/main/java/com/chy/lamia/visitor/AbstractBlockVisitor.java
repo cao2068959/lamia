@@ -1,6 +1,8 @@
 package com.chy.lamia.visitor;
 
 
+import com.chy.lamia.utils.Lists;
+import com.sun.source.tree.BlockTree;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.util.List;
 import lombok.Getter;
@@ -14,7 +16,7 @@ public abstract class AbstractBlockVisitor {
      * 要遍历的 block
      */
     @Getter
-    public JCTree.JCBlock block;
+    public BlockTree block;
 
     /**
      * 这个 block所属的 class
@@ -37,13 +39,31 @@ public abstract class AbstractBlockVisitor {
         if (statements == null) {
             return;
         }
-        this.block = block;
-        this.classTree = classTree;
-        this.processedFinishStatement = new ArrayList<>();
+        initParam(block, classTree);
         visitorAllBlock(statements);
         visitorEnd();
     }
 
+    public void accept(SimpleBlockTree block, JCTree classTree) {
+        if (block == null) {
+            return;
+        }
+        JCTree.JCStatement statement = block.getStatement();
+        if (statement == null) {
+            return;
+        }
+        initParam(block, classTree);
+        visitorAllBlock(Lists.ofSunList(statement));
+        visitorEnd();
+    }
+
+
+
+    private void initParam(BlockTree block, JCTree classTree) {
+        this.block = block;
+        this.classTree = classTree;
+        this.processedFinishStatement = new ArrayList<>();
+    }
 
     private void visitorAllBlock(List<JCTree.JCStatement> statements) {
 
