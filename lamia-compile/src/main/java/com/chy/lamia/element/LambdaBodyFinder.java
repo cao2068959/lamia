@@ -1,10 +1,7 @@
 package com.chy.lamia.element;
 
-import com.chy.lamia.utils.JCUtils;
 import com.sun.source.tree.LambdaExpressionTree;
 import com.sun.source.util.TreeScanner;
-import com.sun.tools.javac.comp.AttrContext;
-import com.sun.tools.javac.comp.Env;
 import com.sun.tools.javac.tree.JCTree;
 import lombok.Getter;
 
@@ -15,7 +12,7 @@ public class LambdaBodyFinder extends TreeScanner<Void, Void> {
 
     private final JCTree classTree;
     @Getter
-    List<JCTree.JCLambda> result;
+    List<JCLambdaWrapper> result;
 
     public LambdaBodyFinder(JCTree classTree) {
         this.classTree = classTree;
@@ -23,12 +20,9 @@ public class LambdaBodyFinder extends TreeScanner<Void, Void> {
 
     @Override
     public Void visitLambdaExpression(LambdaExpressionTree node, Void aVoid) {
-        JCUtils jcUtils = JCUtils.instance;
         if (node instanceof JCTree.JCLambda) {
             JCTree.JCLambda lambda = (JCTree.JCLambda) node;
-            Env<AttrContext> env = jcUtils.attr.lambdaEnv(lambda, jcUtils.enter.getClassEnv(((JCTree.JCClassDecl) classTree).sym));
-            jcUtils.attr.attrib(env);
-            System.out.println(lambda);
+            addResult(lambda);
         }
         return null;
     }
@@ -37,7 +31,7 @@ public class LambdaBodyFinder extends TreeScanner<Void, Void> {
         if (result == null) {
             result = new ArrayList<>();
         }
-        result.add(node);
+        result.add(new JCLambdaWrapper(node, classTree));
     }
 
 }

@@ -320,15 +320,14 @@ public class JCUtils {
         return treeMaker.Binary(JCTree.Tag.NE, var, getNullExpression());
     }
 
-
-    public Optional<String> genRandomMethod(String className) {
-        JCTree tree = elementUtils.getTree(elementUtils.getTypeElement(className));
-        if (tree == null) {
-            return Optional.empty();
-        }
-        RandomMethodCreateVisitor visitor = new RandomMethodCreateVisitor("random", false);
-        tree.accept(visitor);
-        return Optional.ofNullable(visitor.getRandomMethodName());
+    /**
+     * 进行类型推断
+     * @param lambda
+     * @param classTree
+     */
+    public void attrib(JCTree.JCLambda lambda, JCTree classTree) {
+        Env<AttrContext> env = attr.lambdaEnv(lambda, enter.getClassEnv(((JCTree.JCClassDecl) classTree).sym));
+        attr.attrib(env);
     }
 
     /**
@@ -390,7 +389,6 @@ public class JCUtils {
      * @param data 要转换的类型本身
      * @return
      */
-
     public TypeDefinition toTypeDefinition(JCTree node, JCTree data) {
         if (data instanceof JCTree.JCTypeApply) {
             JCTree.JCTypeApply jcTypeApply = (JCTree.JCTypeApply) data;
@@ -446,6 +444,7 @@ public class JCUtils {
     public Context getContext() {
         return context;
     }
+
 
 
 }

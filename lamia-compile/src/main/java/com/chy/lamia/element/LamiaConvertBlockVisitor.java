@@ -13,9 +13,7 @@ import com.chy.lamia.entity.factory.TypeDefinitionFactory;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.visitor.AbstractBlockVisitor;
 import com.chy.lamia.visitor.SimpleBlockTree;
-import com.sun.source.tree.LambdaExpressionTree;
 import com.sun.source.tree.Tree;
-import com.sun.source.tree.VariableTree;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.tree.JCTree;
 
@@ -130,24 +128,21 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
     private void scanLambdaExpression(Tree tree) {
         LambdaBodyFinder lambdaBodyFinder = new LambdaBodyFinder(classTree);
         lambdaBodyFinder.scan(tree, null);
-        List<JCTree.JCLambda> lambdaExpressionTrees = lambdaBodyFinder.getResult();
+        List<JCLambdaWrapper> lambdaExpressionTrees = lambdaBodyFinder.getResult();
         if (lambdaExpressionTrees == null) {
             return;
         }
 
-        for (LambdaExpressionTree lambdaExpressionTree : lambdaExpressionTrees) {
-            lambdaExpressionHandle( tree,lambdaExpressionTree);
+        for (JCLambdaWrapper lambdaExpressionTree : lambdaExpressionTrees) {
+            lambdaExpressionHandle(lambdaExpressionTree);
         }
     }
 
-    private void lambdaExpressionHandle(Tree tree, LambdaExpressionTree lambdaExpressionTree) {
+    private void lambdaExpressionHandle(JCLambdaWrapper lambdaExpressionTree) {
         Tree body = lambdaExpressionTree.getBody();
-        for (VariableTree parameter : lambdaExpressionTree.getParameters()) {
-            JCUtils.instance.attribStat((JCTree) tree, (JCTree.JCVariableDecl) parameter);
-        }
 
         if (body instanceof JCTree.JCBlock) {
-            blockVisit((JCTree.JCBlock) body);
+            getLambdaParamVisitor(lambdaExpressionTree).accept((JCTree.JCBlock) body, classTree);
             return;
         }
         // 没有 {} 的单纯的lambda 的形式
@@ -164,9 +159,16 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
 
             SimpleBlockTree blockTree = new SimpleBlockTree(statement);
             //继续去扫描代码块里面的代码
-            getNewVisitor().accept(blockTree, classTree);
+            getLambdaParamVisitor(lambdaExpressionTree).accept(blockTree, classTree);
             return;
         }
+    }
+
+    private LamiaConvertBlockVisitor getLambdaParamVisitor(JCLambdaWrapper lambdaWrapper) {
+        LamiaConvertBlockVisitor newVisitor = getNewVisitor();
+        // 把lambda 表达式的参数也放进去
+        lambdaWrapper.params().forEach(param -> newVisitor.vars.put(param.getVarRealName(), param));
+        return newVisitor;
     }
 
 
