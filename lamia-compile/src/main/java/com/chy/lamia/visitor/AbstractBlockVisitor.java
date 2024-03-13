@@ -44,7 +44,7 @@ public abstract class AbstractBlockVisitor {
         visitorEnd();
     }
 
-    public void accept(SimpleBlockTree block, JCTree classTree) {
+    public void accept(LambdaLineBlockTree block, JCTree classTree) {
         if (block == null) {
             return;
         }

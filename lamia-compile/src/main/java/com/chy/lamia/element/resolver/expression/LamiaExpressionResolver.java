@@ -74,6 +74,7 @@ public class LamiaExpressionResolver {
         if (methodWrappers.isEmpty()) {
             return;
         }
+
         ConfigParseContext context = new ConfigParseContext();
 
         int iSize = methodWrappers.size() - 1;
@@ -123,8 +124,9 @@ public class LamiaExpressionResolver {
     private List<ArgWrapper> toArgWrapper(List<JCTree.JCExpression> list) {
         List<ArgWrapper> result = new ArrayList<>();
         for (JCTree.JCExpression data : list) {
-            ArgWrapper argWrapper = new RuleTypeArgWrapper();
             JcExpression jcExpression = new JcExpression(data);
+            ArgWrapper argWrapper = new RuleTypeArgWrapper(jcExpression, data.toString());
+
             argWrapper.setExpression(jcExpression);
             argWrapper.setName(data.toString());
             result.add(argWrapper);

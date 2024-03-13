@@ -2,7 +2,9 @@ package com.chy.lamia.element;
 
 import com.chy.lamia.convert.core.entity.LamiaConvertInfo;
 import com.chy.lamia.entity.StatementWrapper;
+import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.utils.Lists;
+import com.chy.lamia.visitor.LambdaLineBlockTree;
 import com.sun.source.tree.BlockTree;
 import com.sun.tools.javac.tree.JCTree;
 import lombok.Getter;
@@ -58,7 +60,15 @@ public class LamiaConvertHolderBlock {
 
         if (parent instanceof JCTree.JCBlock) {
             ((JCTree.JCBlock) parent).stats = Lists.toSunList(newStatement);
+            return;
         }
 
+        // 如果本身就是一个单行的 lambda 表达式，那么把他转成 块状的方式
+        if (parent instanceof LambdaLineBlockTree) {
+            LambdaLineBlockTree lambdaLineBlockTree = (LambdaLineBlockTree) parent;
+            JCTree.JCBlock block = JCUtils.instance.createBlock(newStatement);
+            lambdaLineBlockTree.getJcLambdaWrapper().setBody(block);
+            return;
+        }
     }
 }

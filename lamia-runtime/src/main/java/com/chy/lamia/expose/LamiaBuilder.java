@@ -21,7 +21,7 @@ public class LamiaBuilder {
      *
      * @return
      */
-    public LamiaRule rule(RuleType type) {
+    public LamiaRule rule(RuleType... type) {
         return new LamiaRule();
     }
 

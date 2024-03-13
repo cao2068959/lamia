@@ -12,7 +12,7 @@ import com.chy.lamia.element.resolver.expression.LamiaExpressionResolver;
 import com.chy.lamia.entity.factory.TypeDefinitionFactory;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.visitor.AbstractBlockVisitor;
-import com.chy.lamia.visitor.SimpleBlockTree;
+import com.chy.lamia.visitor.LambdaLineBlockTree;
 import com.sun.source.tree.Tree;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.tree.JCTree;
@@ -72,6 +72,7 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
     public boolean expressionStatementVisit(JCTree.JCExpressionStatement expressionStatement) {
         JCTree.JCExpression expression = expressionStatement.expr;
         if (!(expression instanceof JCTree.JCAssign)) {
+            scanLambdaExpression(expression);
             return true;
         }
         JCTree.JCAssign assign = (JCTree.JCAssign) expression;
@@ -148,16 +149,9 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
         // 没有 {} 的单纯的lambda 的形式
         if (body instanceof JCTree.JCExpression) {
             JCTree.JCExpression expression = (JCTree.JCExpression) body;
-            JCTree.JCStatement statement;
-            // 生成的代码需要 重新生成{} 这里要先判断这个表达式是否有返回值
-            if (expression.isPoly()) {
-                // 有返回值的，生成 return 语句
-                statement = JCUtils.instance.createReturn(expression);
-            } else {
-                statement = JCUtils.instance.toJCStatement(expression);
-            }
-
-            SimpleBlockTree blockTree = new SimpleBlockTree(statement);
+            // 如果不是块lambda那么默认以 return的方式来处理
+            JCTree.JCStatement statement  = JCUtils.instance.createReturn(expression);
+            LambdaLineBlockTree blockTree = new LambdaLineBlockTree(statement, lambdaExpressionTree);
             //继续去扫描代码块里面的代码
             getLambdaParamVisitor(lambdaExpressionTree).accept(blockTree, classTree);
             return;

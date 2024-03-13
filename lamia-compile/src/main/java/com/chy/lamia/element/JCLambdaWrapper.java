@@ -24,6 +24,10 @@ public class JCLambdaWrapper {
         return lambda.body;
     }
 
+    public void setBody(JCTree tree) {
+        lambda.body = tree;
+    }
+
     public List<VarDefinition> params() {
         return lambda.params.stream().map(param -> {
             LazyTypeVarDefinition varDefinition = new LazyTypeVarDefinition(param.name.toString());

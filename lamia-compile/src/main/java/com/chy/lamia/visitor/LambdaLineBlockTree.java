@@ -1,5 +1,6 @@
 package com.chy.lamia.visitor;
 
+import com.chy.lamia.element.JCLambdaWrapper;
 import com.chy.lamia.utils.Lists;
 import com.sun.source.tree.BlockTree;
 import com.sun.source.tree.StatementTree;
@@ -9,13 +10,15 @@ import lombok.Getter;
 
 import java.util.List;
 
-public class SimpleBlockTree implements BlockTree {
-
+public class LambdaLineBlockTree implements BlockTree {
+    @Getter
+    private final JCLambdaWrapper jcLambdaWrapper;
     @Getter
     JCTree.JCStatement statement;
 
-    public SimpleBlockTree(JCTree.JCStatement statement) {
+    public LambdaLineBlockTree(JCTree.JCStatement statement, JCLambdaWrapper jcLambdaWrapper) {
         this.statement = statement;
+        this.jcLambdaWrapper = jcLambdaWrapper;
     }
 
     @Override

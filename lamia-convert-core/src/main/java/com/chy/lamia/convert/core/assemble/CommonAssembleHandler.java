@@ -175,6 +175,10 @@ public abstract class CommonAssembleHandler implements AssembleHandler {
             return null;
         }
         useMaterial.add(varName);
+        // 这个字段将会被忽略
+        if (material.isIgnoreField(target.getType().getClassPath(), varName)) {
+            return null;
+        }
 
         // 万能材料，适配一下
         if (material instanceof OmnipotentMaterial) {

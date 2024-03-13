@@ -34,10 +34,14 @@ public class RuleHandler implements BuilderHandler {
 
 
     public List<RuleType> fetchRuleType(List<ArgWrapper> args) {
+        if (args == null || args.isEmpty()) {
+            return null;
+        }
+
         List<RuleType> result = new ArrayList<>();
         for (ArgWrapper arg : args) {
-            if (arg instanceof RuleTypeArgWrapper){
-                RuleTypeArgWrapper ruleTypeArgWrapper = (RuleTypeArgWrapper)arg;
+            if (arg instanceof RuleTypeArgWrapper) {
+                RuleTypeArgWrapper ruleTypeArgWrapper = (RuleTypeArgWrapper) arg;
                 result.add(ruleTypeArgWrapper.getRuleType());
                 continue;
             }

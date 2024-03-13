@@ -52,5 +52,12 @@ public class Material {
         return result;
     }
 
+    public boolean isIgnoreField(String classPath, String fieldName) {
+        if (ruleInfo == null) {
+            return false;
+        }
+        return ruleInfo.isIgnoreField(classPath, fieldName);
+    }
+
 
 }

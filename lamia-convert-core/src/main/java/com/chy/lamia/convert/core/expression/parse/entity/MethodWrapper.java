@@ -44,4 +44,11 @@ public class MethodWrapper {
         return argWrapper.getExpression();
     }
 
+
+    @Override
+    public String toString() {
+        return "MethodWrapper{" +
+                "name='" + name + '\'' +
+                '}';
+    }
 }
