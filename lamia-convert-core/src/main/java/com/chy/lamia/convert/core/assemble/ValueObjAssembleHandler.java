@@ -33,6 +33,7 @@ public class ValueObjAssembleHandler extends CommonAssembleHandler {
 
 
     public ValueObjAssembleHandler(ConvertFactory convertFactory, TypeDefinition targetType, VarDefinition target) {
+        super(targetType);
         TypeResolverFactory typeResolverFactory = ComponentFactory.getInstanceComponent(convertFactory, TypeResolverFactory.class);
 
         // 解析这个类型, 获取这个类型里面的 方法/变量 等

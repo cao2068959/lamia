@@ -71,20 +71,34 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
     @Override
     public boolean expressionStatementVisit(JCTree.JCExpressionStatement expressionStatement) {
         JCTree.JCExpression expression = expressionStatement.expr;
-        if (!(expression instanceof JCTree.JCAssign)) {
+        if (expression instanceof JCTree.JCAssign) {
+            return assignExpressionHandle((JCTree.JCAssign) expression);
+        }
+
+        if (expression instanceof JCTree.JCMethodInvocation) {
+            return methodInvocationExpressionHandle((JCTree.JCMethodInvocation) expression);
+        }
+
+        return true;
+
+    }
+
+    private boolean methodInvocationExpressionHandle(JCTree.JCMethodInvocation expression) {
+        LamiaConvertInfo lamiaConvertInfo = lamiaConvertStatementCollect(expression);
+        if (lamiaConvertInfo == null) {
             scanLambdaExpression(expression);
             return true;
         }
-        JCTree.JCAssign assign = (JCTree.JCAssign) expression;
+        return false;
+    }
 
+    private boolean assignExpressionHandle(JCTree.JCAssign assign) {
         //去收集写了 Lamia.convert 的语句
         LamiaConvertInfo lamiaConvertInfo = lamiaConvertStatementCollect(assign.rhs);
-
-        String name = Optional.ofNullable(assign.lhs).map(Objects::toString).orElse(null);
-
         if (lamiaConvertInfo != null) {
-            lamiaConvertInfo.setVarName(name);
-            lamiaConvertInfo.setCreatedType(false);
+            String name = Optional.ofNullable(assign.lhs).map(Objects::toString).orElse(null);
+            lamiaConvertInfo.setResultVarName(name);
+            lamiaConvertInfo.setDeclareResultVarType(false);
             // 这一行就是 lamia表达式，就不记录了
             return false;
         }
@@ -113,7 +127,7 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
         //去收集写了 Lamia.convert 的语句
         LamiaConvertInfo lamiaConvertInfo = lamiaConvertStatementCollect(statement.init);
         if (lamiaConvertInfo != null) {
-            lamiaConvertInfo.setVarName(varDefinition.getVarRealName());
+            lamiaConvertInfo.setResultVarName(varDefinition.getVarRealName());
             // 这一行就是 lamia表达式，就不记录了
             return false;
         }
@@ -150,7 +164,7 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
         if (body instanceof JCTree.JCExpression) {
             JCTree.JCExpression expression = (JCTree.JCExpression) body;
             // 如果不是块lambda那么默认以 return的方式来处理
-            JCTree.JCStatement statement  = JCUtils.instance.createReturn(expression);
+            JCTree.JCStatement statement = JCUtils.instance.createReturn(expression);
             LambdaLineBlockTree blockTree = new LambdaLineBlockTree(statement, lambdaExpressionTree);
             //继续去扫描代码块里面的代码
             getLambdaParamVisitor(lambdaExpressionTree).accept(blockTree, classTree);

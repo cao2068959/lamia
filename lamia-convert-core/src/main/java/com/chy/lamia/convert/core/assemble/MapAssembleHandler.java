@@ -23,6 +23,7 @@ public class MapAssembleHandler extends CommonAssembleHandler {
 
 
     public MapAssembleHandler(VarDefinition target) {
+        super(target.getType());
         this.target = target;
     }
 

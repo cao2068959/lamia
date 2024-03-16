@@ -34,6 +34,7 @@ public abstract class CommonAssembleHandler implements AssembleHandler {
      */
     protected final Set<String> useMaterial = new HashSet<>();
     protected final TreeFactory treeFactory;
+    private final TypeDefinition targetType;
 
     /**
      * 生成新实例的名称
@@ -47,8 +48,9 @@ public abstract class CommonAssembleHandler implements AssembleHandler {
     private List<MaterialStatementBuilder> materialStatementBuilders = new ArrayList<>();
     protected LamiaConvertInfo lamiaConvertInfo;
 
-    public CommonAssembleHandler() {
+    public CommonAssembleHandler(TypeDefinition targetType) {
         this.treeFactory = ComponentFactory.getComponent(TreeFactory.class);
+        this.targetType = targetType;
     }
 
     /**
@@ -79,15 +81,11 @@ public abstract class CommonAssembleHandler implements AssembleHandler {
         } else {
             this.newInstant = target.getVarRealName();
             // 如果不是return，那么需要用一个变量来承接一下
-            if (!lamiaConvertInfo.isReturn() && lamiaConvertInfo.getVarName() != null) {
-                MaterialStatementBuilder statementBuilder = new MaterialStatementBuilder();
-
-                statementBuilder.setFunction(() -> {
-                    Statement variableDecl = treeFactory.createVar(lamiaConvertInfo.getVarName(),
-                            lamiaConvertInfo.getTargetType().getClassPath(), treeFactory.toExpression(newInstant));
-                    return Lists.of(variableDecl);
-                });
-                addStatementBuilders(statementBuilder);
+            if (!lamiaConvertInfo.isReturn()) {
+                if (lamiaConvertInfo.getResultVarName() != null){
+                    // 生成对应的 赋值语句
+                    addStatementBuilders(genResultVarAssign());
+                }
             }
 
         }
@@ -95,6 +93,22 @@ public abstract class CommonAssembleHandler implements AssembleHandler {
         // 生成对应的 set 赋值语句
         createConvertExpression(materialMap);
         return materialStatementBuilders;
+    }
+
+    private MaterialStatementBuilder genResultVarAssign() {
+        MaterialStatementBuilder statementBuilder = new MaterialStatementBuilder();
+        statementBuilder.setFunction(() -> {
+            // 如果需要声明类型
+            if (lamiaConvertInfo.isDeclareResultVarType()){
+                Statement variableDecl = treeFactory.createVar(lamiaConvertInfo.getResultVarName(),
+                        lamiaConvertInfo.getTargetType().getClassPath(), treeFactory.toExpression(newInstant));
+                return Lists.of(variableDecl);
+            }
+            // 不需要申明类型的话，直接赋值
+            Statement statement = treeFactory.varAssign(lamiaConvertInfo.getResultVarName(), treeFactory.toExpression(newInstant));
+            return Lists.of(statement);
+        });
+        return statementBuilder;
     }
 
     /**
@@ -110,7 +124,7 @@ public abstract class CommonAssembleHandler implements AssembleHandler {
         Expression newClass = treeFactory.newClass(classPath, newInstanceParam);
 
         // 变量是否已经存在,是否需要去创建类型
-        if (lamiaConvertInfo.isCreatedType()) {
+        if (lamiaConvertInfo.isDeclareResultVarType()) {
             return treeFactory.createVar(instantName, classPath, newClass);
         }
         return treeFactory.varAssign(instantName, newClass);
@@ -143,7 +157,7 @@ public abstract class CommonAssembleHandler implements AssembleHandler {
     }
 
     public String genNewInstantName() {
-        String oldResultName = lamiaConvertInfo.getVarName();
+        String oldResultName = lamiaConvertInfo.getResultVarName();
         String varName;
         if (oldResultName == null) {
             // 新实例的名称生成
@@ -176,7 +190,7 @@ public abstract class CommonAssembleHandler implements AssembleHandler {
         }
         useMaterial.add(varName);
         // 这个字段将会被忽略
-        if (material.isIgnoreField(target.getType().getClassPath(), varName)) {
+        if (material.isIgnoreField(targetType.getClassPath(), varName)) {
             return null;
         }
 

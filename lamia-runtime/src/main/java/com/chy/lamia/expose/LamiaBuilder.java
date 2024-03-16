@@ -6,12 +6,28 @@ import com.chy.lamia.expose.rule.RuleType;
 
 public class LamiaBuilder {
 
-
+    /**
+     * 最终构建对象，需要 强转来指定类型, 更加灵活，可以指定泛型
+     *
+     * @return
+     */
     public Object build() {
         throw new RuntimeException("转换失败，无效的表达式");
     }
 
-    public <T> T build(T t) {
+    /**
+     * 最终构建对象，可以直接指定类型，不需要强转
+     * */
+    public <T> T build(Class<T> type) {
+        throw new RuntimeException("转换失败，无效的表达式");
+    }
+
+    /**
+     * 最终构建对象 使用传入的对象作为接收对象，不会重新去创建对象
+     *
+     * @param data
+     */
+    public void build(Object data) {
         throw new RuntimeException("转换失败，无效的表达式");
     }
 

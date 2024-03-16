@@ -51,7 +51,7 @@ public class LamiaExpressionResolver {
             return null;
         }
 
-        LamiaExpression result = parseMethod(methodInvocation);
+        LamiaExpression result = parseMethod(methodInvocation, contextTree);
         // 表达式解析不出来说明有问题
         if (result == null) {
             return null;
@@ -62,8 +62,8 @@ public class LamiaExpressionResolver {
         return result;
     }
 
-    private void parseBuildConfig(LamiaExpression result, JCTree.JCMethodInvocation methodInvocation) {
-        List<MethodWrapper> methodWrappers = disassembleMethod(methodInvocation);
+    private void parseBuildConfig(LamiaExpression result, JCTree.JCMethodInvocation methodInvocation, JCTree contextTree) {
+        List<MethodWrapper> methodWrappers = disassembleMethod(methodInvocation, contextTree);
         // 第一个是 endMethod,已经解析过了, 所以把他移除
         MethodWrapper buildMethod = methodWrappers.remove(0);
         Expression target = buildMethod.useOnlyArgs();
@@ -97,7 +97,7 @@ public class LamiaExpressionResolver {
     }
 
 
-    private List<MethodWrapper> disassembleMethod(JCTree.JCMethodInvocation methodInvocation) {
+    private List<MethodWrapper> disassembleMethod(JCTree.JCMethodInvocation methodInvocation, JCTree contextTree) {
 
         List<MethodWrapper> result = new ArrayList<>();
 
@@ -115,18 +115,18 @@ public class LamiaExpressionResolver {
 
             JCTree.JCFieldAccess fieldAccess = (JCTree.JCFieldAccess) expression;
             MethodWrapper methodWrapper = new MethodWrapper(fieldAccess.name.toString());
-            methodWrapper.setArgs(toArgWrapper(nextMethod.args));
+            methodWrapper.setArgs(toArgWrapper(nextMethod.args, contextTree));
             result.add(methodWrapper);
             next = fieldAccess.selected;
         }
     }
 
-    private List<ArgWrapper> toArgWrapper(List<JCTree.JCExpression> list) {
+    private List<ArgWrapper> toArgWrapper(List<JCTree.JCExpression> list, JCTree contextTree) {
         List<ArgWrapper> result = new ArrayList<>();
         for (JCTree.JCExpression data : list) {
             JcExpression jcExpression = new JcExpression(data);
             ArgWrapper argWrapper = new RuleTypeArgWrapper(jcExpression, data.toString());
-
+            jcExpression.setContextTree(contextTree);
             argWrapper.setExpression(jcExpression);
             argWrapper.setName(data.toString());
             result.add(argWrapper);
@@ -135,7 +135,7 @@ public class LamiaExpressionResolver {
     }
 
 
-    private LamiaExpression parseMethod(JCTree.JCMethodInvocation data) {
+    private LamiaExpression parseMethod(JCTree.JCMethodInvocation data, JCTree contextTree) {
         JCTree.JCFieldAccess fieldAccess = (JCTree.JCFieldAccess) data.meth;
         String name = fieldAccess.name.toString();
 
@@ -155,7 +155,7 @@ public class LamiaExpressionResolver {
 
         if ("build".equals(name)) {
             LamiaExpression result = new LamiaExpression();
-            parseBuildConfig(result, data);
+            parseBuildConfig(result, data, contextTree);
             return result;
         }
 

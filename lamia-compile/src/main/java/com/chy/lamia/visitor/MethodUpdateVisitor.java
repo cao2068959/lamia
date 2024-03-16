@@ -90,7 +90,7 @@ public class MethodUpdateVisitor extends TreeTranslator {
                 // 生成对应的转换语句
                 List<Statement> makeResult = ConvertFactory.INSTANCE.make(lamiaConvertInfo);
 
-                makeResult.stream().map(s-> (JCTree.JCStatement)s.get()).forEach(newStatement::add);
+                makeResult.stream().map(s -> (JCTree.JCStatement) s.get()).forEach(newStatement::add);
             } else {
                 newStatement.add(statement);
             }
@@ -98,7 +98,6 @@ public class MethodUpdateVisitor extends TreeTranslator {
         //替换原来的老代码
         lamiaConvertHolderBlock.modifyMethodBody(newStatement);
     }
-
 
 
     /**

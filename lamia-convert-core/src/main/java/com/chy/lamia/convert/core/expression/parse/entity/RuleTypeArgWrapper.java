@@ -4,7 +4,7 @@ import com.chy.lamia.convert.core.components.entity.Expression;
 import com.chy.lamia.expose.rule.RuleType;
 import lombok.Getter;
 
-public abstract class RuleTypeArgWrapper extends ArgWrapper {
+public  class RuleTypeArgWrapper extends ArgWrapper {
 
     @Getter
     RuleType ruleType;

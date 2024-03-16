@@ -25,7 +25,7 @@ public class LamiaConvertInfo {
     TypeDefinition targetType;
 
     /**
-     * 要转的实例
+     * 要转换成的变量
      */
     @Getter
     @Setter
@@ -43,13 +43,19 @@ public class LamiaConvertInfo {
     @Setter
     LamiaExpression lamiaExpression;
 
+    /**
+     * 转换的结果变量名称
+     */
     @Getter
     @Setter
-    String varName;
+    String resultVarName;
 
+    /**
+     * 是否需要定义结果变量的类型，如果不需要说明这个结果变量是一个已经定义好的变量
+     */
     @Getter
     @Setter
-    boolean createdType = true;
+    boolean declareResultVarType = true;
 
     @Getter
     @Setter

@@ -58,7 +58,6 @@ public abstract class AbstractBlockVisitor {
     }
 
 
-
     private void initParam(BlockTree block, JCTree classTree) {
         this.block = block;
         this.classTree = classTree;

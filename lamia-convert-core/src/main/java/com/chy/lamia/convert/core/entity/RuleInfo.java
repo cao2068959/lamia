@@ -23,6 +23,15 @@ public class RuleInfo {
             }
             ruleTypes.addAll(srcRuleTypes);
         }
+
+        Set<String> targetIgnoreFields = ruleInfo.getIgnoreFields();
+        if (targetIgnoreFields != null) {
+            if (ignoreFields == null) {
+                ignoreFields = new HashSet<>();
+            }
+            ignoreFields.addAll(targetIgnoreFields);
+        }
+
     }
 
     public boolean isIgnoreField(String classPath, String fieldName) {
@@ -44,7 +53,7 @@ public class RuleInfo {
         ignoreFields.add(getFullFieldName(classPath, fieldName));
     }
 
-    public void init(){
+    public void init() {
 
     }
 }

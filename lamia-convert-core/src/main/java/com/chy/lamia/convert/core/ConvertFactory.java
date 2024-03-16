@@ -165,12 +165,17 @@ public class ConvertFactory {
         }
 
         // 解析对应的类型
-        TypeResolver typeResolver = ComponentFactory.getInstanceComponent(this, TypeResolverFactory.class).getTypeResolver(type);
+        TypeResolver typeResolver = ComponentFactory.getInstanceComponent(this, TypeResolverFactory.class)
+                .getTypeResolver(type);
         Map<String, Getter> instantGetters = typeResolver.getInstantGetters();
 
         List<Material> result = new ArrayList<>();
 
+        RuleInfo ruleInfo = convertVarInfo.getRuleInfo();
         instantGetters.forEach((fieldName, getter) -> {
+            if (ruleInfo != null && ruleInfo.isIgnoreField(type.getClassPath(), fieldName)) {
+                return;
+            }
             Material material = new Material();
             material.setVarDefinition(varDefinition);
             material.setSupplyType(getter.getType());
