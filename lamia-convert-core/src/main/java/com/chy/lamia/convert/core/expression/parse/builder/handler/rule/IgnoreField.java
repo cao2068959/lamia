@@ -1,6 +1,5 @@
 package com.chy.lamia.convert.core.expression.parse.builder.handler.rule;
 
-import com.chy.lamia.convert.core.components.ComponentFactory;
 import com.chy.lamia.convert.core.components.entity.Expression;
 import com.chy.lamia.convert.core.entity.LamiaExpression;
 import com.chy.lamia.convert.core.entity.RuleInfo;
@@ -25,18 +24,29 @@ public class IgnoreField implements BuilderHandler {
         RuleInfo ruleInfos = lamiaExpression.getRuleInfos();
         allArgs.forEach(arg -> {
             Expression expression = arg.getExpression();
-            expression
-
+            Pair<String, String> typeAndVar = parseLambda(expression);
+            ruleInfos.addIgnoreField(typeAndVar.getLeft(), typeAndVar.getRight());
         });
-        System.out.println("IgnoreField");
-
     }
 
-    private Pair<String,String> parseLambda(Expression expression) {
-       if (expression == null) {
-           return null;
-       }
-        ComponentFactory.
+    private Pair<String, String> parseLambda(Expression expression) {
+        if (expression == null) {
+            return null;
+        }
+        Pair<String, String> result = expression.parseMethodReferenceOperator();
+        // 这里获取到的value是 方法名称如: getName , 这边把他转换 name，如果不是 get 开头的话，就直接返回
+        String value = result.getRight();
+        value = getterToVar(value);
+        result.setRight(value);
+        return result;
     }
+
+    private String getterToVar(String value) {
+        if (value.startsWith("get")) {
+            return value.substring(3, 4).toLowerCase() + value.substring(4);
+        }
+        return value;
+    }
+
 
 }
