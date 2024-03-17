@@ -198,19 +198,15 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
 
         Expression targetExpression = lamiaExpression.getTarget();
 
+        // 如果在表达式 设置了 build(*) ，那么就根据Build的参数去找对应的变量, 如果没有就根据强转类型去找最终要转换的类型
         if (targetExpression != null) {
-            String targetName = targetExpression.get().toString();
-            VarDefinition varDefinition = vars.get(targetName);
-            if (varDefinition == null) {
-                throw new RuntimeException("表达式[" + jcExpression.toString() + "] 设置的target 实例有误[" + targetName + "]");
-            }
-            lamiaConvertInfo.setTarget(varDefinition);
-            lamiaConvertInfo.setTargetType(varDefinition.getType());
+            parseBuildTarget(lamiaConvertInfo, targetExpression, jcExpression);
+
 
         } else {
             TypeDefinition targetType = lamiaExpression.getTargetType();
             if (targetType == null) {
-                throw new RuntimeException("表达式[" + jcExpression.toString() + "] 没有设置强转类型");
+                throw new RuntimeException("表达式[" + jcExpression.toString() + "] 没有设置要转换的类型，可以设置对应的强转类型，或者在 build() 方法中指定要转换的类型或对象");
             }
             lamiaConvertInfo.setTargetType(targetType);
         }
@@ -223,6 +219,40 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
         getCurrentBlock().replaceStatement(lamiaConvertInfo);
 
         return lamiaConvertInfo;
+    }
+
+    private void parseBuildTarget(LamiaConvertInfo lamiaConvertInfo, Expression buildParam,
+                                  JCTree.JCExpression jcExpression) {
+        Object buildParamJcExpression = buildParam.get();
+        // 直接在build() 中写了一个变量名引用的，直接去上下文中去找这个变量是什么
+        if (buildParamJcExpression instanceof JCTree.JCIdent) {
+            String targetName = buildParamJcExpression.toString();
+            VarDefinition varDefinition = vars.get(targetName);
+            if (varDefinition == null) {
+                throw new RuntimeException("表达式[" + jcExpression.toString() + "] 设置的target 实例有误[" + targetName + "]");
+            }
+            lamiaConvertInfo.setTarget(varDefinition);
+            lamiaConvertInfo.setTargetType(varDefinition.getType());
+            return;
+        }
+
+        // 在build中写的是 变量.属性 的形式， 如 build(User.class), 这里只支持 .class 的方式，不支持 build(map.getUserVO())
+        if (buildParamJcExpression instanceof JCTree.JCFieldAccess){
+            JCTree.JCFieldAccess fieldAccess = (JCTree.JCFieldAccess) buildParamJcExpression;
+            String targetName = fieldAccess.name.toString();
+            if ("class".equals(targetName)) {
+                JCTree.JCExpression typeSimpleName = fieldAccess.selected;
+                Type type = JCUtils.instance.attribType(classTree, typeSimpleName);
+                lamiaConvertInfo.setTargetType(new TypeDefinition(type.toString()));
+            }else {
+                throw new RuntimeException("表达式[" + jcExpression.toString() + "] 设置的target 实例有误[" + fieldAccess + "] 请使用 .class 的形式来设置对应的类型");
+            }
+        }
+
+
+
+
+
     }
 
     private LamiaConvertBlockVisitor getNewVisitor() {
