@@ -1,9 +1,6 @@
 package com.chy.lamia.convert.core.assemble;
 
-import com.chy.lamia.convert.core.entity.ConvertVarInfo;
-import com.chy.lamia.convert.core.entity.RuleInfo;
-import com.chy.lamia.convert.core.entity.TypeDefinition;
-import com.chy.lamia.convert.core.entity.VarDefinition;
+import com.chy.lamia.convert.core.entity.*;
 import com.chy.lamia.convert.core.expression.imp.builder.VarExpressionFunction;
 import lombok.Getter;
 import lombok.Setter;
@@ -38,26 +35,24 @@ public class Material {
      */
     VarExpressionFunction varExpressionFunction;
 
-    RuleInfo ruleInfo;
+    BuildInfo buildInfo;
 
+    public Material(BuildInfo buildInfo) {
+        this.buildInfo = buildInfo;
+    }
 
     public static Material simpleMaterial(ConvertVarInfo convertVarInfo) {
         VarDefinition varDefinition = convertVarInfo.getVarDefinition();
-        Material result = new Material();
+        Material result = new Material(convertVarInfo.getBuildInfo());
         result.setSupplyName(varDefinition.getVarName());
         result.setVarDefinition(varDefinition);
         // 包装成一个表达式
         result.setVarExpressionFunction(expression -> expression);
-        result.setRuleInfo(convertVarInfo.getRuleInfo());
         return result;
     }
 
     public boolean isIgnoreField(String classPath, String fieldName) {
-        if (ruleInfo == null) {
-            return false;
-        }
-        return ruleInfo.isIgnoreField(classPath, fieldName);
+        return buildInfo.isIgnoreField(classPath, fieldName);
     }
-
 
 }

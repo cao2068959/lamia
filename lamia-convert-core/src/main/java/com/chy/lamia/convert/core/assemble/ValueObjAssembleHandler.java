@@ -6,11 +6,9 @@ import com.chy.lamia.convert.core.components.ComponentFactory;
 import com.chy.lamia.convert.core.components.TypeResolver;
 import com.chy.lamia.convert.core.components.TypeResolverFactory;
 import com.chy.lamia.convert.core.components.entity.Expression;
+import com.chy.lamia.convert.core.components.entity.NewlyStatementHolder;
 import com.chy.lamia.convert.core.components.entity.Statement;
-import com.chy.lamia.convert.core.entity.Constructor;
-import com.chy.lamia.convert.core.entity.Setter;
-import com.chy.lamia.convert.core.entity.TypeDefinition;
-import com.chy.lamia.convert.core.entity.VarDefinition;
+import com.chy.lamia.convert.core.entity.*;
 import com.chy.lamia.convert.core.expression.imp.builder.ConvertResult;
 import com.chy.lamia.convert.core.expression.imp.builder.MaterialStatementBuilder;
 import com.chy.lamia.convert.core.expression.imp.builder.MaterialTypeConvertBuilder;
@@ -116,7 +114,7 @@ public class ValueObjAssembleHandler extends CommonAssembleHandler {
                     .map(MaterialTypeConvertBuilder::convertSimple).collect(Collectors.toList());
 
             Statement jcStatement = genNewInstance(instantName, classPath, expressions);
-            return Lists.of(jcStatement);
+            return Lists.of(new NewlyStatementHolder(jcStatement));
 
         }));
 
@@ -142,7 +140,24 @@ public class ValueObjAssembleHandler extends CommonAssembleHandler {
             MaterialStatementBuilder materialStatementBuilder = new MaterialStatementBuilder();
             // 生成对应的 set的方法
             materialStatementBuilder.setFunction(() -> {
-                ConvertResult convert = material.convert(jcExpression -> Lists.of(treeFactory.execMethod(newInstant, setter.getMethodName(), Lists.of(jcExpression))));
+                ConvertResult convert = material.convert(jcExpression -> {
+                    Statement statement = treeFactory.execMethod(newInstant, setter.getMethodName(), Lists.of(jcExpression));
+                    NewlyStatementHolder newlyStatementHolder = new NewlyStatementHolder(statement);
+                    // 类型无法匹配，标注一下，并且给出异常的字段
+                    if (!material.isTypeMatch()) {
+                        Material materialMate = material.getMaterial();
+                        newlyStatementHolder.setTypeMatch(false);
+                        AbnormalVar abnormalVar = new AbnormalVar(setter.getVarName());
+                        abnormalVar.setInstanceName(newInstant);
+                        abnormalVar.setInstanceType(targetType);
+                        abnormalVar.setType(setter.getType());
+                        SimpleMaterialInfo materialInfo = new SimpleMaterialInfo(materialMate.getVarDefinition().getVarRealName(), materialMate.getSupplyType());
+                        materialInfo.setBuildInfo(materialMate.getBuildInfo());
+                        abnormalVar.setErrorMaterial(materialInfo);
+                        newlyStatementHolder.addAbnormalVar(abnormalVar);
+                    }
+                    return Lists.of(newlyStatementHolder);
+                });
                 return convert.getConvertStatement();
             });
             addStatementBuilders(materialStatementBuilder);

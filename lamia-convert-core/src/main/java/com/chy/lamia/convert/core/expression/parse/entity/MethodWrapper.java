@@ -36,12 +36,20 @@ public class MethodWrapper {
 
 
     public Expression useOnlyArgs() {
+        ArgWrapper wrapper = useOnlyArgsWrapper();
+        if (wrapper == null) {
+            return null;
+        }
+        return wrapper.getExpression();
+    }
+
+    public ArgWrapper useOnlyArgsWrapper() {
         if (args == null || args.isEmpty()) {
             return null;
         }
         ArgWrapper argWrapper = args.get(0);
         argWrapper.use();
-        return argWrapper.getExpression();
+        return argWrapper;
     }
 
 

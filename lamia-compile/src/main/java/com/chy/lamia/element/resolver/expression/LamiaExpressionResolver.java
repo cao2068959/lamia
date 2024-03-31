@@ -5,10 +5,10 @@ import com.chy.lamia.components.entity.JcExpression;
 import com.chy.lamia.convert.core.components.entity.Expression;
 import com.chy.lamia.convert.core.entity.LamiaExpression;
 import com.chy.lamia.convert.core.expression.parse.ConfigParseContext;
-import com.chy.lamia.convert.core.expression.parse.entity.ArgWrapper;
-import com.chy.lamia.convert.core.expression.parse.entity.MethodWrapper;
 import com.chy.lamia.convert.core.expression.parse.builder.BuilderContext;
 import com.chy.lamia.convert.core.expression.parse.builder.BuilderHandler;
+import com.chy.lamia.convert.core.expression.parse.entity.ArgWrapper;
+import com.chy.lamia.convert.core.expression.parse.entity.MethodWrapper;
 import com.chy.lamia.convert.core.expression.parse.entity.RuleTypeArgWrapper;
 import com.chy.lamia.utils.JCUtils;
 import com.sun.tools.javac.tree.JCTree;
@@ -143,12 +143,14 @@ public class LamiaExpressionResolver {
         if ("mapping".equals(name)) {
             LamiaExpression result = new LamiaExpression();
             List<String> argsNames = fetchArgsName(data);
-            result.addSpreadArgs(argsNames, null);
+            result.updateBuild();
+            result.addSpreadArgs(argsNames);
             return result;
         }
         if ("setField".equals(name)) {
             LamiaExpression result = new LamiaExpression();
             List<String> argsNames = fetchArgsName(data);
+            result.updateBuild();
             result.addArgs(argsNames);
             return result;
         }

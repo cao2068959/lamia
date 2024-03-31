@@ -21,7 +21,7 @@ public class IgnoreField implements BuilderHandler {
         if (allArgs == null || allArgs.isEmpty()) {
             return;
         }
-        RuleInfo ruleInfos = lamiaExpression.getRuleInfos();
+        RuleInfo ruleInfos = lamiaExpression.getBuildInfo().getRuleInfo();
         allArgs.forEach(arg -> {
             Expression expression = arg.getExpression();
             Pair<String, String> typeAndVar = parseLambda(expression);

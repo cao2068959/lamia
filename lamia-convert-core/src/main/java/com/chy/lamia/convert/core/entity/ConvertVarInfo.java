@@ -8,10 +8,10 @@ import lombok.Data;
 @Data
 public class ConvertVarInfo {
     VarDefinition varDefinition;
-    RuleInfo ruleInfo;
+    BuildInfo buildInfo;
 
-    public ConvertVarInfo(VarDefinition varDefinition, RuleInfo ruleInfo) {
+    public ConvertVarInfo(VarDefinition varDefinition, BuildInfo buildInfo) {
         this.varDefinition = varDefinition;
-        this.ruleInfo = ruleInfo;
+        this.buildInfo = buildInfo;
     }
 }

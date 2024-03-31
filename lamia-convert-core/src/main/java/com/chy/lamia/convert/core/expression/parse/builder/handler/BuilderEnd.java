@@ -15,6 +15,7 @@ public class BuilderEnd implements BuilderHandler {
 
     @Override
     public void config(LamiaExpression lamiaExpression, MethodWrapper methodWrapper, ConfigParseContext context) {
+        lamiaExpression.setBuildInfo(null);
         context.outScope("builder");
     }
 }

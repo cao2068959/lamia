@@ -15,6 +15,7 @@ public class RuleInfo {
 
     Set<String> ignoreFields;
 
+
     public void merge(RuleInfo ruleInfo) {
         List<RuleType> srcRuleTypes = ruleInfo.getRuleTypes();
         if (srcRuleTypes != null) {

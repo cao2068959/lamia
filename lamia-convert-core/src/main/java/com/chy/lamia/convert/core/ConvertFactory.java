@@ -6,6 +6,7 @@ import com.chy.lamia.convert.core.components.ComponentFactory;
 import com.chy.lamia.convert.core.components.TreeFactory;
 import com.chy.lamia.convert.core.components.TypeResolver;
 import com.chy.lamia.convert.core.components.TypeResolverFactory;
+import com.chy.lamia.convert.core.components.entity.NewlyStatementHolder;
 import com.chy.lamia.convert.core.components.entity.Statement;
 import com.chy.lamia.convert.core.entity.*;
 import com.chy.lamia.convert.core.expression.imp.builder.MaterialStatementBuilder;
@@ -33,7 +34,7 @@ public class ConvertFactory {
      * @param lamiaConvertInfo 表达式信息
      * @return
      */
-    public List<Statement> make(LamiaConvertInfo lamiaConvertInfo) {
+    public List<NewlyStatementHolder> make(LamiaConvertInfo lamiaConvertInfo) {
         // 寻找适合的组成器
         AssembleHandler assembleHandler = getAssembleHandler(lamiaConvertInfo);
         // 在组装器中添加所有的所有可能参与组合结果对象的材料
@@ -99,10 +100,10 @@ public class ConvertFactory {
      * @param lamiaConvertInfo
      * @return
      */
-    private List<Statement> createdStatement(List<MaterialStatementBuilder> expressionBuilders, AssembleHandler assembleHandler, LamiaConvertInfo lamiaConvertInfo) {
-        List<Statement> result = new ArrayList<>();
+    private List<NewlyStatementHolder> createdStatement(List<MaterialStatementBuilder> expressionBuilders, AssembleHandler assembleHandler, LamiaConvertInfo lamiaConvertInfo) {
+        List<NewlyStatementHolder> result = new ArrayList<>();
         expressionBuilders.forEach(expressionBuilder -> {
-            List<Statement> jcStatements = expressionBuilder.build();
+            List<NewlyStatementHolder> jcStatements = expressionBuilder.build();
             result.addAll(jcStatements);
         });
 
@@ -110,7 +111,7 @@ public class ConvertFactory {
         if (lamiaConvertInfo.isReturn()) {
             String newInstantName = assembleHandler.getNewInstantName();
             Statement aReturn = treeFactory.createReturn(newInstantName);
-            result.add(aReturn);
+            result.add(new NewlyStatementHolder(aReturn));
         }
 
         return result;
@@ -155,7 +156,7 @@ public class ConvertFactory {
         TypeDefinition type = varDefinition.getType();
         // 如果扩散的是一个 map
         if (type.matchType(Map.class)) {
-            Material material = new OmnipotentMaterial(varDefinition);
+            Material material = new OmnipotentMaterial(varDefinition, convertVarInfo.getBuildInfo());
             return Lists.of(material);
         }
 
@@ -171,16 +172,15 @@ public class ConvertFactory {
 
         List<Material> result = new ArrayList<>();
 
-        RuleInfo ruleInfo = convertVarInfo.getRuleInfo();
+        BuildInfo buildInfo = convertVarInfo.getBuildInfo();
         instantGetters.forEach((fieldName, getter) -> {
-            if (ruleInfo != null && ruleInfo.isIgnoreField(type.getClassPath(), fieldName)) {
+            if (buildInfo.isIgnoreField(type.getClassPath(), fieldName)) {
                 return;
             }
-            Material material = new Material();
+            Material material = new Material(buildInfo);
             material.setVarDefinition(varDefinition);
             material.setSupplyType(getter.getType());
             material.setSupplyName(fieldName);
-            material.setRuleInfo(convertVarInfo.getRuleInfo());
             // 生成对应的 var.getXX()
             material.setVarExpressionFunction((varExpression -> {
                 Statement statement = treeFactory.execMethod(varExpression, getter.getMethodName(), Lists.of());

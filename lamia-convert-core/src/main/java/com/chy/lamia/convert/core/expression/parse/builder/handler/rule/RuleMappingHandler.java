@@ -1,9 +1,11 @@
 package com.chy.lamia.convert.core.expression.parse.builder.handler.rule;
 
+import com.chy.lamia.convert.core.entity.BuildInfo;
 import com.chy.lamia.convert.core.entity.LamiaExpression;
 import com.chy.lamia.convert.core.expression.parse.ConfigParseContext;
-import com.chy.lamia.convert.core.expression.parse.entity.MethodWrapper;
 import com.chy.lamia.convert.core.expression.parse.builder.BuilderHandler;
+import com.chy.lamia.convert.core.expression.parse.builder.handler.BuilderArgsUse;
+import com.chy.lamia.convert.core.expression.parse.entity.MethodWrapper;
 
 import java.util.List;
 
@@ -12,13 +14,15 @@ import java.util.List;
  *
  * @author bignosecat
  */
-public class RuleMappingHandler implements BuilderHandler {
+public class RuleMappingHandler implements BuilderHandler, BuilderArgsUse {
     @Override
     public void config(LamiaExpression lamiaExpression, MethodWrapper methodWrapper, ConfigParseContext context) {
 
         List<String> argsName = methodWrapper.useAllArgsToName();
-        lamiaExpression.addSpreadArgs(argsName, lamiaExpression.getRuleInfos());
+        lamiaExpression.addSpreadArgs(argsName);
         context.outScope("rule");
+        BuildInfo updatedBuild = lamiaExpression.updateBuild();
+        updatedBuild.setBuilder(true);
     }
 
 

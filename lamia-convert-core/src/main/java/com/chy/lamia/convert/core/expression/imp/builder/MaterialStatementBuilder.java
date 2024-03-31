@@ -1,6 +1,6 @@
 package com.chy.lamia.convert.core.expression.imp.builder;
 
-import com.chy.lamia.convert.core.components.entity.Statement;
+import com.chy.lamia.convert.core.components.entity.NewlyStatementHolder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -26,7 +26,7 @@ public class MaterialStatementBuilder {
      *
      * @return
      */
-    public List<Statement> build() {
+    public List<NewlyStatementHolder> build() {
         return function.builder();
     }
 
@@ -38,8 +38,7 @@ public class MaterialStatementBuilder {
          *
          * @return
          */
-        List<Statement> builder();
-
+        List<NewlyStatementHolder> builder();
     }
 
 

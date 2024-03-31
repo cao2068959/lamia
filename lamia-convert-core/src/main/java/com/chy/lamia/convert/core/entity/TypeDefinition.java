@@ -68,6 +68,12 @@ public class TypeDefinition {
      * @return 是否比较通过
      */
     public boolean matchType(TypeDefinition type, boolean isMatchGeneric) {
+        if (type == null) {
+            return false;
+        }
+        if (type == this) {
+            return true;
+        }
         if (isMatchGeneric) {
             return toString().equals(type.toString());
         }

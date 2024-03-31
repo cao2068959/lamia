@@ -19,7 +19,9 @@ import java.util.List;
  */
 public class RuleHandler implements BuilderHandler {
     @Override
-    public void config(LamiaExpression lamiaExpression, MethodWrapper methodWrapper, ConfigParseContext context) {
+    public void config(LamiaExpression lamiaExpression,
+                       MethodWrapper methodWrapper,
+                       ConfigParseContext context) {
         context.intoScope("rule");
 
         List<ArgWrapper> argWrappers = methodWrapper.useAllArgs();
@@ -27,9 +29,7 @@ public class RuleHandler implements BuilderHandler {
 
         RuleInfo ruleInfo = new RuleInfo();
         ruleInfo.setRuleTypes(ruleTypes);
-
-
-        lamiaExpression.setRuleInfos(ruleInfo);
+        lamiaExpression.getBuildInfo().setRuleInfo(ruleInfo);
     }
 
 

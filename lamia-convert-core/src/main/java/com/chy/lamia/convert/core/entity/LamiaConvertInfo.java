@@ -28,7 +28,6 @@ public class LamiaConvertInfo {
      * 要转换成的变量
      */
     @Getter
-    @Setter
     VarDefinition target;
 
     /**
@@ -95,9 +94,9 @@ public class LamiaConvertInfo {
      */
     public List<ConvertVarInfo> getArgsByPriority() {
         List<ConvertVarInfo> result = new ArrayList<>();
-        getAllArgs().forEach((name, rule) -> {
+        getAllArgs().forEach((name, buildInfo) -> {
             VarDefinition varDefinition = args.get(name);
-            result.add(new ConvertVarInfo(varDefinition, rule));
+            result.add(new ConvertVarInfo(varDefinition, buildInfo));
         });
         // 排序
         result.sort(Comparator.comparingInt(cvi -> cvi.getVarDefinition().getPriority()));
@@ -109,7 +108,7 @@ public class LamiaConvertInfo {
         return lamiaExpression.getAllArgs().keySet();
     }
 
-    public Map<String, RuleInfo> getAllArgs() {
+    public Map<String, BuildInfo> getAllArgs() {
         return lamiaExpression.getAllArgs();
     }
 
@@ -148,4 +147,8 @@ public class LamiaConvertInfo {
         return lamiaExpression.hasConvertData();
     }
 
+    public void setTarget(VarDefinition target) {
+        this.target = target;
+        this.targetType = target.getType();
+    }
 }

@@ -2,6 +2,7 @@ package com.chy.lamia.convert.core.assemble;
 
 
 import com.chy.lamia.convert.core.components.entity.Expression;
+import com.chy.lamia.convert.core.components.entity.NewlyStatementHolder;
 import com.chy.lamia.convert.core.components.entity.Statement;
 import com.chy.lamia.convert.core.entity.VarDefinition;
 import com.chy.lamia.convert.core.expression.imp.builder.MaterialStatementBuilder;
@@ -36,7 +37,7 @@ public class MapAssembleHandler extends CommonAssembleHandler {
 
         materialStatementBuilder.setFunction((() -> {
             Statement jcStatement = genNewInstance(newInstant, classPath, Lists.of());
-            return Lists.of(jcStatement);
+            return Lists.of(new NewlyStatementHolder(jcStatement));
         }));
 
         // 把转换语句给放进去
@@ -55,8 +56,8 @@ public class MapAssembleHandler extends CommonAssembleHandler {
 
                 Expression putName = treeFactory.geStringExpression(material.getSupplyName());
                 List<Expression> args = Lists.of(putName, expression);
-
-                return Lists.of(treeFactory.execMethod(newInstant, "put", args));
+                Statement statement = treeFactory.execMethod(newInstant, "put", args);
+                return Lists.of(new NewlyStatementHolder(statement));
             }).getConvertStatement());
             super.addStatementBuilders(materialStatementBuilder);
         });

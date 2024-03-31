@@ -5,6 +5,7 @@ import com.chy.lamia.convert.core.components.ComponentFactory;
 import com.chy.lamia.convert.core.components.NameHandler;
 import com.chy.lamia.convert.core.components.TreeFactory;
 import com.chy.lamia.convert.core.components.entity.Expression;
+import com.chy.lamia.convert.core.components.entity.NewlyStatementHolder;
 import com.chy.lamia.convert.core.components.entity.Statement;
 import com.chy.lamia.convert.core.entity.LamiaConvertInfo;
 import com.chy.lamia.convert.core.entity.TypeDefinition;
@@ -34,7 +35,7 @@ public abstract class CommonAssembleHandler implements AssembleHandler {
      */
     protected final Set<String> useMaterial = new HashSet<>();
     protected final TreeFactory treeFactory;
-    private final TypeDefinition targetType;
+    protected final TypeDefinition targetType;
 
     /**
      * 生成新实例的名称
@@ -82,7 +83,7 @@ public abstract class CommonAssembleHandler implements AssembleHandler {
             this.newInstant = target.getVarRealName();
             // 如果不是return，那么需要用一个变量来承接一下
             if (!lamiaConvertInfo.isReturn()) {
-                if (lamiaConvertInfo.getResultVarName() != null){
+                if (lamiaConvertInfo.getResultVarName() != null) {
                     // 生成对应的 赋值语句
                     addStatementBuilders(genResultVarAssign());
                 }
@@ -99,14 +100,14 @@ public abstract class CommonAssembleHandler implements AssembleHandler {
         MaterialStatementBuilder statementBuilder = new MaterialStatementBuilder();
         statementBuilder.setFunction(() -> {
             // 如果需要声明类型
-            if (lamiaConvertInfo.isDeclareResultVarType()){
+            if (lamiaConvertInfo.isDeclareResultVarType()) {
                 Statement variableDecl = treeFactory.createVar(lamiaConvertInfo.getResultVarName(),
                         lamiaConvertInfo.getTargetType().getClassPath(), treeFactory.toExpression(newInstant));
-                return Lists.of(variableDecl);
+                return Lists.of(new NewlyStatementHolder(variableDecl));
             }
             // 不需要申明类型的话，直接赋值
             Statement statement = treeFactory.varAssign(lamiaConvertInfo.getResultVarName(), treeFactory.toExpression(newInstant));
-            return Lists.of(statement);
+            return Lists.of(new NewlyStatementHolder(statement));
         });
         return statementBuilder;
     }
@@ -198,7 +199,11 @@ public abstract class CommonAssembleHandler implements AssembleHandler {
         if (material instanceof OmnipotentMaterial) {
             material = ((OmnipotentMaterial) material).adapter(typeDefinition, varName);
         }
-        return new MaterialTypeConvertBuilder(material, typeDefinition);
+        MaterialTypeConvertBuilder result = new MaterialTypeConvertBuilder(material, typeDefinition);
+
+
+        result.setTypeMatch(material.getSupplyType().matchType(typeDefinition, false));
+        return result;
     }
 
 

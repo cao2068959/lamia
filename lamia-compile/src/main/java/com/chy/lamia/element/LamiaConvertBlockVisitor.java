@@ -201,8 +201,6 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
         // 如果在表达式 设置了 build(*) ，那么就根据Build的参数去找对应的变量, 如果没有就根据强转类型去找最终要转换的类型
         if (targetExpression != null) {
             parseBuildTarget(lamiaConvertInfo, targetExpression, jcExpression);
-
-
         } else {
             TypeDefinition targetType = lamiaExpression.getTargetType();
             if (targetType == null) {
@@ -232,7 +230,6 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
                 throw new RuntimeException("表达式[" + jcExpression.toString() + "] 设置的target 实例有误[" + targetName + "]");
             }
             lamiaConvertInfo.setTarget(varDefinition);
-            lamiaConvertInfo.setTargetType(varDefinition.getType());
             return;
         }
 

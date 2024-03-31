@@ -2,7 +2,7 @@ package com.chy.lamia.visitor;
 
 import com.chy.lamia.convert.core.ConvertFactory;
 import com.chy.lamia.convert.core.annotation.MapMember;
-import com.chy.lamia.convert.core.components.entity.Statement;
+import com.chy.lamia.convert.core.components.entity.NewlyStatementHolder;
 import com.chy.lamia.convert.core.entity.LamiaConvertInfo;
 import com.chy.lamia.convert.core.entity.TypeDefinition;
 import com.chy.lamia.convert.core.entity.VarDefinition;
@@ -88,9 +88,8 @@ public class MethodUpdateVisitor extends TreeTranslator {
                 // 合并所有参数 之前只添加了 方法体中参与转换的参数, 现在把入参中的也添加进去
                 lamiaConvertInfo.getAllArgsName().stream().map(paramMap::get).filter(Objects::nonNull).forEach(lamiaConvertInfo::addVarArgs);
                 // 生成对应的转换语句
-                List<Statement> makeResult = ConvertFactory.INSTANCE.make(lamiaConvertInfo);
-
-                makeResult.stream().map(s -> (JCTree.JCStatement) s.get()).forEach(newStatement::add);
+                List<NewlyStatementHolder> makeResult = ConvertFactory.INSTANCE.make(lamiaConvertInfo);
+                makeResult.stream().map(s -> (JCTree.JCStatement) s.getStatement().get()).forEach(newStatement::add);
             } else {
                 newStatement.add(statement);
             }

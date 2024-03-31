@@ -6,6 +6,7 @@ import com.chy.lamia.convert.core.components.ComponentFactory;
 import com.chy.lamia.convert.core.components.NameHandler;
 import com.chy.lamia.convert.core.components.TreeFactory;
 import com.chy.lamia.convert.core.components.entity.Expression;
+import com.chy.lamia.convert.core.components.entity.NewlyStatementHolder;
 import com.chy.lamia.convert.core.components.entity.Statement;
 import com.chy.lamia.convert.core.entity.RuleInfo;
 import com.chy.lamia.convert.core.entity.TypeDefinition;
@@ -32,6 +33,8 @@ public class MaterialTypeConvertBuilder {
 
     TreeFactory treeFactory;
 
+    boolean typeMatch = true;
+
     public MaterialTypeConvertBuilder(Material material, TypeDefinition targetType) {
         treeFactory = ComponentFactory.getComponent(TreeFactory.class);
         this.material = material;
@@ -41,7 +44,7 @@ public class MaterialTypeConvertBuilder {
     /**
      * 将这个类型 转换成 指定的类型
      */
-    public ConvertResult convert(Function<Expression, List<Statement>> callBack) {
+    public ConvertResult convert(Function<Expression, List<NewlyStatementHolder>> callBack) {
         VarDefinition materialVarDefinition = material.getVarDefinition();
 
         Expression materialExpression = treeFactory.toExpression(materialVarDefinition.getVarRealName());
@@ -59,11 +62,11 @@ public class MaterialTypeConvertBuilder {
      * @param callBack
      */
     private ConvertResult ruleConvert(Expression expression,
-                                      Function<Expression, List<Statement>> callBack) {
+                                      Function<Expression, List<NewlyStatementHolder>> callBack) {
         RuleHandlerContext ruleHandlerContext = RuleHandlerContext.INSTANCE;
 
 
-        RuleInfo ruleInfo = material.getRuleInfo();
+        RuleInfo ruleInfo = material.getBuildInfo().getRuleInfo();
         RuleChain ruleChain = ruleHandlerContext.getRuleChain(ruleInfo);
 
         boolean noRule = true;
@@ -77,7 +80,7 @@ public class MaterialTypeConvertBuilder {
                 // 先生成一个变量承接一下
 
                 Statement var = treeFactory.createVar(name, type.getClassPath(), expression);
-                chain.addStatement(var);
+                chain.addStatement(new NewlyStatementHolder(var));
 
                 // 继续下面的执行
                 chain.continueCall(treeFactory.toExpression(name));
@@ -86,7 +89,7 @@ public class MaterialTypeConvertBuilder {
 
         // 添加一个规则，用来给外面生成真正的赋值语句
         ruleChain.addRule((varExpression, chain) -> {
-            List<Statement> allStatement = callBack.apply(varExpression);
+            List<NewlyStatementHolder> allStatement = callBack.apply(varExpression);
             chain.addStatement(allStatement);
             chain.continueCall(varExpression);
         });

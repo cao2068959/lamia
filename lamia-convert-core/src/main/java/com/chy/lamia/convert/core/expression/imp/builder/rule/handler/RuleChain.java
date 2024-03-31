@@ -1,7 +1,7 @@
 package com.chy.lamia.convert.core.expression.imp.builder.rule.handler;
 
 import com.chy.lamia.convert.core.components.entity.Expression;
-import com.chy.lamia.convert.core.components.entity.Statement;
+import com.chy.lamia.convert.core.components.entity.NewlyStatementHolder;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ import java.util.List;
 public class RuleChain {
 
     @Getter
-    List<Statement> result = new ArrayList<>();
+    List<NewlyStatementHolder> result = new ArrayList<>();
 
     List<IRuleHandler> allHandler = new ArrayList<>();
 
@@ -22,16 +22,16 @@ public class RuleChain {
     }
 
 
-    public void addStatement(Statement statement) {
+    public void addStatement(NewlyStatementHolder statement) {
         result.add(statement);
     }
 
-    public void addStatement(List<Statement> statement) {
+    public void addStatement(List<NewlyStatementHolder> statement) {
         result.addAll(statement);
     }
 
 
-    public List<Statement> continueCallAndReturn(Expression var) {
+    public List<NewlyStatementHolder> continueCallAndReturn(Expression var) {
         RuleChain copy = copy();
         copy.continueCall(var);
 
