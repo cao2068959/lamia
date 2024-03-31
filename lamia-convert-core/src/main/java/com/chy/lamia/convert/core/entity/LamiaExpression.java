@@ -14,12 +14,7 @@ public class LamiaExpression {
     /**
      * 要设置的全部参数, 直接设置的字段对象以及需要字段映射的都在这里面
      */
-    Map<String, BuildInfo> allArgs = new LinkedHashMap<>();
-
-    /**
-     * 用于映射的参数名称
-     */
-    Set<String> mappingArgs = new LinkedHashSet<>();
+    Map<String, ProtoMaterialInfo> allArgs = new HashMap<>();
 
     /**
      * 构建的信息会存放到这个里面
@@ -33,6 +28,7 @@ public class LamiaExpression {
     /**
      * 是否已经解析完成
      */
+    @lombok.Setter
     private boolean parseComplete = true;
 
 
@@ -51,31 +47,26 @@ public class LamiaExpression {
      * @return
      */
     public boolean hasConvertData() {
-        return !allArgs.isEmpty() || !mappingArgs.isEmpty();
+        return !allArgs.isEmpty();
     }
 
-    public void setParseComplete(boolean parseComplete) {
-        this.parseComplete = parseComplete;
-    }
-
-    public void addArgs(Collection<String> args) {
-        for (String arg : args) {
-            BuildInfo oldBuildInfo = allArgs.get(arg);
-            if (oldBuildInfo == null) {
-                allArgs.put(arg, buildInfo);
-            } else {
-                oldBuildInfo.merge(buildInfo);
-            }
+    public void addArgs(Collection<ProtoMaterialInfo> args) {
+        for (ProtoMaterialInfo arg : args) {
+            addArgs(arg);
         }
-        // 这一批 buildInfo 用完了，需要重新创建一个
-
-
     }
 
-    public void addSpreadArgs(Collection<String> args) {
-        addArgs(args);
-        mappingArgs.addAll(args);
+    public void addArgs(ProtoMaterialInfo data) {
+        String id = data.getId();
+        data.setBuildInfo(buildInfo);
+        ProtoMaterialInfo protoMaterialInfo = allArgs.get(id);
+        if (protoMaterialInfo == null) {
+            allArgs.put(id, data);
+        } else {
+            protoMaterialInfo.merge(data);
+        }
     }
+
 
     public BuildInfo updateBuild() {
         this.buildInfo = new BuildInfo();

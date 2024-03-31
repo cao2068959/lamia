@@ -9,6 +9,7 @@ import com.chy.lamia.convert.core.entity.VarDefinition;
 import com.chy.lamia.element.LamiaConvertBlockVisitor;
 import com.chy.lamia.element.LamiaConvertHolderBlock;
 import com.chy.lamia.element.annotation.AnnotationProxyFactory;
+import com.chy.lamia.entity.ClassTreeWrapper;
 import com.chy.lamia.entity.StatementWrapper;
 import com.chy.lamia.entity.factory.TypeDefinitionFactory;
 import com.chy.lamia.processor.marked.MarkedMethods;
@@ -23,11 +24,11 @@ public class MethodUpdateVisitor extends TreeTranslator {
 
     private final MarkedMethods markedMethods;
     private final String className;
-    private final JCTree classTree;
+    private final ClassTreeWrapper classTree;
 
     public MethodUpdateVisitor(MarkedMethods markedMethods, JCTree tree, String className) {
         this.markedMethods = markedMethods;
-        this.classTree = tree;
+        this.classTree = new ClassTreeWrapper(tree);
         this.className = className;
     }
 

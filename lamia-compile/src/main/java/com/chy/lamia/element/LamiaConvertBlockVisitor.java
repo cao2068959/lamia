@@ -116,7 +116,7 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
                 .createdAnnotation(classTree, statement.getModifiers().getAnnotations(), MapMember.class);
 
         // 解析这个变量把他转成 VarDefinition
-        Type type = JCUtils.instance.attribType(classTree, statement);
+        Type type = classTree.getFullType(statement.vartype);
         TypeDefinition typeDefinition = TypeDefinitionFactory.create(type);
         VarDefinition varDefinition = new VarDefinition(statement.getName().toString(), typeDefinition);
         varDefinition.setMapMember(mapMember);
@@ -234,20 +234,17 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
         }
 
         // 在build中写的是 变量.属性 的形式， 如 build(User.class), 这里只支持 .class 的方式，不支持 build(map.getUserVO())
-        if (buildParamJcExpression instanceof JCTree.JCFieldAccess){
+        if (buildParamJcExpression instanceof JCTree.JCFieldAccess) {
             JCTree.JCFieldAccess fieldAccess = (JCTree.JCFieldAccess) buildParamJcExpression;
             String targetName = fieldAccess.name.toString();
             if ("class".equals(targetName)) {
                 JCTree.JCExpression typeSimpleName = fieldAccess.selected;
-                Type type = JCUtils.instance.attribType(classTree, typeSimpleName);
+                Type type = classTree.getFullType(typeSimpleName);
                 lamiaConvertInfo.setTargetType(new TypeDefinition(type.toString()));
-            }else {
+            } else {
                 throw new RuntimeException("表达式[" + jcExpression.toString() + "] 设置的target 实例有误[" + fieldAccess + "] 请使用 .class 的形式来设置对应的类型");
             }
         }
-
-
-
 
 
     }

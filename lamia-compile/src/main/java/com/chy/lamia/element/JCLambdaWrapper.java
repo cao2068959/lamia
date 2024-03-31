@@ -3,7 +3,7 @@ package com.chy.lamia.element;
 import com.chy.lamia.convert.core.entity.LazyTypeVarDefinition;
 import com.chy.lamia.convert.core.entity.TypeDefinition;
 import com.chy.lamia.convert.core.entity.VarDefinition;
-import com.chy.lamia.utils.JCUtils;
+import com.chy.lamia.entity.ClassTreeWrapper;
 import com.sun.source.tree.Tree;
 import com.sun.tools.javac.tree.JCTree;
 
@@ -13,9 +13,9 @@ import java.util.stream.Collectors;
 public class JCLambdaWrapper {
 
     JCTree.JCLambda lambda;
-    JCTree parentClass;
+    ClassTreeWrapper parentClass;
 
-    public JCLambdaWrapper(JCTree.JCLambda lambda, JCTree classTree) {
+    public JCLambdaWrapper(JCTree.JCLambda lambda, ClassTreeWrapper classTree) {
         this.lambda = lambda;
         this.parentClass = classTree;
     }
@@ -40,12 +40,10 @@ public class JCLambdaWrapper {
     }
 
     private String findType(JCTree.JCVariableDecl variableDecl) {
+        // 进行类型推到
+        parentClass.typeInference();
         JCTree type = variableDecl.getType();
         // 如果等于null 说明是一个 隐性变量，需要类型推导
-        if (type == null) {
-            JCUtils.instance.attrib(lambda, parentClass);
-        }
-        type = variableDecl.getType();
         if (type == null) {
             throw new RuntimeException("无法推导出lambda:[" + lambda.toString() + "] 的变量类型");
         }

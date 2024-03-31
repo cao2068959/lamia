@@ -5,7 +5,9 @@ import com.chy.lamia.convert.core.utils.CommonUtils;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 每一个 Lamia.convert(setFiled/mapping) 表达式能够使用到的作用域
@@ -81,52 +83,15 @@ public class LamiaConvertInfo {
         }
     }
 
-    /**
-     * 根据优先级 来获取 对应的 参数
-     * 优先级 数字越大 则越优先
-     * 低优先级的放队头，高优先级放队尾
-     * <p>
-     * <p>
-     * 1.根据 varDefinition.getPriority() 来获取优先级，不设置 则是 -1
-     * 2.如果获取的优先级是一样的，那么 根据所在 allArgsNames 中的位置判定
-     *
-     * @return 对应的 var列表
-     */
-    public List<ConvertVarInfo> getArgsByPriority() {
-        List<ConvertVarInfo> result = new ArrayList<>();
-        getAllArgs().forEach((name, buildInfo) -> {
-            VarDefinition varDefinition = args.get(name);
-            result.add(new ConvertVarInfo(varDefinition, buildInfo));
-        });
-        // 排序
-        result.sort(Comparator.comparingInt(cvi -> cvi.getVarDefinition().getPriority()));
-
-        return result;
-    }
-
     public Set<String> getAllArgsName() {
         return lamiaExpression.getAllArgs().keySet();
     }
 
-    public Map<String, BuildInfo> getAllArgs() {
+    public Map<String, ProtoMaterialInfo> getAllArgs() {
         return lamiaExpression.getAllArgs();
     }
 
-    public boolean isSpread(VarDefinition varDefinition) {
-        // 系统的基础类型不进行扩散
-        if (varDefinition.getType().isBaseTypeOrSystemType()) {
-            return false;
-        }
-        // 变量的注解上面标注了一定进行扩散
-        boolean spread = varDefinition.isSpread();
-        if (spread) {
-            return true;
-        }
-        if (lamiaExpression.getMappingArgs().contains(varDefinition.getVarRealName())) {
-            return true;
-        }
-        return false;
-    }
+
 
     /**
      * 判断是否是完整的转换语句

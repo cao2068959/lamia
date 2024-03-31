@@ -151,8 +151,7 @@ public class ValueObjAssembleHandler extends CommonAssembleHandler {
                         abnormalVar.setInstanceName(newInstant);
                         abnormalVar.setInstanceType(targetType);
                         abnormalVar.setType(setter.getType());
-                        SimpleMaterialInfo materialInfo = new SimpleMaterialInfo(materialMate.getVarDefinition().getVarRealName(), materialMate.getSupplyType());
-                        materialInfo.setBuildInfo(materialMate.getBuildInfo());
+                        SimpleMaterialInfo materialInfo = new SimpleMaterialInfo(materialMate.getProtoMaterialInfo(), materialMate.getSupplyType());
                         abnormalVar.setErrorMaterial(materialInfo);
                         newlyStatementHolder.addAbnormalVar(abnormalVar);
                     }

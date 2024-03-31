@@ -67,7 +67,7 @@ public class MapAssembleHandler extends CommonAssembleHandler {
     protected MaterialTypeConvertBuilder toMaterialTypeConvertBuilder(Material material) {
         // 万能材料，适配一下
         if (material instanceof OmnipotentMaterial) {
-            throw new RuntimeException("不允许map扩散转map, 入参map的名称为:[" + material.varDefinition.getVarName() + "]");
+            throw new RuntimeException("不允许map扩散转map, 入参map的名称为:[" + material.getProtoMaterialInfo().getMaterial().getText() + "]");
         }
 
         return new MaterialTypeConvertBuilder(material, material.supplyType);

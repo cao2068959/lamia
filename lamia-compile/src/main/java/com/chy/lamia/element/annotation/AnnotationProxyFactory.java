@@ -1,7 +1,7 @@
 package com.chy.lamia.element.annotation;
 
 
-import com.chy.lamia.utils.JCUtils;
+import com.chy.lamia.entity.ClassTreeWrapper;
 import com.sun.tools.javac.code.Attribute;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
@@ -55,7 +55,7 @@ public class AnnotationProxyFactory {
     }
 
 
-    public static <T extends Annotation> Optional<T> createdAnnotation(JCTree classTree, List<JCTree.JCAnnotation> annotations,
+    public static <T extends Annotation> Optional<T> createdAnnotation(ClassTreeWrapper classTree, List<JCTree.JCAnnotation> annotations,
                                                                        Class<T> annotationClass) {
         if (annotations == null) {
             return Optional.empty();
@@ -64,7 +64,7 @@ public class AnnotationProxyFactory {
             if (!jcAnnotation.hasTag(JCTree.Tag.ANNOTATION)) {
                 continue;
             }
-            Type type = JCUtils.instance.attribType(classTree, jcAnnotation.annotationType.toString());
+            Type type = classTree.getFullType(jcAnnotation.annotationType.toString());
             //该注解和要查找的注解不匹配
             if (!annotationClass.getName().equals(type.toString())) {
                 continue;

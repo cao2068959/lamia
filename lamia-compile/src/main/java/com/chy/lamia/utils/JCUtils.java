@@ -3,6 +3,7 @@ package com.chy.lamia.utils;
 import com.chy.lamia.convert.core.components.ComponentFactory;
 import com.chy.lamia.convert.core.components.NameHandler;
 import com.chy.lamia.convert.core.entity.TypeDefinition;
+import com.chy.lamia.entity.ClassTreeWrapper;
 import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.entity.factory.TypeDefinitionFactory;
 import com.chy.lamia.visitor.RandomMethodCreateVisitor;
@@ -322,11 +323,22 @@ public class JCUtils {
 
     /**
      * 进行类型推断
+     *
      * @param lambda
      * @param classTree
      */
     public void attrib(JCTree.JCLambda lambda, JCTree classTree) {
         Env<AttrContext> env = attr.lambdaEnv(lambda, enter.getClassEnv(((JCTree.JCClassDecl) classTree).sym));
+        attr.attrib(env);
+    }
+
+    /**
+     * 进行类型推断
+     *
+     * @param classTree
+     */
+    public void attrib(JCTree classTree) {
+        Env<AttrContext> env = enter.getClassEnv(((JCTree.JCClassDecl) classTree).sym);
         attr.attrib(env);
     }
 
@@ -385,20 +397,20 @@ public class JCUtils {
     /**
      * JCTypeApply 转 TypeDefinition, 会处理泛型
      *
-     * @param node 父节点
      * @param data 要转换的类型本身
      * @return
      */
-    public TypeDefinition toTypeDefinition(JCTree node, JCTree data) {
+    public TypeDefinition toTypeDefinition(ClassTreeWrapper nodeContext, JCTree data) {
         if (data instanceof JCTree.JCTypeApply) {
             JCTree.JCTypeApply jcTypeApply = (JCTree.JCTypeApply) data;
 
             JCTree.JCExpression clazz = jcTypeApply.clazz;
-            Type completeType = attribType(node, clazz);
+
+            Type completeType = nodeContext.getFullType(clazz);
             return TypeDefinitionFactory.create(completeType);
         } else if (data instanceof JCTree.JCIdent) {
             JCTree.JCIdent jcIdent = (JCTree.JCIdent) data;
-            Type completeType = attribType(node, jcIdent);
+            Type completeType = nodeContext.getFullType(jcIdent);
             return TypeDefinitionFactory.create(completeType);
         }
         throw new RuntimeException("无法解析泛型类型 [" + data.toString() + "] class:[" + data.getClass().toString() + "]");
@@ -444,7 +456,6 @@ public class JCUtils {
     public Context getContext() {
         return context;
     }
-
 
 
 }

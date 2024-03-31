@@ -1,5 +1,6 @@
 package com.chy.lamia.convert.core.components.entity;
 
+import com.chy.lamia.convert.core.entity.MethodParameterWrapper;
 import com.chy.lamia.convert.core.utils.struct.Pair;
 
 public interface Expression {
@@ -13,5 +14,11 @@ public interface Expression {
      * @return
      */
     public Pair<String, String> parseMethodReferenceOperator();
+
+
+    /**
+     * 将一个 Expression 转成一个 MethodParameterWrapper（如果是的话） 否则会抛出异常
+     */
+    public MethodParameterWrapper toMethodParameterWrapper();
 
 }

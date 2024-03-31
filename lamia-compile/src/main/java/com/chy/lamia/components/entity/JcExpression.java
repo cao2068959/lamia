@@ -1,8 +1,10 @@
 package com.chy.lamia.components.entity;
 
 import com.chy.lamia.convert.core.components.entity.Expression;
+import com.chy.lamia.convert.core.entity.MethodParameterWrapper;
+import com.chy.lamia.convert.core.entity.TypeDefinition;
 import com.chy.lamia.convert.core.utils.struct.Pair;
-import com.chy.lamia.utils.JCUtils;
+import com.chy.lamia.entity.ClassTreeWrapper;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.tree.JCTree;
 import lombok.Setter;
@@ -11,7 +13,7 @@ public class JcExpression implements Expression {
 
     JCTree.JCExpression jcExpression;
     @Setter
-    JCTree contextTree;
+    ClassTreeWrapper contextTree;
 
 
     public JcExpression(JCTree.JCExpression jcExpression) {
@@ -38,7 +40,7 @@ public class JcExpression implements Expression {
         }
         Type type = expr.type;
         if (type == null && contextTree != null) {
-            type = JCUtils.instance.attribType(contextTree, expr.toString());
+            type = contextTree.getFullType(expr.toString());
         }
 
         if (type == null) {
@@ -46,6 +48,24 @@ public class JcExpression implements Expression {
         }
         return new Pair<>(type.toString(), jcMemberReference.name.toString());
 
+    }
+
+    @Override
+    public MethodParameterWrapper toMethodParameterWrapper() {
+        if (jcExpression instanceof JCTree.JCIdent) {
+            JCTree.JCIdent jcIdent = (JCTree.JCIdent) jcExpression;
+            return new MethodParameterWrapper(jcIdent.name.toString());
+        }
+
+        if (jcExpression instanceof JCTree.JCMethodInvocation) {
+            JCTree.JCMethodInvocation methodInvocation = (JCTree.JCMethodInvocation) jcExpression;
+            Type type = contextTree.getByAfterTypeInference(() -> methodInvocation.type);
+            MethodParameterWrapper parameterWrapper = new MethodParameterWrapper(new TypeDefinition(type.toString()));
+            parameterWrapper.setText(jcExpression.toString());
+            return parameterWrapper;
+        }
+
+        throw new RuntimeException("不支持类型[" + jcExpression.getClass().getName() + "] 进行toMethodParameterWrapper 转换");
     }
 
     public JCTree.JCExpression getByType() {

@@ -5,13 +5,12 @@ import lombok.Data;
 @Data
 public class SimpleMaterialInfo {
 
-    String name;
     TypeDefinition type;
 
-    BuildInfo buildInfo;
+    ProtoMaterialInfo protoMaterialInfo;
 
-    public SimpleMaterialInfo(String name, TypeDefinition type) {
-        this.name = name;
+    public SimpleMaterialInfo(ProtoMaterialInfo protoMaterialInfo, TypeDefinition type) {
+        this.protoMaterialInfo = protoMaterialInfo;
         this.type = type;
     }
 }

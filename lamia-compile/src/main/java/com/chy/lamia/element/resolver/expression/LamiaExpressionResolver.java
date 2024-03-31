@@ -4,13 +4,18 @@ package com.chy.lamia.element.resolver.expression;
 import com.chy.lamia.components.entity.JcExpression;
 import com.chy.lamia.convert.core.components.entity.Expression;
 import com.chy.lamia.convert.core.entity.LamiaExpression;
+import com.chy.lamia.convert.core.entity.MethodParameterWrapper;
+import com.chy.lamia.convert.core.entity.ProtoMaterialInfo;
+import com.chy.lamia.convert.core.entity.TypeDefinition;
 import com.chy.lamia.convert.core.expression.parse.ConfigParseContext;
 import com.chy.lamia.convert.core.expression.parse.builder.BuilderContext;
 import com.chy.lamia.convert.core.expression.parse.builder.BuilderHandler;
 import com.chy.lamia.convert.core.expression.parse.entity.ArgWrapper;
 import com.chy.lamia.convert.core.expression.parse.entity.MethodWrapper;
 import com.chy.lamia.convert.core.expression.parse.entity.RuleTypeArgWrapper;
+import com.chy.lamia.entity.ClassTreeWrapper;
 import com.chy.lamia.utils.JCUtils;
+import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.tree.JCTree;
 
 import java.util.ArrayList;
@@ -24,7 +29,7 @@ import java.util.List;
 public class LamiaExpressionResolver {
 
 
-    public LamiaExpression resolving(JCTree contextTree, JCTree.JCExpression jcExpression) {
+    public LamiaExpression resolving(ClassTreeWrapper contextTree, JCTree.JCExpression jcExpression) {
 
         JCTree.JCMethodInvocation methodInvocation;
         JCTree.JCTypeCast typeCast = null;
@@ -62,7 +67,8 @@ public class LamiaExpressionResolver {
         return result;
     }
 
-    private void parseBuildConfig(LamiaExpression result, JCTree.JCMethodInvocation methodInvocation, JCTree contextTree) {
+    private void parseBuildConfig(LamiaExpression result, JCTree.JCMethodInvocation methodInvocation,
+                                  ClassTreeWrapper contextTree) {
         List<MethodWrapper> methodWrappers = disassembleMethod(methodInvocation, contextTree);
         // 第一个是 endMethod,已经解析过了, 所以把他移除
         MethodWrapper buildMethod = methodWrappers.remove(0);
@@ -97,7 +103,7 @@ public class LamiaExpressionResolver {
     }
 
 
-    private List<MethodWrapper> disassembleMethod(JCTree.JCMethodInvocation methodInvocation, JCTree contextTree) {
+    private List<MethodWrapper> disassembleMethod(JCTree.JCMethodInvocation methodInvocation, ClassTreeWrapper contextTree) {
 
         List<MethodWrapper> result = new ArrayList<>();
 
@@ -121,7 +127,7 @@ public class LamiaExpressionResolver {
         }
     }
 
-    private List<ArgWrapper> toArgWrapper(List<JCTree.JCExpression> list, JCTree contextTree) {
+    private List<ArgWrapper> toArgWrapper(List<JCTree.JCExpression> list, ClassTreeWrapper contextTree) {
         List<ArgWrapper> result = new ArrayList<>();
         for (JCTree.JCExpression data : list) {
             JcExpression jcExpression = new JcExpression(data);
@@ -135,23 +141,25 @@ public class LamiaExpressionResolver {
     }
 
 
-    private LamiaExpression parseMethod(JCTree.JCMethodInvocation data, JCTree contextTree) {
+    private LamiaExpression parseMethod(JCTree.JCMethodInvocation data, ClassTreeWrapper contextTree) {
         JCTree.JCFieldAccess fieldAccess = (JCTree.JCFieldAccess) data.meth;
         String name = fieldAccess.name.toString();
 
         // 结束方法一共有 3个  convert / setArgs / build
         if ("mapping".equals(name)) {
             LamiaExpression result = new LamiaExpression();
-            List<String> argsNames = fetchArgsName(data);
             result.updateBuild();
-            result.addSpreadArgs(argsNames);
+            fetchArgs(data, contextTree).forEach(arg -> {
+                arg.setSpread(true);
+                result.addArgs(arg);
+            });
             return result;
         }
         if ("setField".equals(name)) {
             LamiaExpression result = new LamiaExpression();
-            List<String> argsNames = fetchArgsName(data);
+            List<ProtoMaterialInfo> args = fetchArgs(data, contextTree);
             result.updateBuild();
-            result.addArgs(argsNames);
+            result.addArgs(args);
             return result;
         }
 
@@ -165,10 +173,23 @@ public class LamiaExpressionResolver {
     }
 
 
-    private List<String> fetchArgsName(JCTree.JCMethodInvocation data) {
-        List<String> result = new ArrayList<>();
+    private List<ProtoMaterialInfo> fetchArgs(JCTree.JCMethodInvocation data, ClassTreeWrapper contextTree) {
+        List<ProtoMaterialInfo> result = new ArrayList<>();
         for (JCTree.JCExpression arg : data.args) {
-            result.add(arg.toString());
+
+            if (arg instanceof JCTree.JCMethodInvocation) {
+                JCTree.JCMethodInvocation methodInvocation = (JCTree.JCMethodInvocation) arg;
+                String methodInvocationText = methodInvocation.toString();
+                ProtoMaterialInfo protoMaterialInfo = new ProtoMaterialInfo("methodInvocation-" + methodInvocationText);
+                Type type = contextTree.getByAfterTypeInference(() -> methodInvocation.type);
+                MethodParameterWrapper parameterWrapper = new MethodParameterWrapper(new TypeDefinition(type.toString()));
+                protoMaterialInfo.setMaterial(parameterWrapper);
+                parameterWrapper.setText(methodInvocationText);
+                result.add(protoMaterialInfo);
+                continue;
+            }
+            result.add(ProtoMaterialInfo.simpleMaterialInfo(arg.toString()));
+
         }
         return result;
     }

@@ -1,6 +1,7 @@
 package com.chy.lamia.visitor;
 
 
+import com.chy.lamia.entity.ClassTreeWrapper;
 import com.chy.lamia.utils.Lists;
 import com.sun.source.tree.BlockTree;
 import com.sun.tools.javac.tree.JCTree;
@@ -22,7 +23,7 @@ public abstract class AbstractBlockVisitor {
      * 这个 block所属的 class
      */
     @Getter
-    public JCTree classTree;
+    public ClassTreeWrapper classTree;
 
     /**
      * 已经 迭代遍历后的语句
@@ -31,7 +32,7 @@ public abstract class AbstractBlockVisitor {
     public java.util.List<JCTree.JCStatement> processedFinishStatement;
 
 
-    public void accept(JCTree.JCBlock block, JCTree classTree) {
+    public void accept(JCTree.JCBlock block, ClassTreeWrapper classTree) {
         if (block == null) {
             return;
         }
@@ -44,7 +45,7 @@ public abstract class AbstractBlockVisitor {
         visitorEnd();
     }
 
-    public void accept(LambdaLineBlockTree block, JCTree classTree) {
+    public void accept(LambdaLineBlockTree block, ClassTreeWrapper classTree) {
         if (block == null) {
             return;
         }
@@ -58,7 +59,7 @@ public abstract class AbstractBlockVisitor {
     }
 
 
-    private void initParam(BlockTree block, JCTree classTree) {
+    private void initParam(BlockTree block, ClassTreeWrapper classTree) {
         this.block = block;
         this.classTree = classTree;
         this.processedFinishStatement = new ArrayList<>();

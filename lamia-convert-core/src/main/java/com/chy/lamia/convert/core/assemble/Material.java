@@ -26,33 +26,33 @@ public class Material {
 
 
     /**
-     * 该材料的变量本身， 如果该材料提供的是 a.getName(), 那这里 varDefinition 指的是 A a; 这个变量
+     * 材料的原始信息，如 这个材料是 a.getName , 这里 protoMaterialInfo 指代的就是 A a 这个信息
      */
-    VarDefinition varDefinition;
+    ProtoMaterialInfo protoMaterialInfo;
 
     /**
      * 表达式生成函数, 传入真实的变量名,生成执行的表达式, 如果普通对象就是变量名称,如果是map/扩散 则是 map.get("") , 或者 vobj.getVar();
      */
     VarExpressionFunction varExpressionFunction;
 
-    BuildInfo buildInfo;
 
-    public Material(BuildInfo buildInfo) {
-        this.buildInfo = buildInfo;
+    public Material(ProtoMaterialInfo protoMaterialInfo) {
+        this.protoMaterialInfo = protoMaterialInfo;
     }
 
-    public static Material simpleMaterial(ConvertVarInfo convertVarInfo) {
-        VarDefinition varDefinition = convertVarInfo.getVarDefinition();
-        Material result = new Material(convertVarInfo.getBuildInfo());
-        result.setSupplyName(varDefinition.getVarName());
-        result.setVarDefinition(varDefinition);
+    public static Material simpleMaterial(ProtoMaterialInfo protoMaterialInfo) {
+        if (protoMaterialInfo.getMaterial().isMethodInvoke()) {
+            throw new RuntimeException("方法[simpleMaterial] 不支持参数是调用表达式的情况");
+        }
+        Material result = new Material(protoMaterialInfo);
+        result.setSupplyName(protoMaterialInfo.getMaterial().getName());
         // 包装成一个表达式
         result.setVarExpressionFunction(expression -> expression);
         return result;
     }
 
     public boolean isIgnoreField(String classPath, String fieldName) {
-        return buildInfo.isIgnoreField(classPath, fieldName);
+        return protoMaterialInfo.getBuildInfo().isIgnoreField(classPath, fieldName);
     }
 
 }

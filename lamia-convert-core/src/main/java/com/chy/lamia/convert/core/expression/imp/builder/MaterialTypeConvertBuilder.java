@@ -10,7 +10,6 @@ import com.chy.lamia.convert.core.components.entity.NewlyStatementHolder;
 import com.chy.lamia.convert.core.components.entity.Statement;
 import com.chy.lamia.convert.core.entity.RuleInfo;
 import com.chy.lamia.convert.core.entity.TypeDefinition;
-import com.chy.lamia.convert.core.entity.VarDefinition;
 import com.chy.lamia.convert.core.expression.imp.builder.rule.RuleHandlerContext;
 import com.chy.lamia.convert.core.expression.imp.builder.rule.handler.RuleChain;
 import lombok.Data;
@@ -45,9 +44,9 @@ public class MaterialTypeConvertBuilder {
      * 将这个类型 转换成 指定的类型
      */
     public ConvertResult convert(Function<Expression, List<NewlyStatementHolder>> callBack) {
-        VarDefinition materialVarDefinition = material.getVarDefinition();
+        String name = material.getProtoMaterialInfo().getName();
 
-        Expression materialExpression = treeFactory.toExpression(materialVarDefinition.getVarRealName());
+        Expression materialExpression = treeFactory.toExpression(name);
         // 把 material 转成真正执行表达式, 也就是拿到 material.getA() 这样的表达式
         Expression expression = material.getVarExpressionFunction().run(materialExpression);
 
@@ -66,7 +65,7 @@ public class MaterialTypeConvertBuilder {
         RuleHandlerContext ruleHandlerContext = RuleHandlerContext.INSTANCE;
 
 
-        RuleInfo ruleInfo = material.getBuildInfo().getRuleInfo();
+        RuleInfo ruleInfo = material.getProtoMaterialInfo().getBuildInfo().getRuleInfo();
         RuleChain ruleChain = ruleHandlerContext.getRuleChain(ruleInfo);
 
         boolean noRule = true;
@@ -110,8 +109,8 @@ public class MaterialTypeConvertBuilder {
      */
     public Expression convertSimple() {
 
-        VarDefinition materialVarDefinition = material.getVarDefinition();
-        Expression materialExpression = treeFactory.toExpression(materialVarDefinition.getVarRealName());
+        String name = material.getProtoMaterialInfo().getName();
+        Expression materialExpression = treeFactory.toExpression(name);
         return material.getVarExpressionFunction().run(materialExpression);
     }
 

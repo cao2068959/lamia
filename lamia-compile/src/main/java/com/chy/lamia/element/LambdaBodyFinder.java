@@ -1,5 +1,6 @@
 package com.chy.lamia.element;
 
+import com.chy.lamia.entity.ClassTreeWrapper;
 import com.sun.source.tree.LambdaExpressionTree;
 import com.sun.source.util.TreeScanner;
 import com.sun.tools.javac.tree.JCTree;
@@ -10,11 +11,11 @@ import java.util.List;
 
 public class LambdaBodyFinder extends TreeScanner<Void, Void> {
 
-    private final JCTree classTree;
+    private final ClassTreeWrapper classTree;
     @Getter
     List<JCLambdaWrapper> result;
 
-    public LambdaBodyFinder(JCTree classTree) {
+    public LambdaBodyFinder(ClassTreeWrapper classTree) {
         this.classTree = classTree;
     }
 

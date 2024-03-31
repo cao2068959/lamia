@@ -2,7 +2,10 @@ package com.chy.lamia.convert.core.expression.parse.builder;
 
 import com.chy.lamia.convert.core.components.entity.Expression;
 import com.chy.lamia.convert.core.entity.LamiaExpression;
+import com.chy.lamia.convert.core.entity.MethodParameterWrapper;
+import com.chy.lamia.convert.core.entity.ProtoMaterialInfo;
 import com.chy.lamia.convert.core.expression.parse.ConfigParseContext;
+import com.chy.lamia.convert.core.expression.parse.entity.ArgWrapper;
 import com.chy.lamia.convert.core.expression.parse.entity.MethodWrapper;
 
 import java.util.ArrayList;
@@ -25,4 +28,16 @@ public interface BuilderHandler {
         }
         return result;
     }
+
+    default ProtoMaterialInfo toProtoMaterialInfo(ArgWrapper arg) {
+        MethodParameterWrapper methodParameter = arg.getExpression().toMethodParameterWrapper();
+        String id = methodParameter.getName();
+        if (methodParameter.isMethodInvoke()) {
+            id = "methodInvocation-" + methodParameter.getText();
+        }
+        ProtoMaterialInfo protoMaterialInfo = new ProtoMaterialInfo(id);
+        protoMaterialInfo.setMaterial(methodParameter);
+        return protoMaterialInfo;
+    }
+
 }

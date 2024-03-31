@@ -45,48 +45,6 @@ public class ConvertFactory {
         return createdStatement(materialStatementBuilders, assembleHandler, lamiaConvertInfo);
     }
 
-    /**
-     * 将会执行表达式，并获取参与转换的所有变量， 包括 target set 的var 也会算入其中
-     *
-     * @param lamiaConvertInfo
-     * @return key:类全路径， value：这个类中用到的所有 var
-     */
-    public Map<String, Set<String>> getParticipateVar(LamiaConvertInfo lamiaConvertInfo) {
-        // 寻找适合的组成器
-        AssembleHandler assembleHandler = getAssembleHandler(lamiaConvertInfo);
-        // 在组装器中添加所有的所有可能参与组合结果对象的材料
-        assembleHandler.addMaterial(createdMaterials(lamiaConvertInfo));
-        // 执行转换
-        assembleHandler.run();
-
-        Map<String, Set<String>> result = new HashMap<>();
-        Set<String> mappingVarName = assembleHandler.getMappingVarName();
-        for (String varName : mappingVarName) {
-            Material material = assembleHandler.getMaterial(varName);
-            if (material == null) {
-                continue;
-            }
-
-            if (material instanceof OmnipotentMaterial) {
-                continue;
-            }
-            if (material.getSupplyType() == null) {
-                continue;
-            }
-            String supplyName = material.getSupplyName();
-            String classPath = material.getVarDefinition().getType().getClassPath();
-            result.computeIfAbsent(classPath, __ -> new HashSet<>()).add(supplyName);
-        }
-
-        if (assembleHandler instanceof MapAssembleHandler) {
-            return result;
-        }
-
-        String classPath = lamiaConvertInfo.getTargetType().getClassPath();
-        result.put(classPath, mappingVarName);
-
-        return result;
-    }
 
 
     /**
@@ -124,21 +82,19 @@ public class ConvertFactory {
      * @return
      */
     private List<Material> createdMaterials(LamiaConvertInfo lamiaConvertInfo) {
-        // 根据优先级 获取出所有的参数, 高优先级的放队尾
-        List<ConvertVarInfo> args = lamiaConvertInfo.getArgsByPriority();
+
         List<Material> result = new ArrayList<>();
         List<Material> highPriority = new ArrayList<>();
 
-        args.forEach(convertVarInfo -> {
-            VarDefinition varDefinition = convertVarInfo.getVarDefinition();
+        lamiaConvertInfo.getAllArgs().forEach((__, protoMaterialInfo) -> {
             // 判断这个参数是否需要扩散开
-            if (lamiaConvertInfo.isSpread(varDefinition)) {
-                List<Material> materials = spreadVarDefinition(convertVarInfo);
+            if (protoMaterialInfo.isSpread()) {
+                List<Material> materials = spreadVarDefinition(protoMaterialInfo);
                 result.addAll(materials);
                 return;
             }
             // 不需要扩散那 直接封装了
-            Material material = Material.simpleMaterial(convertVarInfo);
+            Material material = Material.simpleMaterial(protoMaterialInfo);
             highPriority.add(material);
         });
         result.addAll(highPriority);
@@ -146,23 +102,22 @@ public class ConvertFactory {
     }
 
     /**
-     * 扩散 varDefinition 转成对应的 Material
+     * 扩散 ProtoMaterialInfo 转成对应的 Material
      *
-     * @param convertVarInfo ConvertVarInfo
+     * @param  protoMaterialInfo
      * @return
      */
-    private List<Material> spreadVarDefinition(ConvertVarInfo convertVarInfo) {
-        VarDefinition varDefinition = convertVarInfo.getVarDefinition();
-        TypeDefinition type = varDefinition.getType();
+    private List<Material> spreadVarDefinition(ProtoMaterialInfo protoMaterialInfo) {
+        TypeDefinition type = protoMaterialInfo.getMaterial().getType();
         // 如果扩散的是一个 map
         if (type.matchType(Map.class)) {
-            Material material = new OmnipotentMaterial(varDefinition, convertVarInfo.getBuildInfo());
+            Material material = new OmnipotentMaterial(protoMaterialInfo);
             return Lists.of(material);
         }
 
         // 是系统类型或者基础数据类型,不允许扩散
         if (type.isBaseTypeOrSystemType()) {
-            throw new RuntimeException("变量 [" + varDefinition + "] 是系统类型不允许扩散, 可以使用 Lamia.convert(不扩散的类型) 方法或者 Lamia.config().spreadArgs(需要扩散的类型).convert(不扩散的类型) 来指定");
+            throw new RuntimeException("参数 [" + protoMaterialInfo.getMaterial().getText() + "] 是系统类型不允许扩散, 可以使用 Lamia.setField(不扩散的类型) 方法来指定");
         }
 
         // 解析对应的类型
@@ -172,13 +127,11 @@ public class ConvertFactory {
 
         List<Material> result = new ArrayList<>();
 
-        BuildInfo buildInfo = convertVarInfo.getBuildInfo();
         instantGetters.forEach((fieldName, getter) -> {
-            if (buildInfo.isIgnoreField(type.getClassPath(), fieldName)) {
+            if (protoMaterialInfo.getBuildInfo().isIgnoreField(type.getClassPath(), fieldName)) {
                 return;
             }
-            Material material = new Material(buildInfo);
-            material.setVarDefinition(varDefinition);
+            Material material = new Material(protoMaterialInfo);
             material.setSupplyType(getter.getType());
             material.setSupplyName(fieldName);
             // 生成对应的 var.getXX()
