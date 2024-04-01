@@ -86,7 +86,7 @@ public class ConvertFactory {
         List<Material> result = new ArrayList<>();
         List<Material> highPriority = new ArrayList<>();
 
-        lamiaConvertInfo.getAllArgs().forEach((__, protoMaterialInfo) -> {
+        lamiaConvertInfo.getAllProtoMaterial().forEach((__, protoMaterialInfo) -> {
             // 判断这个参数是否需要扩散开
             if (protoMaterialInfo.isSpread()) {
                 List<Material> materials = spreadVarDefinition(protoMaterialInfo);

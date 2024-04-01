@@ -209,10 +209,8 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
             lamiaConvertInfo.setTargetType(targetType);
         }
 
-
-        Set<String> allArgsName = lamiaConvertInfo.getAllArgsName();
-        allArgsName.stream().map(vars::get).filter(Objects::nonNull).forEach(lamiaConvertInfo::addVarArgs);
-
+        // 将当前
+        vars.forEach((__, value)-> lamiaConvertInfo.addScopeVar(value));
         // 替换当前的 statement
         getCurrentBlock().replaceStatement(lamiaConvertInfo);
 

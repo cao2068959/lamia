@@ -19,6 +19,7 @@ public class MethodParameterWrapper {
      * 参数的类型
      */
     TypeDefinition type;
+
     boolean isMethodInvoke = false;
 
 

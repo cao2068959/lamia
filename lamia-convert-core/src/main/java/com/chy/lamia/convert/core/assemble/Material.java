@@ -45,7 +45,9 @@ public class Material {
             throw new RuntimeException("方法[simpleMaterial] 不支持参数是调用表达式的情况");
         }
         Material result = new Material(protoMaterialInfo);
-        result.setSupplyName(protoMaterialInfo.getMaterial().getName());
+        MethodParameterWrapper parameterWrapper = protoMaterialInfo.getMaterial();
+        result.setSupplyName(parameterWrapper.getName());
+        result.setSupplyType(parameterWrapper.getType());
         // 包装成一个表达式
         result.setVarExpressionFunction(expression -> expression);
         return result;

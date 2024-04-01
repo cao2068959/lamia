@@ -87,7 +87,7 @@ public class MethodUpdateVisitor extends TreeTranslator {
             if (statement instanceof StatementWrapper) {
                 LamiaConvertInfo lamiaConvertInfo = lamiaConvertHolderBlock.getLamiaConvertInfo((StatementWrapper) statement);
                 // 合并所有参数 之前只添加了 方法体中参与转换的参数, 现在把入参中的也添加进去
-                lamiaConvertInfo.getAllArgsName().stream().map(paramMap::get).filter(Objects::nonNull).forEach(lamiaConvertInfo::addVarArgs);
+                paramMap.forEach((__, value) -> lamiaConvertInfo.addScopeVar(value));
                 // 生成对应的转换语句
                 List<NewlyStatementHolder> makeResult = ConvertFactory.INSTANCE.make(lamiaConvertInfo);
                 makeResult.stream().map(s -> (JCTree.JCStatement) s.getStatement().get()).forEach(newStatement::add);

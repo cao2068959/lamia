@@ -13,6 +13,7 @@ public class LamiaExpression {
 
     /**
      * 要设置的全部参数, 直接设置的字段对象以及需要字段映射的都在这里面
+     * key 是这个字段的id
      */
     Map<String, ProtoMaterialInfo> allArgs = new HashMap<>();
 
