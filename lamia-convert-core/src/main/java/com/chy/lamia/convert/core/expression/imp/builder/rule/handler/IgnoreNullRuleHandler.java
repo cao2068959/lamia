@@ -30,5 +30,8 @@ public class IgnoreNullRuleHandler implements IRuleHandler {
         chain.addStatement(new NewlyStatementHolder(anIf));
     }
 
-
+    @Override
+    public boolean isReRefVar() {
+        return true;
+    }
 }

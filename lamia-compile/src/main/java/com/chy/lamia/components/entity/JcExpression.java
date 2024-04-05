@@ -60,7 +60,7 @@ public class JcExpression implements Expression {
         if (jcExpression instanceof JCTree.JCMethodInvocation) {
             JCTree.JCMethodInvocation methodInvocation = (JCTree.JCMethodInvocation) jcExpression;
             Type type = contextTree.getByAfterTypeInference(() -> methodInvocation.type);
-            MethodParameterWrapper parameterWrapper = new MethodParameterWrapper(new TypeDefinition(type.toString()));
+            MethodParameterWrapper parameterWrapper = new MethodParameterWrapper(new TypeDefinition(type.toString()), new JcExpression(methodInvocation));
             parameterWrapper.setText(jcExpression.toString());
             return parameterWrapper;
         }

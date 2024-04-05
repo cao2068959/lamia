@@ -1,5 +1,6 @@
 package com.chy.lamia.convert.core.entity;
 
+import com.chy.lamia.convert.core.components.entity.Expression;
 import lombok.Data;
 
 @Data
@@ -22,6 +23,10 @@ public class MethodParameterWrapper {
 
     boolean isMethodInvoke = false;
 
+    /**
+     * 如果是方法调用的话，这里要存储对应的调用语句
+     */
+    Expression methodInvokeExpression;
 
 
     public MethodParameterWrapper(String name) {
@@ -30,8 +35,9 @@ public class MethodParameterWrapper {
     }
 
 
-    public MethodParameterWrapper(TypeDefinition type) {
+    public MethodParameterWrapper(TypeDefinition type, Expression methodInvokeExpression) {
         this.type = type;
-        isMethodInvoke = true;
+        this.isMethodInvoke = true;
+        this.methodInvokeExpression = methodInvokeExpression;
     }
 }

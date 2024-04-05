@@ -8,6 +8,13 @@ import com.chy.lamia.convert.core.components.entity.Expression;
  */
 public interface IRuleHandler {
 
-
     void run(Expression varExpression, RuleChain chain);
+
+    /**
+     * 是否是一个重新引用的变量
+     *
+     */
+    default boolean isReRefVar() {
+        return false;
+    }
 }

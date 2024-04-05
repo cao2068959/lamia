@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 
 public class JCUtils {
@@ -229,6 +230,11 @@ public class JCUtils {
     }
 
 
+    public JCTree.JCVariableDecl createVar(String varName, String varClass, JCTree.JCExpression varValue, Long modifiers) {
+        return createVar(varName, memberAccess(varClass), varValue, modifiers);
+
+    }
+
     /**
      * 创建一个变量/常量  比如  String aa = "" / User u = xxxx
      *
@@ -238,14 +244,13 @@ public class JCUtils {
      * @param modifiers public private final 等修饰符
      * @return
      */
-    public JCTree.JCVariableDecl createVar(String varName, String varClass, JCTree.JCExpression varValue, Long modifiers) {
+    public JCTree.JCVariableDecl createVar(String varName, JCTree.JCExpression varClass, JCTree.JCExpression varValue, Long modifiers) {
         return treeMaker.VarDef(
                 treeMaker.Modifiers(modifiers),
                 elementUtils.getName(varName),
-                memberAccess(varClass),
+                varClass,
                 varValue
         );
-
     }
 
     /**
@@ -293,6 +298,19 @@ public class JCUtils {
         JCTree.JCVariableDecl forVar = createVar(itemName, itemType.getTypePatch(), null);
         JCTree.JCBlock block = createBlock(statements);
         return treeMaker.ForeachLoop(forVar, collectionExpression, block);
+    }
+
+    /**
+     * 把 TypeDefinition 转换成 JCTypeApply，可能会存在泛型
+     *
+     * @param type
+     * @return
+     */
+    public JCTree.JCTypeApply toJCTypeApply(TypeDefinition type) {
+        JCTree.JCExpression baseType = memberAccess(type.getClassPath());
+        java.util.List<JCTree.JCExpression> generic = type.getGeneric().stream().map(this::toJCTypeApply)
+                .collect(Collectors.toList());
+        return treeMaker.TypeApply(baseType, toSunList(generic));
     }
 
 
@@ -402,11 +420,7 @@ public class JCUtils {
      */
     public TypeDefinition toTypeDefinition(ClassTreeWrapper nodeContext, JCTree data) {
         if (data instanceof JCTree.JCTypeApply) {
-            JCTree.JCTypeApply jcTypeApply = (JCTree.JCTypeApply) data;
-
-            JCTree.JCExpression clazz = jcTypeApply.clazz;
-
-            Type completeType = nodeContext.getFullType(clazz);
+            Type completeType = nodeContext.getFullType((JCTree.JCTypeApply) data);
             return TypeDefinitionFactory.create(completeType);
         } else if (data instanceof JCTree.JCIdent) {
             JCTree.JCIdent jcIdent = (JCTree.JCIdent) data;

@@ -113,7 +113,7 @@ public class ValueObjAssembleHandler extends CommonAssembleHandler {
             List<Expression> expressions = constructorParam.stream()
                     .map(MaterialTypeConvertBuilder::convertSimple).collect(Collectors.toList());
 
-            Statement jcStatement = genNewInstance(instantName, classPath, expressions);
+            Statement jcStatement = genNewInstance(instantName, targetType, classPath, expressions);
             return Lists.of(new NewlyStatementHolder(jcStatement));
 
         }));

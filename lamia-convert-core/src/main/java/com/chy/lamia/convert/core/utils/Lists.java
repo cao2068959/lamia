@@ -6,9 +6,11 @@ import java.util.List;
 
 public class Lists {
 
+    public static List empty = new LinkedList();
+
     public static <T> List<T> of(T... t) {
         if (t == null || t.length == 0) {
-            return new LinkedList<>();
+            return empty;
         }
         List<T> result = new ArrayList<>(t.length);
         for (T item : t) {
@@ -18,7 +20,7 @@ public class Lists {
     }
 
     public static String toString(List<String> data) {
-        if (data == null){
+        if (data == null) {
             return "null";
         }
         return String.join(",", data);

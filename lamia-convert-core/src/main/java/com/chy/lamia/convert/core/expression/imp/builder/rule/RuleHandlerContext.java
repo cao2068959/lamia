@@ -7,7 +7,6 @@ import com.chy.lamia.convert.core.expression.imp.builder.rule.handler.IgnoreNull
 import com.chy.lamia.convert.core.expression.imp.builder.rule.handler.RuleChain;
 import com.chy.lamia.expose.rule.RuleType;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,22 +28,22 @@ public class RuleHandlerContext {
 
     public RuleChain getRuleChain(RuleInfo ruleInfo) {
         if (ruleInfo == null) {
-            return new RuleChain(new ArrayList<>());
+            return new RuleChain();
         }
 
         List<RuleType> ruleTypes = ruleInfo.getRuleTypes();
 
-        List<IRuleHandler> ruleHandlers = new ArrayList<>();
+        RuleChain result = new RuleChain();
         if (ruleTypes != null) {
             ruleTypes.forEach(value -> {
                 IRuleHandler iRuleHandler = handlerMap.get(value);
                 if (iRuleHandler == null) {
                     throw new RuntimeException("无效的 rule:[" + value + "]");
                 }
-                ruleHandlers.add(iRuleHandler);
+                result.addRule(iRuleHandler);
             });
         }
 
-        return new RuleChain(ruleHandlers);
+        return result;
     }
 }

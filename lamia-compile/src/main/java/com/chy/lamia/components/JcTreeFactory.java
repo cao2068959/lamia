@@ -5,8 +5,10 @@ import com.chy.lamia.components.entity.JcStatement;
 import com.chy.lamia.convert.core.components.TreeFactory;
 import com.chy.lamia.convert.core.components.entity.Expression;
 import com.chy.lamia.convert.core.components.entity.Statement;
+import com.chy.lamia.convert.core.entity.TypeDefinition;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.utils.Lists;
+import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.tree.JCTree;
 
 import java.util.List;
@@ -31,10 +33,18 @@ public class JcTreeFactory implements TreeFactory {
     }
 
     @Override
-    public Statement createVar(String instantName, String classPath, Expression newClass) {
-        JCTree.JCVariableDecl variableDecl = jcUtils.createVar(instantName, classPath, JcExpression.get(newClass));
+    public Statement createVar(String instantName, String classPath, Expression expression) {
+        JCTree.JCVariableDecl variableDecl = jcUtils.createVar(instantName, classPath, JcExpression.get(expression));
         return new JcStatement(variableDecl);
     }
+
+    @Override
+    public Statement createVar(String instantName, TypeDefinition type, Expression expression) {
+        JCTree.JCTypeApply typeApply = jcUtils.toJCTypeApply(type);
+        JCTree.JCVariableDecl variableDecl = jcUtils.createVar(instantName, typeApply, JcExpression.get(expression), Flags.PARAMETER);
+        return new JcStatement(variableDecl);
+    }
+
 
     @Override
     public Statement varAssign(String instantName, Expression newClass) {

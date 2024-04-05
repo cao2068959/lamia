@@ -101,10 +101,16 @@ public class TypeDefinition {
         String typePatch = classPath;
         typePatch = typePatch == null ? "null" : typePatch;
         StringBuilder result = new StringBuilder(typePatch);
+
+
         if (generic != null && generic.size() != 0) {
             result.append("<");
-            for (TypeDefinition typeDefinition : generic) {
+            for (int i = 0; i < generic.size(); i++) {
+                TypeDefinition typeDefinition = generic.get(i);
                 result.append(typeDefinition.toString());
+                if (i != generic.size() - 1) {
+                    result.append(", ");
+                }
             }
             result.append(">");
         }

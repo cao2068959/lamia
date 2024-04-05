@@ -182,7 +182,7 @@ public class LamiaExpressionResolver {
                 String methodInvocationText = methodInvocation.toString();
                 ProtoMaterialInfo protoMaterialInfo = new ProtoMaterialInfo("methodInvocation-" + methodInvocationText);
                 Type type = contextTree.getByAfterTypeInference(() -> methodInvocation.type);
-                MethodParameterWrapper parameterWrapper = new MethodParameterWrapper(new TypeDefinition(type.toString()));
+                MethodParameterWrapper parameterWrapper = new MethodParameterWrapper(new TypeDefinition(type.toString()), new JcExpression(methodInvocation));
                 protoMaterialInfo.setMaterial(parameterWrapper);
                 parameterWrapper.setText(methodInvocationText);
                 result.add(protoMaterialInfo);

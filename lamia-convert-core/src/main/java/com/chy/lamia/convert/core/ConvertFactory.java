@@ -46,7 +46,6 @@ public class ConvertFactory {
     }
 
 
-
     /**
      * 使用 MaterialExpressionBuilder 去生成真正的 statement
      * <p>
@@ -104,7 +103,7 @@ public class ConvertFactory {
     /**
      * 扩散 ProtoMaterialInfo 转成对应的 Material
      *
-     * @param  protoMaterialInfo
+     * @param protoMaterialInfo
      * @return
      */
     private List<Material> spreadVarDefinition(ProtoMaterialInfo protoMaterialInfo) {
@@ -156,7 +155,7 @@ public class ConvertFactory {
         AssembleHandler result;
         // 如果要组装的是 map, 则用map的组装器
         if (targetType.matchType(Map.class)) {
-            result = new MapAssembleHandler(lamiaConvertInfo.getTarget());
+            result = new MapAssembleHandler(targetType, lamiaConvertInfo.getTarget());
         } else {
             result = new ValueObjAssembleHandler(this, targetType, lamiaConvertInfo.getTarget());
         }

@@ -16,11 +16,15 @@ public class RuleChain {
 
     int index = 0;
 
+    @Getter
+    boolean isReRefVar = false;
 
-    public RuleChain(List<IRuleHandler> allHandler) {
-        this.allHandler = allHandler;
+    public RuleChain() {
     }
 
+    private RuleChain(List<IRuleHandler> allHandler) {
+        this.allHandler = allHandler;
+    }
 
     public void addStatement(NewlyStatementHolder statement) {
         result.add(statement);
@@ -52,6 +56,7 @@ public class RuleChain {
     public RuleChain copy() {
         RuleChain result = new RuleChain(allHandler);
         result.index = index;
+        result.isReRefVar = isReRefVar;
         return result;
     }
 
@@ -61,11 +66,19 @@ public class RuleChain {
     }
 
     public void addFirstRule(IRuleHandler ruleHandler) {
+        addRuleHandle(ruleHandler);
         allHandler.add(0, ruleHandler);
     }
 
     public void addRule(IRuleHandler ruleHandler) {
+        addRuleHandle(ruleHandler);
         allHandler.add(ruleHandler);
+    }
+
+    private void addRuleHandle(IRuleHandler ruleHandler) {
+        if (ruleHandler.isReRefVar()) {
+            isReRefVar = true;
+        }
     }
 
     public int size() {

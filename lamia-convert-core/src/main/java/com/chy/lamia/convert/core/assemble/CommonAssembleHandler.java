@@ -35,7 +35,7 @@ public abstract class CommonAssembleHandler implements AssembleHandler {
      */
     protected final Set<String> useMaterial = new HashSet<>();
     protected final TreeFactory treeFactory;
-    protected final TypeDefinition targetType;
+    protected  TypeDefinition targetType;
 
     /**
      * 生成新实例的名称
@@ -116,17 +116,19 @@ public abstract class CommonAssembleHandler implements AssembleHandler {
      * 生成新实例的表达式
      *
      * @param instantName      实例名称
-     * @param classPath        实例类型
-     * @param newInstanceParam 新实例的参数
+     * @param instantClass     实例的类型
+     * @param newClassPath     需要new的类型
+     * @param newInstanceParam new的参数
      * @return
      */
-    protected Statement genNewInstance(String instantName, String classPath, List<Expression> newInstanceParam) {
+    protected Statement genNewInstance(String instantName, TypeDefinition instantClass, String newClassPath,
+                                       List<Expression> newInstanceParam) {
 
-        Expression newClass = treeFactory.newClass(classPath, newInstanceParam);
+        Expression newClass = treeFactory.newClass(newClassPath, newInstanceParam);
 
         // 变量是否已经存在,是否需要去创建类型
         if (lamiaConvertInfo.isDeclareResultVarType()) {
-            return treeFactory.createVar(instantName, classPath, newClass);
+            return treeFactory.createVar(instantName, instantClass, newClass);
         }
         return treeFactory.varAssign(instantName, newClass);
     }

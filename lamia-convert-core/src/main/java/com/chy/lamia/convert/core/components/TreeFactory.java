@@ -2,6 +2,7 @@ package com.chy.lamia.convert.core.components;
 
 import com.chy.lamia.convert.core.components.entity.Expression;
 import com.chy.lamia.convert.core.components.entity.Statement;
+import com.chy.lamia.convert.core.entity.TypeDefinition;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ public interface TreeFactory {
      * @return
      */
     Expression newClass(String classPath, List<Expression> newInstanceParam);
+
     /**
      * 创建一个变量
      *
@@ -23,6 +25,16 @@ public interface TreeFactory {
      * @return
      */
     Statement createVar(String instantName, String classPath, Expression newClass);
+
+    /**
+     * 创建一个变量 （可能是存在泛型的）
+     *
+     * @param instantName
+     * @param type
+     * @param expression
+     * @return
+     */
+    Statement createVar(String instantName, TypeDefinition type, Expression expression);
 
     /**
      * 给一个变量赋值
