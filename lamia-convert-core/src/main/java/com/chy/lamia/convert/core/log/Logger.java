@@ -16,4 +16,5 @@ public class Logger {
     public static void push() {
         lamiaSimpleLogger.push();
     }
+
 }

@@ -37,10 +37,10 @@ public class LamiaConvertHolderBlock {
         this.parent = block;
     }
 
-    public void replaceStatement(LamiaConvertInfo lamiaConvertInfo) {
+    public void replaceStatement(LamiaConvertInfo lamiaConvertInfo, JCTree.JCExpression jcExpression) {
         lamiaConvertScopes.put(lamiaConvertInfo.getId(), lamiaConvertInfo);
         String id = lamiaConvertInfo.getId();
-        contents.add(new StatementWrapper(id));
+        contents.add(new StatementWrapper(id, jcExpression));
     }
 
 

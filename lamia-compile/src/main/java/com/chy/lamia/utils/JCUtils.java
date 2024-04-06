@@ -7,6 +7,7 @@ import com.chy.lamia.entity.ClassTreeWrapper;
 import com.chy.lamia.entity.ParameterType;
 import com.chy.lamia.entity.factory.TypeDefinitionFactory;
 import com.chy.lamia.visitor.RandomMethodCreateVisitor;
+import com.sun.source.util.Trees;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
@@ -35,6 +36,7 @@ public class JCUtils {
     public final Annotate annotate;
     public final Names names;
     public final Context context;
+    public final Trees trees;
     TreeMaker treeMaker;
     JavacElements elementUtils;
     public static JCUtils instance;
@@ -60,6 +62,8 @@ public class JCUtils {
         this.enter = Enter.instance(context);
         this.annotate = Annotate.instance(context);
         this.names = Names.instance(context);
+        this.trees = Trees.instance(processingEnv);
+
     }
 
     public Annotate getAnnotate() {

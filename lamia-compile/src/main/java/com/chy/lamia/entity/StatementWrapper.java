@@ -2,13 +2,17 @@ package com.chy.lamia.entity;
 
 import com.sun.source.tree.TreeVisitor;
 import com.sun.tools.javac.tree.JCTree;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
 @Getter
 public class StatementWrapper extends JCTree.JCStatement {
+    private final JCExpression oldExpression;
     String id;
+
+    public StatementWrapper(String id, JCExpression jcExpression) {
+        this.id = id;
+        this.oldExpression = jcExpression;
+    }
 
     @Override
     public Tag getTag() {

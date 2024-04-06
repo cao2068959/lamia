@@ -15,7 +15,9 @@ import com.chy.lamia.convert.core.components.entity.Expression;
 import com.chy.lamia.convert.core.components.entity.Statement;
 import com.chy.lamia.convert.core.log.Logger;
 import com.chy.lamia.convert.core.utils.ReflectUtils;
+import com.chy.lamia.exception.IgnoreException;
 import com.chy.lamia.processor.marked.MarkedContext;
+import com.chy.lamia.reporter.Reporter;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.visitor.MethodUpdateVisitor;
 import com.sun.tools.javac.code.Symbol;
@@ -44,6 +46,8 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
         try {
             ProcessingEnvironment processingEnv = ReflectUtils.getFile(roundEnv, "processingEnv", ProcessingEnvironment.class);
             JCUtils.refreshJCUtils(processingEnv);
+            Reporter.messager = processingEnv.getMessager();
+
 
             if (roundEnv.processingOver()) {
                 handleSignMethod();
@@ -52,6 +56,9 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
             }
             return true;
         } catch (Throwable e) {
+            if (e instanceof IgnoreException) {
+                return true;
+            }
             Logger.throwableLog(e);
             throw e;
         } finally {

@@ -210,9 +210,9 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
         }
 
         // 将当前
-        vars.forEach((__, value)-> lamiaConvertInfo.addScopeVar(value));
+        vars.forEach((__, value) -> lamiaConvertInfo.addScopeVar(value));
         // 替换当前的 statement
-        getCurrentBlock().replaceStatement(lamiaConvertInfo);
+        getCurrentBlock().replaceStatement(lamiaConvertInfo, jcExpression);
 
         return lamiaConvertInfo;
     }

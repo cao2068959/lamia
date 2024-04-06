@@ -27,4 +27,5 @@ public class MarkedMethods {
     public Map<String, Symbol.MethodSymbol> getDatas() {
         return map;
     }
+
 }
