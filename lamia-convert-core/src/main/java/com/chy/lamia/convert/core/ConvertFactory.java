@@ -161,6 +161,49 @@ public class ConvertFactory {
         }
         result.setLamiaConvertInfo(lamiaConvertInfo);
         return result;
-
     }
+
+    /**
+     * 将会执行表达式，并获取参与转换的所有变量， 包括 target set 的var 也会算入其中
+     *
+     * @param lamiaConvertInfo
+     * @return key:类全路径， value：这个类中用到的所有 var
+     */
+    public Map<String, Set<String>> getParticipateVar(LamiaConvertInfo lamiaConvertInfo) {
+        // 寻找适合的组成器
+        AssembleHandler assembleHandler = getAssembleHandler(lamiaConvertInfo);
+        // 在组装器中添加所有的所有可能参与组合结果对象的材料
+        assembleHandler.addMaterial(createdMaterials(lamiaConvertInfo));
+        // 执行转换
+        assembleHandler.run();
+
+        Map<String, Set<String>> result = new HashMap<>();
+        Set<String> mappingVarName = assembleHandler.getMappingVarName();
+        for (String varName : mappingVarName) {
+            Material material = assembleHandler.getMaterial(varName);
+            if (material == null) {
+                continue;
+            }
+
+            if (material instanceof OmnipotentMaterial) {
+                continue;
+            }
+            if (material.getSupplyType() == null) {
+                continue;
+            }
+            String supplyName = material.getSupplyName();
+            String classPath = material.getProtoMaterialInfo().getMaterial().getType().getClassPath();
+            result.computeIfAbsent(classPath, __ -> new HashSet<>()).add(supplyName);
+        }
+
+        if (assembleHandler instanceof MapAssembleHandler) {
+            return result;
+        }
+
+        String classPath = lamiaConvertInfo.getTargetType().getClassPath();
+        result.put(classPath, mappingVarName);
+
+        return result;
+    }
+
 }

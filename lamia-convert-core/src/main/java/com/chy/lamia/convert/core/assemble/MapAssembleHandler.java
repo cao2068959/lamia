@@ -82,7 +82,13 @@ public class MapAssembleHandler extends CommonAssembleHandler {
     public void createConvertExpression(DefaultHashMap<String, Material> materialMap) {
         // 找到所有的材料, 放入 map中,将生成对应的 put函数
         materialMap.forEach((key, material) -> {
-            MaterialTypeConvertBuilder materialTypeConvertBuilder = toMaterialTypeConvertBuilder(material);
+            MaterialTypeConvertBuilder materialTypeConvertBuilder = useMaterial(material.getSupplyType(), material.getSupplyName());
+            if (materialTypeConvertBuilder == null) {
+                return;
+            }
+            if (materialTypeConvertBuilder.getMaterial() instanceof OmnipotentMaterial) {
+                throw new RuntimeException("不允许map扩散转map, 入参map的名称为:[" + material.getProtoMaterialInfo().getMaterial().getText() + "]");
+            }
 
             MaterialStatementBuilder materialStatementBuilder = new MaterialStatementBuilder();
             materialStatementBuilder.setFunction(() -> materialTypeConvertBuilder.convert(expression -> {
