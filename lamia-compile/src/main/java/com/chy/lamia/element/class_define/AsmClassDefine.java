@@ -40,8 +40,6 @@ public class AsmClassDefine implements IClassDefine {
             URL url = ClassPath.getPathFromClass(leadClass);
             ClassReader classReader = new ClassReader(url.openStream());
             classReader.accept(classMetadataReadingVisitor, 0);
-
-
         } catch (IOException e) {
             Logger.throwableLog(e);
             throw new RuntimeException("类 : [" + classPath + "] 无法解析");

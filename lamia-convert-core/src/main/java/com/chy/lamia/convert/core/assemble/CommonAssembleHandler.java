@@ -204,7 +204,7 @@ public abstract class CommonAssembleHandler implements AssembleHandler {
         MaterialTypeConvertBuilder result = new MaterialTypeConvertBuilder(material, typeDefinition);
 
 
-        result.setTypeMatch(material.getSupplyType().matchType(typeDefinition, false));
+        result.setTypeMatch(material.getSupplyType().matchType(typeDefinition, true));
         return result;
     }
 

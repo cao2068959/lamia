@@ -1,8 +1,10 @@
 package com.chy.lamia.element.class_define;
 
 import com.chy.lamia.convert.core.entity.*;
+import com.chy.lamia.element.resolver.type.JcTypeResolver;
 import com.chy.lamia.entity.SimpleMethod;
 import com.chy.lamia.entity.Var;
+import com.chy.lamia.entity.factory.TypeDefinitionFactory;
 import com.chy.lamia.utils.StringUtils;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
@@ -42,6 +44,24 @@ public class SymbolClassDefine implements IClassDefine {
             }
         }
 
+        Type superclass = classSymbol.getSuperclass();
+        if (superclass != null) {
+            String superclassString = superclass.toString();
+            if (invalidSuperclass(superclassString)) {
+                return;
+            }
+            JcTypeResolver parentClassElement = JcTypeResolver.getTypeResolver(TypeDefinitionFactory.create(superclass));
+            getters.putAll(parentClassElement.getInstantGetters());
+            setters.putAll(parentClassElement.getInstantSetters());
+        }
+
+    }
+
+    private boolean invalidSuperclass(String superclassString) {
+        if (superclassString == null) {
+            return true;
+        }
+        return superclassString.startsWith("java.");
     }
 
     private void handlerMethod(Symbol.MethodSymbol methodSymbol) {
