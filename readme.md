@@ -7,7 +7,8 @@
 - 使用简单，没有繁琐的配置和接口定义，开箱即用
 - 高性能的对象转换，转换性能和手写`get/set`一致
 - 完善的兼容性，支持`jdk8-jdk21`等常用JDK版本以及可以和`lombok`等`AnnotationProcessor`框架同时使用  
-- 在Idea插件的加持下，支持增量编译、可视化转换等
+- 在Idea插件的加持下，支持增量编译、可视化转换等 
+  - 插件地址: [lamia-plugin](https://github.com/cao2068959/lamia-plugin)
 
 
 # 2. 快速使用
@@ -127,6 +128,7 @@ public class UserVO {
 
 在介绍详细配置的时候，会展示一些表达式最终生成的语句来让大家更加理解对应配置的作用，在文中截图展示最终生成语句的工具是`lamia Idea插件`
 欢迎大家去idea插件商店下载体验
+- 插件地址: [lamia-plugin](https://github.com/cao2068959/lamia-plugin)
 
 ## 3.1 注解 @LamiaMapping
 - 对于标注了注解`@LamiaMapping`的方法, 那么在`编译期`中将会去扫描这个方法中的每一行代码, 直到扫描到语句
@@ -331,7 +333,7 @@ public class FamilyVO {
 ```
 ![img_6.png](img/img_6.png)
 
-> 如果在idea中配合`lamia-plugin` 使用可以在编码期就提示你类型不匹配，并且可以自动生成对应的`对策语句`,具体可以参考
+> 如果在idea中配合`lamia-plugin` 使用可以在编码期就提示你类型不匹配，并且可以自动生成对应的`对策语句`,具体可以参考  [lamia-plugin](https://github.com/cao2068959/lamia-plugin)
 
 可以看到生成的代码中，两个`user` 字段因类型不对报错了，所以需要去定义忽略掉`user`字段
 
@@ -344,25 +346,41 @@ FamilyVO familyVO = Lamia.builder().rule().ignoreField(FamilyVO::getUser)
 ```
 ![img_7.png](img/img_7.png)
 
-# 4. 其他能力
 
-除了上述能力，还有一些能提高体验度的小方法
-
-## 4.1 对象和map的相互转换
+## 3.6 对象和map的相互转换
 
 也提供了能力，可以让对象和`map`，相互转换
 
 对于 `对象 --> map`，需要注意现在只支持泛型`<String, Object>` 以及 `<String, String>`， 其他的泛型会报错
 
+如:
+![img_8.png](img/img_8.png)
+
+
+![img_9.png](img/img_9.png)
+
+__注意__: 在转成  `<String, String>` 的时候，因为自动使用了`toString` 为了防止出现`npe` 建议配合 规则规则`RuleType.IGNORE_NULL` 使用
+
+默认情况之下，转成`map`, 都是使用 `new HashMap()` , 如果想设置成其他的`map`请自行创建，下面例子将展示怎么转换成`ConcurrentHashMap`:
+```java
+ @LamiaMapping
+    public void test8() {
+        User user = ...;
+        Map<String, String> result = new ConcurrentHashMap<>();
+        Lamia.builder().mapping(user).build(result);
+    }
+```
+
+以及可以反过来，`map --> obj ` ，反向转换的时候，仅仅支持`<String, Object>`, 如下:
+![img_10.png](img/img_10.png)
 
 
 
 
-
-
-
-
-
+# 4. 其他
+- 配合 [lamia-plugin](https://github.com/cao2068959/lamia-plugin) 可以获得更完整的体验
+- 欢迎各路大佬来帮忙完善整个框架
+- QQ交流群: 179545939
 
 
 
