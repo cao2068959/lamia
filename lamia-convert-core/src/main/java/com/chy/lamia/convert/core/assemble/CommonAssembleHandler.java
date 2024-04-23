@@ -35,7 +35,7 @@ public abstract class CommonAssembleHandler implements AssembleHandler {
      */
     protected final Set<String> useMaterial = new HashSet<>();
     protected final TreeFactory treeFactory;
-    protected  TypeDefinition targetType;
+    protected TypeDefinition targetType;
 
     /**
      * 生成新实例的名称
@@ -64,7 +64,11 @@ public abstract class CommonAssembleHandler implements AssembleHandler {
                 materialMap.setDefaultValue(material);
                 return;
             }
-            materialMap.put(material.getSupplyName(), material);
+            String supplyName = material.getSupplyName();
+            Material exsitMaterial = materialMap.get(supplyName);
+            if (exsitMaterial == null || material.getPriority() > exsitMaterial.getPriority()) {
+                materialMap.put(material.getSupplyName(), material);
+            }
         });
     }
 

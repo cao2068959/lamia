@@ -32,6 +32,11 @@ public class LamiaExpression {
     @lombok.Setter
     private boolean parseComplete = true;
 
+    /**
+     * 当前添加的 Args 数量，也用来当做优先级，越向后添加的优先级越高
+     */
+    private int count;
+
 
     /**
      * 判断这一个表达式是否完整
@@ -59,6 +64,7 @@ public class LamiaExpression {
 
     public void addArgs(ProtoMaterialInfo data) {
         String id = data.getId();
+        data.setPriority(count++);
         data.setBuildInfo(buildInfo);
         ProtoMaterialInfo protoMaterialInfo = allArgs.get(id);
         if (protoMaterialInfo == null) {

@@ -35,9 +35,14 @@ public class Material {
      */
     VarExpressionFunction varExpressionFunction;
 
+    /**
+     * 优先级，数字越大优先级越高
+     */
+    int priority;
 
     public Material(ProtoMaterialInfo protoMaterialInfo) {
         this.protoMaterialInfo = protoMaterialInfo;
+        this.priority = protoMaterialInfo.getPriority();
     }
 
     public static Material simpleMaterial(ProtoMaterialInfo protoMaterialInfo) {

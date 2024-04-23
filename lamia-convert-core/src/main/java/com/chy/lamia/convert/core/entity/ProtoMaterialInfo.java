@@ -23,6 +23,8 @@ public class ProtoMaterialInfo {
 
     boolean spread = false;
 
+    int priority;
+
 
     public ProtoMaterialInfo(String id) {
         this.id = id;
