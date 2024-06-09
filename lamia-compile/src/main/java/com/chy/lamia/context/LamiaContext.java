@@ -19,7 +19,7 @@ public class LamiaContext {
         return path.getCompilationUnit().getSourceFile();
     }
 
-    public static Pair<Long, Long> getCurrentPosition(JCTree.JCExpression expression) {
+    public static Pair<Long, Long> getCurrentPosition(JCTree expression) {
         TreePath path = JCUtils.instance.trees.getPath(currentElement);
         LineMap lineMap = path.getCompilationUnit().getLineMap();
         int startPosition = expression.getStartPosition();

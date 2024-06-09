@@ -10,7 +10,6 @@ import com.chy.lamia.convert.core.entity.VarDefinition;
 import com.chy.lamia.element.LamiaConvertBlockVisitor;
 import com.chy.lamia.element.LamiaConvertHolderBlock;
 import com.chy.lamia.element.annotation.AnnotationProxyFactory;
-import com.chy.lamia.element.pos.PosUpdateTreeScanner;
 import com.chy.lamia.entity.ClassTreeWrapper;
 import com.chy.lamia.entity.StatementWrapper;
 import com.chy.lamia.entity.factory.TypeDefinitionFactory;
@@ -88,9 +87,6 @@ public class MethodUpdateVisitor extends TreeTranslator {
         // 获取这个代码块中 所有的代码
         List<JCTree.JCStatement> statements = lamiaConvertHolderBlock.getContents();
         List<JCTree.JCStatement> newStatement = new LinkedList<>();
-
-        PosUpdateTreeScanner statementScanner = new PosUpdateTreeScanner();
-
         for (JCTree.JCStatement statement : statements) {
             // 如果是 LamiaConvertInfo.Statement 说明这段代码本身就需要修改的
             if (statement instanceof StatementWrapper) {
@@ -102,12 +98,7 @@ public class MethodUpdateVisitor extends TreeTranslator {
                     paramMap.forEach((__, value) -> lamiaConvertInfo.addScopeVar(value));
                     // 生成对应的转换语句
                     List<NewlyStatementHolder> makeResult = ConvertFactory.INSTANCE.make(lamiaConvertInfo);
-                    makeResult.stream().map(s -> {
-                        JCTree.JCStatement item = (JCTree.JCStatement) s.getStatement().get();
-                        statementScanner.setPos(wrapper.getOldExpression().getStartPosition());
-                        statementScanner.scan(item);
-                        return item;
-                    }).forEach(newStatement::add);
+                    makeResult.stream().map(s -> (JCTree.JCStatement) s.getStatement().get()).forEach(newStatement::add);
 
                 } catch (RuntimeException e) {
                     Reporter.reportException(e, wrapper.getOldExpression());

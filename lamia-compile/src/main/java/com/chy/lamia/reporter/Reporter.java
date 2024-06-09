@@ -14,10 +14,10 @@ public class Reporter {
     public static Messager messager;
 
 
-    public static void reportException(RuntimeException exception, JCTree.JCExpression expression) {
+    public static void reportException(RuntimeException exception, JCTree tree) {
         Logger.throwableLog(exception);
         try {
-            sendMessager(exception, expression);
+            sendMessager(exception, tree);
         } catch (Exception e) {
             if (e instanceof IgnoreException) {
                 throw e;
@@ -27,7 +27,10 @@ public class Reporter {
         }
     }
 
-    public static void sendMessager(Exception exception, JCTree.JCExpression expression) {
+    public static void sendMessager(Exception exception, JCTree expression) {
+        if (exception instanceof IgnoreException) {
+            return;
+        }
         String filePath = LamiaContext.getCurrentJavaFileObject().getName();
         Pair<Long, Long> currentPosition = LamiaContext.getCurrentPosition(expression);
         StringBuilder msg = new StringBuilder(filePath);

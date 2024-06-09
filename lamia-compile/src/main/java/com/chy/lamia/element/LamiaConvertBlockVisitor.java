@@ -9,10 +9,12 @@ import com.chy.lamia.convert.core.entity.TypeDefinition;
 import com.chy.lamia.convert.core.entity.VarDefinition;
 import com.chy.lamia.element.annotation.AnnotationProxyFactory;
 import com.chy.lamia.element.resolver.expression.LamiaExpressionResolver;
+import com.chy.lamia.entity.ClassTreeWrapper;
 import com.chy.lamia.entity.factory.TypeDefinitionFactory;
 import com.chy.lamia.utils.JCUtils;
 import com.chy.lamia.visitor.AbstractBlockVisitor;
 import com.chy.lamia.visitor.LambdaLineBlockTree;
+import com.sun.source.tree.BlockTree;
 import com.sun.source.tree.Tree;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.tree.JCTree;
@@ -56,6 +58,15 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
         this.updateBlocks = lamiaConvertHolderBlock;
     }
 
+
+    @Override
+    protected void subInitParam(BlockTree block, ClassTreeWrapper classTree) {
+        if (vars.containsKey("this")) {
+            return;
+        }
+        TypeDefinition typeDefinition = classTree.getTypeDefinition();
+        vars.put("this", new VarDefinition("this", typeDefinition));
+    }
 
     /**
      * 如果 遇到了 代码块 if while for 等 都递归进去 再次扫描一次
@@ -282,5 +293,6 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
     public List<LamiaConvertHolderBlock> getResult() {
         return updateBlocks;
     }
+
 
 }

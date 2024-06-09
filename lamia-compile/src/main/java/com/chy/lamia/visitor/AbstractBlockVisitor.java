@@ -2,6 +2,7 @@ package com.chy.lamia.visitor;
 
 
 import com.chy.lamia.entity.ClassTreeWrapper;
+import com.chy.lamia.reporter.Reporter;
 import com.chy.lamia.utils.Lists;
 import com.sun.source.tree.BlockTree;
 import com.sun.tools.javac.tree.JCTree;
@@ -63,13 +64,19 @@ public abstract class AbstractBlockVisitor {
         this.block = block;
         this.classTree = classTree;
         this.processedFinishStatement = new ArrayList<>();
+        subInitParam(block, classTree);
     }
+
 
     private void visitorAllBlock(List<JCTree.JCStatement> statements) {
 
         for (JCTree.JCStatement statement : statements) {
-            if (doVisitorAllBlock(statement)) {
-                processedFinishStatement.add(statement);
+            try {
+                if (doVisitorAllBlock(statement)) {
+                    processedFinishStatement.add(statement);
+                }
+            } catch (RuntimeException e) {
+                Reporter.reportException(e, statement);
             }
         }
     }
@@ -151,5 +158,7 @@ public abstract class AbstractBlockVisitor {
 
     public void visitorEnd() {
     }
+
+    protected abstract void subInitParam(BlockTree block, ClassTreeWrapper classTree);
 
 }
