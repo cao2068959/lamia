@@ -19,4 +19,9 @@ public class Setter {
      */
     private TypeDefinition type;
 
+
+    /**
+     * set方法所在类的类型
+     */
+    private TypeDefinition parentClassType;
 }

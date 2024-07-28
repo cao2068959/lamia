@@ -103,6 +103,13 @@ public abstract class AbstractBlockVisitor {
             return true;
         }
 
+        if (statement instanceof JCTree.JCEnhancedForLoop) {
+            JCTree.JCEnhancedForLoop forLoop = (JCTree.JCEnhancedForLoop) statement;
+            enhancedForLoopVisit(forLoop.getVariable());
+            blockVisit((JCTree.JCBlock) forLoop.body);
+            return true;
+        }
+
         //如果是 return 语句
         if (statement instanceof JCTree.JCReturn) {
             JCTree.JCReturn jCReturn = (JCTree.JCReturn) statement;
@@ -123,12 +130,18 @@ public abstract class AbstractBlockVisitor {
             return true;
         }
 
+
+
         // 普通的执行表达式
         if (statement instanceof JCTree.JCExpressionStatement) {
             JCTree.JCExpressionStatement expressionStatement = (JCTree.JCExpressionStatement) statement;
             return expressionStatementVisit(expressionStatement);
         }
         return true;
+    }
+
+    public void enhancedForLoopVisit(JCTree.JCVariableDecl variable) {
+
     }
 
     public boolean expressionStatementVisit(JCTree.JCExpressionStatement expressionStatement) {

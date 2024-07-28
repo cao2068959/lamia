@@ -7,7 +7,7 @@ public class Getter {
 
 
     /**
-     * set方法 设置的字段的名称
+     * get 字段的名称
      */
     private String varName;
     /**
@@ -16,8 +16,14 @@ public class Getter {
     private String methodName;
 
     /**
-     * set方法 设置的字段的类型
+     * get出来的类型
      */
     private TypeDefinition type;
+
+    /**
+     *  get方法所在类的类型
+     */
+    private TypeDefinition parentClassType;
+
 
 }

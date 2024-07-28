@@ -133,6 +133,7 @@ public class ConvertFactory {
             Material material = new Material(protoMaterialInfo);
             material.setSupplyType(getter.getType());
             material.setSupplyName(fieldName);
+            material.setMaterialSubordinationType(getter.getParentClassType());
             // 生成对应的 var.getXX()
             material.setVarExpressionFunction((varExpression -> {
                 Statement statement = treeFactory.execMethod(varExpression, getter.getMethodName(), Lists.of());
@@ -179,6 +180,13 @@ public class ConvertFactory {
 
         Map<String, Set<String>> result = new HashMap<>();
         Set<String> mappingVarName = assembleHandler.getMappingVarName();
+
+        Map<String, Setter> targetSetters = null;
+        if (assembleHandler instanceof ValueObjAssembleHandler) {
+
+            ValueObjAssembleHandler valueObjAssembleHandler = (ValueObjAssembleHandler) assembleHandler;
+            targetSetters = valueObjAssembleHandler.getTargetSetters();
+        }
         for (String varName : mappingVarName) {
             Material material = assembleHandler.getMaterial(varName);
             if (material == null) {
@@ -192,13 +200,18 @@ public class ConvertFactory {
                 continue;
             }
             String supplyName = material.getSupplyName();
-            String classPath = material.getProtoMaterialInfo().getMaterial().getType().getClassPath();
+
+            // 设置 使用到了 哪些 get信息
+            String classPath = material.getMaterialSubordinationType().getClassPath();
             result.computeIfAbsent(classPath, __ -> new HashSet<>()).add(supplyName);
+
+            // 设置使用了哪些 set信息
+            if (targetSetters != null && targetSetters.containsKey(supplyName)) {
+                Setter setter = targetSetters.get(supplyName);
+                result.computeIfAbsent(setter.getParentClassType().getClassPath(), __ -> new HashSet<>()).add(supplyName);
+            }
         }
 
-        if (assembleHandler instanceof MapAssembleHandler) {
-            return result;
-        }
 
         String classPath = lamiaConvertInfo.getTargetType().getClassPath();
         result.put(classPath, mappingVarName);

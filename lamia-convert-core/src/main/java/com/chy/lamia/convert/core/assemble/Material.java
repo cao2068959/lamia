@@ -24,6 +24,10 @@ public class Material {
      */
     TypeDefinition supplyType;
 
+    /**
+     *  材料从属的类型，比如 a extend b ,  getName 在 b 中，那么这里提供的就是 b
+     */
+    TypeDefinition materialSubordinationType;
 
     /**
      * 材料的原始信息，如 这个材料是 a.getName , 这里 protoMaterialInfo 指代的就是 A a 这个信息

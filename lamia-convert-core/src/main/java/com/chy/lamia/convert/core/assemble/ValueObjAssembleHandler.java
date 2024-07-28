@@ -27,6 +27,8 @@ import java.util.stream.Collectors;
 public class ValueObjAssembleHandler extends CommonAssembleHandler {
 
     private final TypeResolver targetTypeResolver;
+
+    @lombok.Getter
     private final Map<String, Setter> targetSetters;
 
 

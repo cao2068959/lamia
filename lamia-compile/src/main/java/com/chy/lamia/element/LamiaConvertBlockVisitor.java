@@ -275,6 +275,15 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
     }
 
 
+    public void enhancedForLoopVisit(JCTree.JCVariableDecl variable) {
+        // 解析这个变量把他转成 VarDefinition
+        Type type = classTree.getFullType(variable.vartype);
+        TypeDefinition typeDefinition = TypeDefinitionFactory.create(type);
+        VarDefinition varDefinition = new VarDefinition(variable.getName().toString(), typeDefinition);
+        // 将这个变量放入 容器
+        vars.put(varDefinition.getVarRealName(), varDefinition);
+    }
+
     @Override
     public void visitorEnd() {
         if (currentBlock != null) {
