@@ -47,9 +47,9 @@ public class LamiaConvertBlockVisitor extends AbstractBlockVisitor {
     private LamiaExpressionResolver lamiaExpressionResolver = new LamiaExpressionResolver();
 
 
-    public LamiaConvertBlockVisitor() {
+    public LamiaConvertBlockVisitor(Map<String, VarDefinition> paramMap) {
         this.updateBlocks = new ArrayList<>();
-        vars = new HashMap<>();
+        vars = new HashMap<>(paramMap);
     }
 
     public LamiaConvertBlockVisitor(Map<String, VarDefinition> vars, List<LamiaConvertHolderBlock> lamiaConvertHolderBlock) {

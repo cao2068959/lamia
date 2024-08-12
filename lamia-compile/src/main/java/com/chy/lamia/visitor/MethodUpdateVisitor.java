@@ -59,7 +59,7 @@ public class MethodUpdateVisitor extends TreeTranslator {
 
 
         //解析原来方法中的方法体,计算出所有需要去修改的 方法体
-        List<LamiaConvertHolderBlock> needUpdateBlocks = findLamiaConvertBlock(methodSymbolDecl);
+        List<LamiaConvertHolderBlock> needUpdateBlocks = findLamiaConvertBlock(methodSymbolDecl, paramMap);
         for (LamiaConvertHolderBlock lamiaConvertHolderBlock : needUpdateBlocks) {
             updateBlock(lamiaConvertHolderBlock, paramMap);
         }
@@ -119,11 +119,12 @@ public class MethodUpdateVisitor extends TreeTranslator {
      * 每一个 LamiaConvertHolderBlock 代表着存在 Lamia.convert 表达式的代码块, 如果一个代码块中同时出现了多个  Lamia.convert 表达式 那么将多个表达式存到一个 LamiaConvertHolderBlock 中
      *
      * @param methodSymbolDecl
+     * @param paramMap
      * @return
      */
-    private List<LamiaConvertHolderBlock> findLamiaConvertBlock(JCTree.JCMethodDecl methodSymbolDecl) {
+    private List<LamiaConvertHolderBlock> findLamiaConvertBlock(JCTree.JCMethodDecl methodSymbolDecl, Map<String, VarDefinition> paramMap) {
         JCTree.JCBlock originalBody = methodSymbolDecl.body;
-        LamiaConvertBlockVisitor lamiaConvertBlockVisitor = new LamiaConvertBlockVisitor();
+        LamiaConvertBlockVisitor lamiaConvertBlockVisitor = new LamiaConvertBlockVisitor(paramMap);
         lamiaConvertBlockVisitor.accept(originalBody, classTree);
         return lamiaConvertBlockVisitor.getResult();
     }
