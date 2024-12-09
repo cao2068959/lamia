@@ -14,6 +14,7 @@ public class StatementWrapper extends JCTree.JCStatement {
         this.oldExpression = jcExpression;
     }
 
+
     @Override
     public Tag getTag() {
         return null;
@@ -32,5 +33,13 @@ public class StatementWrapper extends JCTree.JCStatement {
     @Override
     public <R, D> R accept(TreeVisitor<R, D> treeVisitor, D d) {
         return null;
+    }
+
+    public int getPos() {
+        int result = oldExpression.pos;
+        if (result > 0) {
+            return result;
+        }
+        return oldExpression.getStartPosition();
     }
 }
