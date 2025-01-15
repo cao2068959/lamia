@@ -64,7 +64,6 @@ public class MethodUpdateVisitor extends TreeTranslator {
         for (LamiaConvertHolderBlock lamiaConvertHolderBlock : needUpdateBlocks) {
             updateBlock(lamiaConvertHolderBlock, paramMap);
         }
-
     }
 
     private VarDefinition toVarDefinition(Symbol.VarSymbol varSymbol) {
@@ -102,10 +101,10 @@ public class MethodUpdateVisitor extends TreeTranslator {
                     List<NewlyStatementHolder> makeResult = ConvertFactory.INSTANCE.make(lamiaConvertInfo);
 
                     makeResult.stream().map(s -> {
-                            JCTree.JCStatement item = (JCTree.JCStatement) s.getStatement().get();
-                            statementScanner.setPos(wrapper.getPos());
-                            statementScanner.scan(item);
-                            return item;
+                        JCTree.JCStatement item = (JCTree.JCStatement) s.getStatement().get();
+                        statementScanner.setPos(wrapper.getPos());
+                        statementScanner.scan(item);
+                        return item;
                     }).forEach(newStatement::add);
 
                 } catch (RuntimeException e) {

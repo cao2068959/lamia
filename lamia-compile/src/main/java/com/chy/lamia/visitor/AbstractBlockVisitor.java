@@ -86,11 +86,16 @@ public abstract class AbstractBlockVisitor {
         //如果是 if 语句
         if (statement instanceof JCTree.JCIf) {
             JCTree.JCIf jcif = (JCTree.JCIf) statement;
-            JCTree.JCBlock elseBlock = (JCTree.JCBlock) jcif.elsepart;
             JCTree.JCBlock thenBlock = (JCTree.JCBlock) jcif.thenpart;
-            ifVisit(jcif, thenBlock, elseBlock);
             blockVisit(thenBlock);
-            blockVisit(elseBlock);
+            JCTree.JCStatement elsepart = jcif.elsepart;
+            if (elsepart instanceof JCTree.JCBlock) {
+                JCTree.JCBlock elseBlock = (JCTree.JCBlock) elsepart;
+                blockVisit(elseBlock);
+            } else if (elsepart instanceof JCTree.JCIf) {
+                return doVisitorAllBlock(elsepart);
+            }
+
             return true;
         }
 
@@ -131,7 +136,6 @@ public abstract class AbstractBlockVisitor {
         }
 
 
-
         // 普通的执行表达式
         if (statement instanceof JCTree.JCExpressionStatement) {
             JCTree.JCExpressionStatement expressionStatement = (JCTree.JCExpressionStatement) statement;
@@ -148,9 +152,6 @@ public abstract class AbstractBlockVisitor {
         return true;
     }
 
-
-    public void ifVisit(JCTree.JCIf statement, JCTree.JCBlock thenBlock, JCTree.JCBlock elseBlock) {
-    }
 
     public void innerBlockVisit(JCTree.JCBlock statement) {
     }

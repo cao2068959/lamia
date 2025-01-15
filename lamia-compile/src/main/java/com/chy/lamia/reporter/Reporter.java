@@ -34,8 +34,8 @@ public class Reporter {
         String filePath = LamiaContext.getCurrentJavaFileObject().getName();
         Pair<Long, Long> currentPosition = LamiaContext.getCurrentPosition(expression);
         StringBuilder msg = new StringBuilder(filePath);
-        msg.append(":[").append(currentPosition.getLeft()).append(",")
-                .append(currentPosition.getRight()).append("] ")
+        msg.append(":").append(currentPosition.getLeft()).append(":")
+                .append(currentPosition.getRight()).append(" ")
                 .append("错误: ").append(exception.getMessage());
         messager.printMessage(Diagnostic.Kind.ERROR, msg.toString());
         throw new IgnoreException();

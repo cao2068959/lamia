@@ -28,12 +28,20 @@ public class TypeDefinition {
     List<TypeDefinition> generic = new ArrayList<>();
 
     public TypeDefinition(String classPath) {
-        this.classPath = classPath;
+        setClassPath(classPath);
     }
 
     public TypeDefinition(TypeDefinition typeDefinition) {
-        classPath = typeDefinition.getClassPath();
+        setClassPath(typeDefinition.getClassPath());
         generic = new ArrayList<>(typeDefinition.getGeneric());
+    }
+
+    public void setClassPath(String classPath) {
+        if (classPath.contains("<")) {
+            throw new RuntimeException("不支持的类型---> " + classPath);
+        }
+
+        this.classPath = classPath;
     }
 
 

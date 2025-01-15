@@ -14,6 +14,7 @@ import com.chy.lamia.convert.core.components.TypeResolverFactory;
 import com.chy.lamia.convert.core.components.entity.Expression;
 import com.chy.lamia.convert.core.components.entity.Statement;
 import com.chy.lamia.convert.core.log.Logger;
+import com.chy.lamia.convert.core.utils.FileUtils;
 import com.chy.lamia.convert.core.utils.ReflectUtils;
 import com.chy.lamia.exception.IgnoreException;
 import com.chy.lamia.processor.marked.MarkedContext;
@@ -24,10 +25,14 @@ import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.tree.JCTree;
 
 import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.tools.JavaFileObject;
+import java.io.IOException;
+import java.net.URI;
 import java.util.Set;
 
 public class MappingAnnotationProcessor extends AbstractProcessor {
@@ -50,7 +55,7 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
 
 
             if (roundEnv.processingOver()) {
-                handleSignMethod();
+                handleSignMethod(processingEnv);
             } else {
                 prepare(roundEnv);
             }
@@ -69,10 +74,10 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
     /**
      * 处理标注了@Mapping 的方法， 生成对应的实现代码
      */
-    private void handleSignMethod() {
+    private void handleSignMethod(ProcessingEnvironment processingEnv) {
         if (!markedContext.isEmpty()) {
             // 注册lamia的通用组件
-            registerComponents();
+            registerComponents(processingEnv);
         }
 
         markedContext.forEach((className, markedMethods) -> {
@@ -97,7 +102,7 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
         }
     }
 
-    private void registerComponents() {
+    private void registerComponents(ProcessingEnvironment processingEnv) {
         ComponentFactory.registerComponents(TreeFactory.class, new JcTreeFactory(JCUtils.instance));
         ComponentFactory.registerComponents(NameHandler.class, new CommonNameHandler());
 
@@ -105,6 +110,26 @@ public class MappingAnnotationProcessor extends AbstractProcessor {
 
         ComponentFactory.registerEntityStructure(Expression.class, JcExpression::new);
         ComponentFactory.registerEntityStructure(Statement.class, JcStatement::new);
+
+
+        FileUtils.classPathSupplier = () -> {
+            Filer filer = processingEnv.getFiler();
+            return genClassPath(filer);
+        };
+    }
+
+    private String genClassPath(Filer filer) {
+        try {
+            JavaFileObject file = filer.createSourceFile("lamia", null);
+            String path = file.toUri().getPath();
+            String[] split = path.split("/generated-sources/");
+            if (split.length == 1) {
+                return "";
+            }
+            return split[0];
+        } catch (IOException e) {
+            return "";
+        }
 
     }
 

@@ -1,14 +1,20 @@
 package com.chy.lamia.convert.core.utils;
 
 
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.function.Supplier;
 
 public class FileUtils {
 
-    static String classPath = "lamia";
+    static String classPath;
+
+    public static Supplier<String> classPathSupplier;
+
+    static String dirName = "lamia";
 
     public static File openFile(String fileName, String path) {
         if (path == null || path.length() == 0) {
@@ -52,7 +58,19 @@ public class FileUtils {
 
 
     public static String getClassPath() {
-        return classPath;
+        if (classPath != null) {
+            return classPath;
+        }
+        String property = System.getProperty("lamia.output.dir");
+        if (property != null && !property.isEmpty()) {
+            return dirName;
+        }
+
+        if (classPathSupplier != null) {
+            classPath = classPathSupplier.get() + "/" + dirName;
+            return classPath;
+        }
+        return dirName;
     }
 
 

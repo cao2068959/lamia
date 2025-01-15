@@ -2,6 +2,7 @@ package com.chy.lamia.utils;
 
 
 import com.chy.lamia.convert.core.entity.TypeDefinition;
+import com.chy.lamia.entity.factory.TypeDefinitionFactory;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.util.List;
@@ -26,10 +27,8 @@ public class SymbolUtils {
             return result;
         }
         for (Type typeArgument : typeArguments) {
-            TypeDefinition typeDefinition = new TypeDefinition(typeArgument.toString());
+            TypeDefinition typeDefinition = TypeDefinitionFactory.create(typeArgument);
             result.add(typeDefinition);
-            // 这个泛型类型本身可能还继续有泛型
-            typeDefinition.setGeneric(getGeneric(typeArgument));
         }
         return result;
     }

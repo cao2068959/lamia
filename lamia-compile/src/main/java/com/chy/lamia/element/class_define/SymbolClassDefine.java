@@ -84,12 +84,12 @@ public class SymbolClassDefine implements IClassDefine {
             return;
         }
         Symbol.VarSymbol varSymbol = parameters.get(0);
-        String type = getType(varSymbol.type);
+        TypeDefinition type = getType(varSymbol.type);
 
         Setter setter = new Setter();
         String varName = StringUtils.toCamelCase(name.substring(3));
         setter.setMethodName(name);
-        setter.setType(new TypeDefinition(type));
+        setter.setType(type);
         setter.setVarName(varName);
         setters.put(varName, setter);
 
@@ -97,9 +97,9 @@ public class SymbolClassDefine implements IClassDefine {
     }
 
     private void getterHandle(String name, Symbol.MethodSymbol methodSymbol) {
-        String type = getType(methodSymbol.getReturnType());
+        TypeDefinition type = getType(methodSymbol.getReturnType());
         // 返回值不对
-        if ("void".equals(type)) {
+        if (type == null) {
             return;
         }
         com.sun.tools.javac.util.List<Symbol.VarSymbol> parameters = methodSymbol.getParameters();
@@ -127,19 +127,19 @@ public class SymbolClassDefine implements IClassDefine {
 
     private void handlerVar(Symbol.VarSymbol varSymbol) {
         String name = getName(varSymbol.name);
-        String type = getType(varSymbol.type);
-        Var var = new Var(name, type);
+        TypeDefinition type = getType(varSymbol.type);
+        Var var = new Var(name, type.getClassPath());
         instantVars.put(name, var);
     }
 
-    private String getType(Type type) {
+    private TypeDefinition getType(Type type) {
         if (type == null) {
-            return "void";
+            return null;
         }
         if (type instanceof Type.JCVoidType) {
-            return "void";
+            return null;
         }
-        return type.toString();
+        return TypeDefinitionFactory.create(type);
     }
 
     private String getName(Name name) {

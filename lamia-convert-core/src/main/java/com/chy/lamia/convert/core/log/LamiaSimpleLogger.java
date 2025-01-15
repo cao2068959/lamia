@@ -51,6 +51,7 @@ public class LamiaSimpleLogger {
             if (outputStream == null) {
                 return;
             }
+
             for (String txt : content) {
                 wire(outputStream, txt + "\n");
             }
