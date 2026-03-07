@@ -16,6 +16,7 @@
         <module>lamia-runtime</module>
         <module>lamia-compile</module>
         <module>lamia-convert-core</module>
+        <module>lamia-test</module>
     </modules>
     <description>A high-performance framework for quickly generating assignment operations</description>
 
