@@ -63,7 +63,7 @@ public class MappingAnnotationProcessorProxy extends AbstractProcessor {
     }
 
     interface JdkCompilerModule {
-        @Method.Expr("implAddOpens($0, getClass().forName('com.chy.lamia.processor.MappingAnnotationProcessor').getModule())")
+        @Method.Expr("implAddOpens($0, class('com.chy.lamia.processor.MappingAnnotationProcessor').getModule())")
         void implAddOpens(String pn);
     }
 
